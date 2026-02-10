@@ -55,6 +55,7 @@ class _BottomSheetEditBoxState extends State<BottomSheetEditBox> {
 
   @override
   Widget build(BuildContext context) {
+    // bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return BottomSheetDefault(
       widget: Column(
         mainAxisSize: MainAxisSize.min,
@@ -69,7 +70,7 @@ class _BottomSheetEditBoxState extends State<BottomSheetEditBox> {
               spacing: 24,
               children: [
                 ModernTextField(
-                  hint: "* Nome",
+                  hint: "Nome",
                   controller: nameProductController,
                   isValid: nameIsValid,
                   onChanged: (value) {
@@ -85,7 +86,7 @@ class _BottomSheetEditBoxState extends State<BottomSheetEditBox> {
           SizedBox(
             width: double.infinity,
             child: Row(
-              spacing: 12,
+              spacing: 4,
               children: [
                 Expanded(
                   child: ButtonDefaultCustom(label: "Salvar", onClick: _edit),
@@ -93,11 +94,11 @@ class _BottomSheetEditBoxState extends State<BottomSheetEditBox> {
                 if (widget.boxModel != null)
                   InkWell(
                     onTap: () {
-                      // homeController.deleteProduct(widget.boxModel!);
                       Get.back();
+                      homeController.deleteBox(widget.boxModel!);
                     },
                     child: Container(
-                      padding: EdgeInsets.all(18),
+                      padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         color: AppColors.error,

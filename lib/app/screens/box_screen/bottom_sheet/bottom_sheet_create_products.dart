@@ -28,6 +28,10 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
   final descriptionProductController = TextEditingController();
   final priceProductController = TextEditingController();
   final quantityProductController = TextEditingController();
+
+  bool errorName = false;
+  bool errorPrice = false;
+  bool errorQuantity = false;
   @override
   void initState() {
     super.initState();
@@ -47,7 +51,19 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
     super.dispose();
   }
 
+  bool validetForm() {
+    setState(() {
+      errorName = nameProductController.text.isEmpty;
+      errorPrice = priceProductController.text.isEmpty;
+      errorQuantity = quantityProductController.text.isEmpty;
+    });
+    return errorName || errorPrice || errorQuantity;
+  }
+
   void _submit() {
+    if (validetForm()) {
+      return;
+    }
     if (widget.productModel != null) {
       boxController.editProduct(
         ProductModel(
@@ -78,9 +94,10 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
   @override
   Widget build(BuildContext context) {
     return BottomSheetDefault(
+      height: Get.height * 0.44,
       widget: Expanded(
         child: Column(
-         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextCustom(
               text: widget.productModel != null
@@ -88,27 +105,33 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
                   : "Novo Produto",
               fontSize: AppFontSizes.fz11,
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 12),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 24,
+                  spacing: 12,
                   children: [
                     ModernTextField(
-                      hint: "* Nome",
+                      hint: "Nome",
                       controller: nameProductController,
+                      errorText: errorName ? "Campo obrigatório" : null,
+                      error: errorName,
                     ),
                     ModernTextField(
-                      hint: "Descrição",
+                      hint: "Descrição (Opcional)",
                       controller: descriptionProductController,
                     ),
                     Row(
                       children: [
                         Expanded(
                           child: ModernTextField(
-                            hint: "* Quantidade",
+                            hint: "Quantidade",
                             controller: quantityProductController,
+                            errorText: errorQuantity
+                                ? "Campo obrigatório"
+                                : null,
+                            error: errorQuantity,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
@@ -117,8 +140,10 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
                         SizedBox(width: 12),
                         Expanded(
                           child: ModernTextField(
-                            hint: "* Preço",
+                            hint: "Preço",
                             controller: priceProductController,
+                            errorText: errorPrice ? "Campo obrigatório" : null,
+                            error: errorPrice,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               CentavosInputFormatter(moeda: true),
@@ -137,7 +162,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
             ),
             SizedBox(height: 12),
             Row(
-              spacing: 12,
+              spacing: 4,
               children: [
                 Expanded(
                   child: ButtonDefaultCustom(
@@ -152,7 +177,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
                       boxController.deleteProduct(widget.productModel!);
                     },
                     child: Container(
-                      padding: EdgeInsets.all(18),
+                      padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         color: AppColors.error,

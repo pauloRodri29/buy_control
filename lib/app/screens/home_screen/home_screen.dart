@@ -11,6 +11,7 @@ import 'package:buy_control/app/screens/home_screen/bottom_sheet/bottom_sheet_bo
 import 'package:buy_control/app/screens/home_screen/bottom_sheet/bottom_sheet_create_box.dart';
 import 'package:buy_control/app/screens/home_screen/home_controller.dart';
 import 'package:buy_control/app/utils/data_time_custom_formatter.dart';
+import 'package:buy_control/app/utils/formatter_price.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:get/get.dart';
@@ -84,6 +85,13 @@ class HomeScreen extends StatelessWidget {
                                   fontSize: AppFontSizes.fz09,
                                   maxLines: 2,
                                 ),
+
+                                SizedBox(height: 6),
+                                TextCustom(
+                                  text: formatPrice(item.calculateTotalPrice()),
+                                  fontSize: AppFontSizes.fz08,
+                                  color: AppColors.textPrimaryDark,
+                                ),
                                 SizedBox(height: 6),
                                 TextCustom(
                                   text: "${item.getTotalQuantity()} itens",
@@ -91,6 +99,7 @@ class HomeScreen extends StatelessWidget {
                                   color: AppColors.textPrimaryDark,
                                 ),
                                 SizedBox(height: 6),
+
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: TextCustom(

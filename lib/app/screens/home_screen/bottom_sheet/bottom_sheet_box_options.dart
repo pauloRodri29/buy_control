@@ -15,6 +15,7 @@ class BottomSheetBoxOptions extends StatelessWidget {
   BottomSheetBoxOptions({super.key, this.boxModel});
   @override
   Widget build(BuildContext context) {
+    // bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return BottomSheetDefault(
       widget: Column(
         mainAxisSize: MainAxisSize.min,
@@ -38,6 +39,7 @@ class BottomSheetBoxOptions extends StatelessWidget {
                 Expanded(
                   child: ButtonDefaultCustom(
                     label: "Editar",
+                    // textColor: isDarkMode ? AppColors.textOnDarkButton : null,
                     onClick: () {
                       Get.back();
                       Get.bottomSheet(BottomSheetEditBox(boxModel: boxModel));

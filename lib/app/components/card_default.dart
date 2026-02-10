@@ -21,7 +21,8 @@ class CardDefault extends StatefulWidget {
     this.radius,
     this.padding,
     this.onPressed,
-    this.height, this.onLongPressed,
+    this.height,
+    this.onLongPressed,
   });
 
   @override
@@ -42,6 +43,7 @@ class _CardDefaultState extends State<CardDefault> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () => _runAnimation(widget.onPressed),
       onLongPress: () {
         widget.onLongPressed?.call();

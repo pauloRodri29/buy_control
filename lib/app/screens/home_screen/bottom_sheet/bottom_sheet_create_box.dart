@@ -21,7 +21,8 @@ class BottomSheetCreateBox extends StatefulWidget {
 
 class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
   final HomeController homeController = Get.find();
-  final nameProductController = TextEditingController();
+  bool errorName = false;
+  final nameBoxController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -42,6 +43,13 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
   }
 
   void _submit() {
+    final name = nameBoxController.text.trim();
+
+    setState(() {
+      errorName = name.isEmpty;
+    });
+
+    if (errorName) return;
     if (widget.boxModel != null) {
       // homeController.editProduct(
       //   ProductModel(
@@ -54,8 +62,9 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
       //   ),
       // );
     } else {
-      homeController.createBox(BoxModel(name: nameProductController.text));
+      homeController.createBox(BoxModel(name: nameBoxController.text));
     }
+
     Get.back();
   }
 
@@ -72,8 +81,10 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
               spacing: 24,
               children: [
                 ModernTextField(
-                  hint: "* Nome",
-                  controller: nameProductController,
+                  hint: "Nome",
+                  controller: nameBoxController,
+                  errorText: errorName ? "Campo obrigatório" : null,
+                  error: errorName,
                 ),
               ],
             ),
@@ -92,10 +103,12 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
                 ),
                 if (widget.boxModel != null)
                   InkWell(
-                    onTap: () {
-                      // homeController.deleteProduct(widget.boxModel!);
-                      Get.back();
-                    },
+                    onTap: errorName
+                        ? null
+                        : () {
+                            // homeController.deleteProduct(widget.boxModel!);
+                            Get.back();
+                          },
                     child: Container(
                       padding: EdgeInsets.all(18),
                       decoration: BoxDecoration(

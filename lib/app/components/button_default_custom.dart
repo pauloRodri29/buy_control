@@ -8,15 +8,24 @@ class ButtonDefaultCustom extends StatelessWidget {
   final VoidCallback? onClick;
   final Color? backgroundColor;
   final Color? textColor;
-  const ButtonDefaultCustom({super.key, required this.label, this.onClick, this.backgroundColor, this.textColor});
+  final double sizeButton;
+  const ButtonDefaultCustom({
+    super.key,
+    required this.label,
+    this.onClick,
+    this.backgroundColor,
+    this.textColor,
+    this.sizeButton = 46,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onClick,
       child: Container(
+        height: sizeButton,
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: backgroundColor ?? AppColors.primary,
           borderRadius: BorderRadius.circular(10),

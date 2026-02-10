@@ -33,4 +33,8 @@ class ProductModel {
       'quantity': quantity,
     };
   }
+
+  double calculateTotalPrice() {
+    return price * quantity;
+  }
 }

@@ -15,6 +15,7 @@ class BottomSheetDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: Get.width,
       constraints: BoxConstraints(maxHeight: height ?? Get.height * 0.95),

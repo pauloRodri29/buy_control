@@ -22,29 +22,38 @@ class BoxScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 18.0),
-            child: InkWell(
-              onTap: () {
-                Get.bottomSheet(BottomSheetCreateProducts());
-              },
-              child: LucideIconContainer(
-                icon: LucideIcons.plus,
-                color: AppColors.buttonSecondaryLight,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 18.0),
-            child: InkWell(
-              onTap: () async {
-                controller.homeController.deleteBox(box);
-              },
-              child: LucideIconContainer(
-                icon: LucideIcons.trash,
-                color: AppColors.buttonSecondaryLight,
-              ),
-            ),
+          GetBuilder<BoxController>(
+            builder: (_) {
+              return Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 18.0),
+                    child: InkWell(
+                      onTap: () {
+                        Get.bottomSheet(BottomSheetCreateProducts());
+                      },
+                      child: LucideIconContainer(
+                        icon: LucideIcons.plus,
+                        color: AppColors.buttonSecondaryLight,
+                      ),
+                    ),
+                  ),
+                  if (controller.products.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 18.0),
+                      child: InkWell(
+                        onTap: () async {
+                          controller.deleteAllProduct();
+                        },
+                        child: LucideIconContainer(
+                          icon: LucideIcons.trash,
+                          color: AppColors.buttonSecondaryLight,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
         title: TextCustom(
@@ -69,7 +78,7 @@ class BoxScreen extends StatelessWidget {
             children: [
               Container(
                 margin: EdgeInsets.only(top: 2),
-                height: 60,
+                height: 80,
                 decoration: BoxDecoration(color: AppColors.cardDark),
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -80,10 +89,20 @@ class BoxScreen extends StatelessWidget {
                       color: AppColors.textPrimaryDark,
                       fontSize: AppFontSizes.fz10,
                     ),
-                    TextCustom(
-                      text: 'Qtd: ${box.getTotalQuantity()}',
-                      color: AppColors.textPrimaryDark,
-                      fontSize: AppFontSizes.fz10,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        TextCustom(
+                          text: 'Qtd. Produtos: ${box.products.length}',
+                          color: AppColors.textPrimaryDark,
+                          fontSize: AppFontSizes.fz10,
+                        ),
+                        TextCustom(
+                          text: 'Qtd. Total: ${box.getTotalQuantity()}',
+                          color: AppColors.textPrimaryDark,
+                          fontSize: AppFontSizes.fz10,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -168,10 +187,24 @@ class BoxScreen extends StatelessWidget {
                                               color: AppColors.textPrimaryDark,
                                               fontSize: AppFontSizes.fz10,
                                             ),
-                                            TextCustom(
-                                              text: 'Qtd: ${product.quantity}',
-                                              color: AppColors.textPrimaryDark,
-                                              fontSize: AppFontSizes.fz10,
+                                            Row(
+                                              children: [
+                                                TextCustom(
+                                                  text:
+                                                      'Qtd: ${product.quantity}',
+                                                  color:
+                                                      AppColors.textPrimaryDark,
+                                                  fontSize: AppFontSizes.fz10,
+                                                ),
+                                                if (product.quantity > 1)
+                                                  TextCustom(
+                                                    text:
+                                                        " - ${formatPrice(product.calculateTotalPrice())}",
+                                                    color: AppColors
+                                                        .textPrimaryDark,
+                                                    fontSize: AppFontSizes.fz10,
+                                                  ),
+                                              ],
                                             ),
                                           ],
                                         ),
