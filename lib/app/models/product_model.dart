@@ -6,6 +6,7 @@ class ProductModel {
   final String? description;
   final double price;
   final int quantity;
+  final String unitType;
 
   ProductModel({
     String? id,
@@ -13,6 +14,7 @@ class ProductModel {
     this.description,
     required this.price,
     required this.quantity,
+    required this.unitType,
   }) : id = id ?? const Uuid().v1();
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
@@ -22,6 +24,7 @@ class ProductModel {
       description: map['description'] as String?,
       price: (map['price'] as num).toDouble(),
       quantity: map['quantity'] as int,
+      unitType: map['unitType'] as String,
     );
   }
   Map<String, dynamic> toMap() {
@@ -31,6 +34,7 @@ class ProductModel {
       'description': description,
       'price': price,
       'quantity': quantity,
+      'unitType': unitType,
     };
   }
 

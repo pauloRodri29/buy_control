@@ -107,6 +107,7 @@ class BoxScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
               Container(
                 height: 2,
                 margin: EdgeInsets.only(
@@ -135,80 +136,109 @@ class BoxScreen extends StatelessWidget {
                       : Column(
                           children: controller.products
                               .map(
-                                (product) => InkWell(
-                                  onTap: () {
-                                    Get.bottomSheet(
-                                      BottomSheetCreateProducts(
-                                        productModel: product,
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 80,
-                                    margin: EdgeInsets.only(bottom: 12),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.cardDark,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            TextCustom(
-                                              text: product.name,
-                                              color: AppColors.textPrimaryDark,
-                                              fontSize: AppFontSizes.fz10,
-                                            ),
-                                            if (product
-                                                    .description
-                                                    ?.isNotEmpty ??
-                                                false)
-                                              TextCustom(
-                                                text: product.description!,
-                                                color:
-                                                    AppColors.textSecondaryDark,
-                                                fontSize: AppFontSizes.fz08,
-                                              ),
-                                          ],
+                                (product) => Padding(
+                                  padding: EdgeInsets.only(bottom: 12),
+
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(12),
+                                    onTap: () {
+                                      Get.bottomSheet(
+                                        BottomSheetCreateProducts(
+                                          productModel: product,
                                         ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            TextCustom(
-                                              text: formatPrice(product.price),
-                                              color: AppColors.textPrimaryDark,
-                                              fontSize: AppFontSizes.fz10,
-                                            ),
-                                            Row(
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.cardDark,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Flexible(
+                                            flex: 1,
+                                            child: Column(
+                                              spacing: 4,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
                                               children: [
                                                 TextCustom(
-                                                  text:
-                                                      'Qtd: ${product.quantity}',
+                                                  text: product.name,
                                                   color:
                                                       AppColors.textPrimaryDark,
                                                   fontSize: AppFontSizes.fz10,
                                                 ),
-                                                if (product.quantity > 1)
+                                                if (product
+                                                        .description
+                                                        ?.isNotEmpty ??
+                                                    false)
                                                   TextCustom(
-                                                    text:
-                                                        " - ${formatPrice(product.calculateTotalPrice())}",
+                                                    text: product.description!,
                                                     color: AppColors
-                                                        .textPrimaryDark,
-                                                    fontSize: AppFontSizes.fz10,
+                                                        .textSecondaryDark,
+                                                    fontSize: AppFontSizes.fz06,
                                                   ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                          Flexible(
+                                            flex: 1,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                TextCustom(
+                                                  text: product.unitType,
+                                                  color:
+                                                      AppColors.textPrimaryDark,
+                                                  fontSize: AppFontSizes.fz08,
+                                                ),
+                                                TextCustom(
+                                                  text: formatPrice(
+                                                    product.price,
+                                                  ),
+                                                  color:
+                                                      AppColors.textPrimaryDark,
+                                                  fontSize: AppFontSizes.fz10,
+                                                ),
+
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    TextCustom(
+                                                      text:
+                                                          'Qtd: ${product.quantity}',
+                                                      color: AppColors
+                                                          .textPrimaryDark,
+                                                      fontSize:
+                                                          AppFontSizes.fz07,
+                                                    ),
+                                                    if (product.quantity > 1)
+                                                      TextCustom(
+                                                        text:
+                                                            " - ${formatPrice(product.calculateTotalPrice())}",
+                                                        color: AppColors
+                                                            .textPrimaryDark,
+                                                        fontSize:
+                                                            AppFontSizes.fz07,
+                                                      ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

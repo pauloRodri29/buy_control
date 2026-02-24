@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:buy_control/app/components/bottom_sheet_default.dart';
 import 'package:buy_control/app/components/button_default_custom.dart';
 import 'package:buy_control/app/components/lucide_icon_container.dart';
+import 'package:buy_control/app/components/modern_dropdow_list.dart';
 import 'package:buy_control/app/components/text_custom.dart';
 import 'package:buy_control/app/components/text_field_custom.dart';
 import 'package:buy_control/app/constants/app_colors.dart';
@@ -28,6 +31,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
   final descriptionProductController = TextEditingController();
   final priceProductController = TextEditingController();
   final quantityProductController = TextEditingController();
+  late String selectedUnit;
 
   bool errorName = false;
   bool errorPrice = false;
@@ -43,6 +47,9 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
         widget.productModel!.price.toDouble(),
       );
       quantityProductController.text = widget.productModel!.quantity.toString();
+      selectedUnit = widget.productModel!.unitType;
+    } else {
+      selectedUnit = boxController.units.first.code;
     }
   }
 
@@ -74,6 +81,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
             priceProductController.text,
           ),
           quantity: int.parse(quantityProductController.text),
+          unitType: selectedUnit,
         ),
       );
     } else {
@@ -85,6 +93,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
             priceProductController.text,
           ),
           quantity: int.parse(quantityProductController.text),
+          unitType: selectedUnit,
         ),
       );
     }
@@ -94,7 +103,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
   @override
   Widget build(BuildContext context) {
     return BottomSheetDefault(
-      height: Get.height * 0.44,
+      height: Get.height * 0.8,
       widget: Expanded(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -116,6 +125,7 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
                       hint: "Nome",
                       controller: nameProductController,
                       errorText: errorName ? "Campo obrigatório" : null,
+                      maxLength: 16,
                       error: errorName,
                     ),
                     ModernTextField(
@@ -155,6 +165,17 @@ class _BottomSheetCreateProductsState extends State<BottomSheetCreateProducts> {
                           ),
                         ),
                       ],
+                    ),
+                    ModernDropdownList(
+                      // showKey: true,
+                      items: boxController.getValueDropdown(),
+                      onChanged: (value) {
+                        setState(() {
+                          log("value: $value");
+                          selectedUnit = value;
+                        });
+                      },
+                      valueKey: selectedUnit,
                     ),
                   ],
                 ),

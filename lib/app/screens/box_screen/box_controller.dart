@@ -6,16 +6,39 @@ import 'package:buy_control/app/constants/app_colors.dart';
 import 'package:buy_control/app/constants/app_font_size.dart';
 import 'package:buy_control/app/models/box_model.dart';
 import 'package:buy_control/app/models/product_model.dart';
+import 'package:buy_control/app/models/unit_type.dart';
 import 'package:buy_control/app/screens/home_screen/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BoxController extends GetxController {
+  BoxController({required this.box});
   final BoxModel box;
   final HomeController homeController = Get.find();
   RxList<ProductModel> products = <ProductModel>[].obs;
 
-  BoxController({required this.box});
+  final units = [
+    UnitType("UN", "Unidade"),
+    UnitType("PCT", "Pacote"),
+    UnitType("CX", "Caixa"),
+    UnitType("FD", "Fardo"),
+    UnitType("KG", "Quilo (kg)"),
+    UnitType("G", "Grama (g)"),
+    UnitType("L", "Litro (L)"),
+    UnitType("ML", "Mililitro (ml)"),
+    UnitType("FR", "Frasco"),
+    UnitType("PT", "Pote"),
+    UnitType("TB", "Tubo"),
+    UnitType("BDJ", "Bandeja"),
+    UnitType("DZ", "Dúzia"),
+    UnitType("KIT", "Kit"),
+  ];
+
+  List<Map<String, String>> getValueDropdown() {
+    return units.map((e) {
+      return {"key": e.code, "label": e.label};
+    }).toList();
+  }
 
   Future<void> createProduct(ProductModel product) async {
     try {
@@ -55,31 +78,42 @@ class BoxController extends GetxController {
     try {
       final result = await Get.bottomSheet<bool>(
         BottomSheetDefault(
-          widget: Row(
+          widget: Column(
             spacing: 12,
             children: [
-              Expanded(
-                child: ButtonDefaultCustom(
-                  backgroundColor: AppColors.error,
-                  label: "Excluir",
-                  onClick: () {
-                    Get.back(result: true);
-                    // controller.homeController.deleteBox(
-                    //   controller.homeController.listBox.indexOf(box),
-                    // );
-                  },
-                ),
+              TextCustom(
+                text: "Deseja realmente excluir o produto: ${product.name}?",
+                fontSize: AppFontSizes.fz10,
+                fontWeight: FontWeight.bold,
+                textAlign: TextAlign.center,
               ),
-              Expanded(
-                child: ButtonDefaultCustom(
-                  label: "Cancelar",
-                  onClick: () {
-                    Get.back(result: false);
-                    // controller.homeController.deleteBox(
-                    //   controller.homeController.listBox.indexOf(box),
-                    // );
-                  },
-                ),
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: ButtonDefaultCustom(
+                      backgroundColor: AppColors.error,
+                      label: "Excluir",
+                      onClick: () {
+                        Get.back(result: true);
+                        // controller.homeController.deleteBox(
+                        //   controller.homeController.listBox.indexOf(box),
+                        // );
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: ButtonDefaultCustom(
+                      label: "Cancelar",
+                      onClick: () {
+                        Get.back(result: false);
+                        // controller.homeController.deleteBox(
+                        //   controller.homeController.listBox.indexOf(box),
+                        // );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
