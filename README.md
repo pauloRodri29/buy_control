@@ -1,16 +1,29 @@
-# buy_control
+# Buy Control
 
-A new Flutter project.
+Aplicação desenvolvida em Flutter para gerenciamento e controle de compras.
 
-## Getting Started
+> ⚠️ Este é um projeto público para fins de portfólio e demonstração.
+> Não está aberto para contribuições externas.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Tecnologias Utilizadas
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter 3.32.7
+- Dart SDK (compatível com Flutter 3.32.7)
+- Material Design
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 📦 Versão do Flutter
+
+Este projeto foi desenvolvido e testado utilizando:
+
+Flutter SDK: 3.32.7
+
+Recomenda-se utilizar exatamente esta versão para evitar problemas de compatibilidade.
+
+Se você utiliza FVM:
+
+```bash
+fvm use 3.32.7
