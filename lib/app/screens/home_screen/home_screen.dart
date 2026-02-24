@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:buy_control/app/components/button_circle.dart';
 import 'package:buy_control/app/components/card_default.dart';
 import 'package:buy_control/app/components/lucide_icon_container.dart';
@@ -30,13 +29,13 @@ class HomeScreen extends StatelessWidget {
           children: [
             LucideIconContainer(
               icon: LucideIcons.clipboardList,
-              size: 32,
+              size: 24,
               color: AppColors.backgroundLight,
             ),
             const TextCustom.title(
-              'BuyControl',
+              'Buy Control',
               color: AppColors.secondary,
-              fontSize: AppFontSizes.fz12,
+              fontSize: AppFontSizes.fz11,
             ),
           ],
         ),
@@ -68,6 +67,7 @@ class HomeScreen extends StatelessWidget {
                         itemBuilder: (box) {
                           final BoxModel item = box;
                           return CardDefault(
+                            height: 200,
                             onLongPressed: () {
                               Get.bottomSheet(
                                 BottomSheetBoxOptions(boxModel: item),
@@ -84,6 +84,8 @@ class HomeScreen extends StatelessWidget {
                                   color: AppColors.textPrimaryDark,
                                   fontSize: AppFontSizes.fz09,
                                   maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  fontWeight: FontWeight.bold,
                                 ),
 
                                 SizedBox(height: 6),
@@ -102,11 +104,22 @@ class HomeScreen extends StatelessWidget {
 
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: TextCustom(
-                                    text:
-                                        "criado em ${DataTimeCustomFormatter.formatDateCustom(item.createdAt)}",
-                                    color: AppColors.textPrimaryDark,
-                                    fontSize: AppFontSizes.fz05,
+                                  child: Column(
+                                    spacing: 4,
+                                    children: [
+                                      TextCustom(
+                                        text:
+                                            "criado em ${DataTimeCustomFormatter.formatDateCustom(item.createdAt, abbreviated: true)}",
+                                        color: AppColors.textPrimaryDark,
+                                        fontSize: AppFontSizes.fz05,
+                                      ),
+                                      TextCustom(
+                                        text:
+                                            "atualizado em ${DataTimeCustomFormatter.formatDateCustom(item.updatedAt, abbreviated: true)}",
+                                        color: AppColors.textPrimaryDark,
+                                        fontSize: AppFontSizes.fz05,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -145,19 +158,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
               ),
-              // Align(
-              //   alignment: Alignment.bottomLeft,
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(24),
-              //     child: ButtonCircle(
-              //       onPressed: () {
-              //         controller.showHiveDate();
-              //       },
-              //       icon: LucideIcons.database,
-              //       size: 64,
-              //     ),
-              //   ),
-              // ),
+
               if (controller.listBox.isNotEmpty)
                 Align(
                   alignment: Alignment.bottomRight,

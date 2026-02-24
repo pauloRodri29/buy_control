@@ -72,7 +72,9 @@ class _BottomSheetEditBoxState extends State<BottomSheetEditBox> {
                 ModernTextField(
                   hint: "Nome",
                   controller: nameProductController,
-                  isValid: nameIsValid,
+                  error: !nameIsValid,
+                  errorText: nameIsValid ? null : "Campo obrigatório",
+                  maxLength: 20,
                   onChanged: (value) {
                     setState(() {
                       nameIsValid = isValidForm();

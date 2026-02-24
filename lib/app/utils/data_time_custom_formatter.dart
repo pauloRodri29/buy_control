@@ -3,6 +3,36 @@ import 'package:intl/intl.dart';
 
 // Classe utilitária para manipulação e formatação de datas
 class DataTimeCustomFormatter {
+  static List<String> months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+
+  static List<String> monthsAbbreviated = [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
+  ];
+
   /// Formata um TimeOfDay no padrão "hh:mm"
   static String formatTime(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0');
@@ -18,24 +48,26 @@ class DataTimeCustomFormatter {
   }
 
   // Formata a data no padrão personalizado "dia, Mês, ano" (ex: 16, Julho, 2025)
-  static String formatDateCustom(DateTime date) {
+  static String formatDateCustom(
+    DateTime date, {
+    bool abbreviated = false,
+    bool withTime = false,
+  }) {
     // Lista de nomes dos meses em português
-    const List<String> months = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ];
-    // Retorna a data formatada como "dia, Mês, ano"
-    return '${date.day}, ${months[date.month - 1]}, ${date.year}';
+
+    if (abbreviated) {
+      if (withTime) {
+        return '${date.day}, ${monthsAbbreviated[date.month - 1]}, ${date.year}, ${toHHMM(formatTimeHHMMSS(date))}';
+      }
+      return '${date.day}, ${monthsAbbreviated[date.month - 1]}, ${date.year}';
+    } else {
+      // Retorna a data formatada como "dia, Mês, ano"
+      if (withTime) {
+        return '${date.day}, ${months[date.month - 1]}, ${date.year}, ${toHHMM(formatTimeHHMMSS(date))}';
+      } else {
+        return '${date.day}, ${months[date.month - 1]}, ${date.year}';
+      }
+    }
   }
 
   // Formata a data no padrão "dd/MM/yyyy" (ex: 16/07/2025)

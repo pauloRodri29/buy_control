@@ -14,6 +14,7 @@ class ModernTextField extends StatefulWidget {
   final Color? fillColor;
   final Color? borderColor;
   final int maxLines;
+  final int? maxLength;
   final TextAlign textAlign;
   final TextInputType? keyboardType;
   final TextInputAction textInputAction;
@@ -46,6 +47,7 @@ class ModernTextField extends StatefulWidget {
     this.suffix,
     this.errorText,
     this.error = false,
+    this.maxLength,
   });
 
   @override
@@ -53,27 +55,77 @@ class ModernTextField extends StatefulWidget {
 }
 
 class _ModernTextFieldState extends State<ModernTextField> {
+  TextEditingController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller;
+    _controller?.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant ModernTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(_onTextChanged);
+      _controller = widget.controller;
+      _controller?.addListener(_onTextChanged);
+    }
+  }
+
+  void _onTextChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final bool hasText = widget.controller?.text.isNotEmpty ?? false;
+    final textLength = widget.controller?.text.length ?? 0;
+    final maxLength = widget.maxLength; // pode ser null
+
     return Focus(
       onFocusChange: (_) => setState(() {}),
       child: Builder(
         builder: (context) {
           final focusNode = Focus.of(context);
           final hasFocus = focusNode.hasFocus;
-          // final hasError = widget.errorText != null;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.error) ...[
-                TextCustom(
-                  text: widget.errorText!,
-                  color: AppColors.error,
-                  fontSize: AppFontSizes.fz04,
-                ),
-                const SizedBox(height: 4),
-              ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (widget.error)
+                    TextCustom(
+                      text: widget.errorText ?? "",
+                      color: AppColors.error,
+                      fontSize: AppFontSizes.fz04,
+                    )
+                  else
+                    const SizedBox(),
+
+                  if (maxLength != null)
+                    TextCustom(
+                      text: "$textLength/$maxLength",
+                      color: textLength >= maxLength
+                          ? AppColors.error
+                          : AppColors.textSecondaryLight,
+                      fontSize: AppFontSizes.fz04,
+                    )
+                  else
+                    const SizedBox(),
+                ],
+              ),
+              const SizedBox(height: 4),
+
               AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -108,17 +160,15 @@ class _ModernTextFieldState extends State<ModernTextField> {
                         textAlign: widget.textAlign,
                         onChanged: widget.onChanged,
                         maxLines: widget.maxLines,
+                        maxLength: maxLength,
                         onTap: widget.onTap,
                         style: TextStyle(
                           fontSize: AppFontSizes.fz10,
                           color: AppColors.textPrimaryLight,
                         ),
                         decoration: InputDecoration(
+                          counterText: '', // esconde o contador padrão
                           border: InputBorder.none,
-                          enabledBorder: InputBorder.none, // Adicionedwed
-                          focusedBorder: InputBorder.none, // Adicione
-                          errorBorder: InputBorder.none, // Adicione
-                          disabledBorder: InputBorder.none, // Adicione
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                           hintText: widget.hint,
@@ -141,84 +191,5 @@ class _ModernTextFieldState extends State<ModernTextField> {
         },
       ),
     );
-
-    // return StatefulBuilder(
-    //   builder: (_, setState) {
-    //     return Focus(
-    //       onFocusChange: (_) => setState(() {}),
-    //       child: Builder(
-    //         builder: (context) {
-    //           final focusNode = Focus.of(context);
-    //           final hasFocus = focusNode.hasFocus;
-
-    //           return AnimatedContainer(
-    //             duration: const Duration(milliseconds: 150),
-    //             padding: const EdgeInsets.symmetric(horizontal: 12),
-    //             height: 50,
-    //             decoration: BoxDecoration(
-    //               color: widget.filled
-    //                   ? (widget.fillColor ?? AppColors.textPrimaryDark)
-    //                   : null,
-    //               borderRadius: BorderRadius.circular(10),
-    //               border: Border.all(
-    //                 color: !widget.isValid
-    //                     ? Colors.red
-    //                     : hasFocus
-    //                     ? AppColors.backgroundDark
-    //                     : (widget.borderColor ?? AppColors.borderLight),
-    //                 width: hasFocus ? 1.3 : 1,
-    //               ),
-    //             ),
-    //             alignment: Alignment.center,
-    //             child: Row(
-    //               children: [
-    //                 if (widget.prefix != null) ...[
-    //                   widget.prefix!,
-    //                   const SizedBox(width: 8),
-    //                 ],
-    //                 Expanded(
-    //                   child: TextField(
-    //                     controller: widget.controller,
-    //                     autofocus: widget.autofocus,
-    //                     readOnly: widget.readOnly,
-    //                     inputFormatters: widget.inputFormatters,
-    //                     keyboardType: widget.keyboardType,
-    //                     textInputAction: widget.textInputAction,
-    //                     textAlign: widget.textAlign,
-    //                     onChanged: widget.onChanged,
-    //                     maxLines: widget.maxLines,
-    //                     onTap: widget.onTap,
-    //                     style: TextStyle(
-    //                       fontSize: AppFontSizes.fz10,
-    //                       color: AppColors.textPrimaryLight,
-    //                     ),
-    //                     decoration: InputDecoration(
-    //                       border: InputBorder.none,
-    //                       enabledBorder: InputBorder.none, // Adicionedwed
-    //                       focusedBorder: InputBorder.none, // Adicione
-    //                       errorBorder: InputBorder.none, // Adicione
-    //                       disabledBorder: InputBorder.none, // Adicione
-    //                       isDense: true,
-    //                       contentPadding: EdgeInsets.zero,
-    //                       hintText: widget.hint,
-    //                       hintStyle: TextStyle(
-    //                         color: AppColors.textSecondaryLight,
-    //                         fontSize: AppFontSizes.fz08,
-    //                       ),
-    //                     ),
-    //                   ),
-    //                 ),
-    //                 if (widget.suffix != null) ...[
-    //                   const SizedBox(width: 8),
-    //                   widget.suffix!,
-    //                 ],
-    //               ],
-    //             ),
-    //           );
-    //         },
-    //       ),
-    //     );
-    //   },
-    // );
   }
 }

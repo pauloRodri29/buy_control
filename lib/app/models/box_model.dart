@@ -6,15 +6,18 @@ class BoxModel {
   String name;
   List<ProductModel> products;
   final DateTime createdAt;
+  DateTime updatedAt;
 
   BoxModel({
     String? id,
     required this.name,
     List<ProductModel>? products,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : id = id ?? const Uuid().v1(),
        products = products ?? [],
-       createdAt = createdAt ?? DateTime.now();
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = createdAt ?? DateTime.now();
 
   factory BoxModel.fromMap(Map<String, dynamic> map) {
     return BoxModel(
@@ -30,6 +33,11 @@ class BoxModel {
                 ? DateTime.parse(map['createdAt'] as String)
                 : map['createdAt'] as DateTime)
           : DateTime.now(),
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] is String
+                ? DateTime.parse(map['updatedAt'] as String)
+                : map['updatedAt'] as DateTime)
+          : DateTime.now(),
     );
   }
 
@@ -39,6 +47,7 @@ class BoxModel {
       'name': name,
       'products': products.map((p) => p.toMap()).toList(),
       'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
@@ -54,6 +63,7 @@ class BoxModel {
       name: name ?? this.name,
       products: products ?? this.products,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -70,6 +80,7 @@ class BoxModel {
 
   void addProduct(ProductModel product) {
     products.add(product);
+    updatedAt = DateTime.now();
   }
 
   void updateProduct(ProductModel product) {
@@ -77,5 +88,10 @@ class BoxModel {
     if (index != -1) {
       products[index] = product;
     }
+    updatedAt = DateTime.now();
+  }
+
+  void updateLastUpdate() {
+    updatedAt = DateTime.now();
   }
 }

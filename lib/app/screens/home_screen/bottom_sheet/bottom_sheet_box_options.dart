@@ -26,11 +26,6 @@ class BottomSheetBoxOptions extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
           SizedBox(height: 12),
-          SingleChildScrollView(child: Column(spacing: 24, children: [
-               
-              ],
-            )),
-          SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -40,6 +35,7 @@ class BottomSheetBoxOptions extends StatelessWidget {
                   child: ButtonDefaultCustom(
                     label: "Editar",
                     // textColor: isDarkMode ? AppColors.textOnDarkButton : null,
+                    
                     onClick: () {
                       Get.back();
                       Get.bottomSheet(BottomSheetEditBox(boxModel: boxModel));

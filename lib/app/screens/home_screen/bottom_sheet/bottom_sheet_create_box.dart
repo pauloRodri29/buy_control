@@ -81,6 +81,7 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
               spacing: 24,
               children: [
                 ModernTextField(
+                  maxLength: 20,
                   hint: "Nome",
                   controller: nameBoxController,
                   errorText: errorName ? "Campo obrigatório" : null,
@@ -106,7 +107,6 @@ class _BottomSheetCreateBoxState extends State<BottomSheetCreateBox> {
                     onTap: errorName
                         ? null
                         : () {
-                            // homeController.deleteProduct(widget.boxModel!);
                             Get.back();
                           },
                     child: Container(

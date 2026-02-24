@@ -79,6 +79,7 @@ class HomeController extends GetxController {
         (b) => b.id.toLowerCase() == box.id.toLowerCase(),
       );
       result.name = newName;
+      result.updateLastUpdate();
       listBox.refresh();
       saveListBoxHive(listBox);
     } catch (e) {
@@ -106,8 +107,9 @@ class HomeController extends GetxController {
           widget: Column(
             children: [
               TextCustom(
-                text: "Box  ${box.name}",
-                fontSize: AppFontSizes.fz11,
+                text: "Deseja realmente excluir a box: ${box.name}?",
+                fontSize: AppFontSizes.fz09,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 12),
               Row(
