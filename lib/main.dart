@@ -1,14 +1,15 @@
+import 'package:buy_control/app/bindings/initial_binding.dart';
+import 'package:buy_control/app/bootstrap/app_bootstrap.dart';
 import 'package:buy_control/app/routes/pages.dart';
 import 'package:buy_control/app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-
-  await Hive.openBox('box_buy_control');
+  await initializeDateFormatting('pt_BR');
+  await AppBootstrap.run();
   runApp(const BuyControlApp());
 }
 
@@ -20,14 +21,12 @@ class BuyControlApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BuyControl',
-      // Rotas
+      initialBinding: InitialBinding(),
       initialRoute: Routes.INITIAL,
       getPages: Pages.pages,
-      // Tema
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      // Definir tema baseado no sistema
-      themeMode: ThemeMode.system, // muda automaticamente entre light/dark
+      themeMode: ThemeMode.system,
     );
   }
 }

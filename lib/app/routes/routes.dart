@@ -1,7 +1,6 @@
 part of 'pages.dart';
 
 abstract class Routes {
+  // ignore: constant_identifier_names
   static const INITIAL = '/';
-  static const HOME = '/home';
-  static const BOX = '/box';
 }

@@ -1,0 +1,184 @@
+import 'package:buy_control/app/theme/app_colors.dart';
+import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/widgets/app_button.dart';
+import 'package:buy_control/app/widgets/app_dropdown.dart';
+import 'package:buy_control/app/widgets/app_text.dart';
+import 'package:buy_control/app/widgets/app_text_field.dart';
+import 'package:buy_control/core/money/money.dart';
+import 'package:buy_control/features/products/domain/entities/product_entity.dart';
+import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+/// Formulário de criação/edição de produto. Todo o estado fica local ao
+/// widget (rascunho) — nada é persistido até o usuário tocar em Salvar.
+class ProductFormSheet extends StatefulWidget {
+  final ProductEntity? product;
+  const ProductFormSheet({super.key, this.product});
+
+  @override
+  State<ProductFormSheet> createState() => _ProductFormSheetState();
+}
+
+class _ProductFormSheetState extends State<ProductFormSheet> {
+  final controller = Get.find<ProductsController>();
+
+  late final codeController = TextEditingController(text: widget.product?.code);
+  late final barcodeController = TextEditingController(text: widget.product?.barcode);
+  late final nameController = TextEditingController(text: widget.product?.name);
+  late final descriptionController = TextEditingController(text: widget.product?.description);
+  late final brandController = TextEditingController(text: widget.product?.brand);
+  late final referencePriceController =
+      TextEditingController(text: widget.product?.referencePrice?.toDouble().toStringAsFixed(2));
+
+  String? categoryId;
+  String? productTypeId;
+  String? defaultUnitId;
+  String? errorMessage;
+  bool submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    categoryId = widget.product?.categoryId;
+    productTypeId = widget.product?.productTypeId;
+    defaultUnitId = widget.product?.defaultUnitId;
+  }
+
+  @override
+  void dispose() {
+    codeController.dispose();
+    barcodeController.dispose();
+    nameController.dispose();
+    descriptionController.dispose();
+    brandController.dispose();
+    referencePriceController.dispose();
+    super.dispose();
+  }
+
+  Money? _parseReferencePrice() {
+    final raw = referencePriceController.text.trim();
+    if (raw.isEmpty) return null;
+    final value = double.tryParse(raw.replaceAll(',', '.'));
+    return value == null ? null : Money.fromReais(value);
+  }
+
+  Future<void> _submit() async {
+    setState(() => submitting = true);
+
+    final String? error;
+    if (widget.product != null) {
+      error = await controller.edit(widget.product!.copyWith(
+        code: codeController.text.trim().isEmpty ? null : codeController.text.trim(),
+        barcode: barcodeController.text.trim().isEmpty ? null : barcodeController.text.trim(),
+        name: nameController.text,
+        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        brand: brandController.text.trim().isEmpty ? null : brandController.text.trim(),
+        categoryId: categoryId,
+        productTypeId: productTypeId,
+        defaultUnitId: defaultUnitId,
+        referencePrice: _parseReferencePrice(),
+      ));
+    } else {
+      error = await controller.create(
+        code: codeController.text.trim().isEmpty ? null : codeController.text.trim(),
+        barcode: barcodeController.text.trim().isEmpty ? null : barcodeController.text.trim(),
+        name: nameController.text,
+        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        brand: brandController.text.trim().isEmpty ? null : brandController.text.trim(),
+        categoryId: categoryId ?? '',
+        productTypeId: productTypeId ?? '',
+        defaultUnitId: defaultUnitId ?? '',
+        referencePrice: _parseReferencePrice(),
+      );
+    }
+
+    if (!mounted) return;
+    setState(() {
+      submitting = false;
+      errorMessage = error;
+    });
+
+    if (error == null) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryOptions = controller.categories
+        .map((c) => AppDropdownOption(value: c.id, label: c.name))
+        .toList();
+    final productTypeOptions = controller.productTypes
+        .map((t) => AppDropdownOption(value: t.id, label: t.name))
+        .toList();
+    final unitOptions = controller.units
+        .map((u) => AppDropdownOption(value: u.id, label: '${u.name} (${u.abbreviation})'))
+        .toList();
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.title(widget.product != null ? 'Editar produto' : 'Novo produto', fontSize: AppFontSizes.fz09),
+          const SizedBox(height: AppSpacing.lg),
+          AppTextField(controller: nameController, label: 'Nome', hint: 'Arroz Tipo 1'),
+          const SizedBox(height: AppSpacing.md),
+          AppTextField(controller: brandController, label: 'Marca', hint: 'Camil'),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(child: AppTextField(controller: codeController, label: 'Código', hint: 'Opcional')),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(child: AppTextField(controller: barcodeController, label: 'Código de barras', hint: 'Opcional')),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppDropdown<String>(
+            label: 'Categoria',
+            hint: 'Selecione',
+            value: categoryId,
+            options: categoryOptions,
+            onChanged: (value) => setState(() => categoryId = value),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppDropdown<String>(
+            label: 'Tipo de produto',
+            hint: 'Selecione',
+            value: productTypeId,
+            options: productTypeOptions,
+            onChanged: (value) => setState(() => productTypeId = value),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppDropdown<String>(
+            label: 'Unidade padrão',
+            hint: 'Selecione',
+            value: defaultUnitId,
+            options: unitOptions,
+            onChanged: (value) => setState(() => defaultUnitId = value),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppTextField(
+            controller: referencePriceController,
+            label: 'Preço de referência',
+            hint: '0,00',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppTextField(
+            controller: descriptionController,
+            label: 'Observações',
+            hint: 'Opcional',
+            maxLines: 3,
+          ),
+          if (errorMessage != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppText(errorMessage!, color: AppColors.error),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+        ],
+      ),
+    );
+  }
+}
