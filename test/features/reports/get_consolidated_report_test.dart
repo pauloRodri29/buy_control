@@ -117,8 +117,14 @@ void main() {
         unitPrice: Money.fromReais(10),
       );
       final transactions = [
-        TransactionEntity(id: 't1', boxId: 'b1', occurredAt: now, items: [item1], createdAt: now, updatedAt: now),
-        TransactionEntity(id: 't2', boxId: 'b2', occurredAt: now, items: [item2], createdAt: now, updatedAt: now),
+        TransactionEntity(
+          id: 't1', boxId: 'b1', occurredAt: now, items: [item1],
+          closureId: 'closure-1', createdAt: now, updatedAt: now,
+        ),
+        TransactionEntity(
+          id: 't2', boxId: 'b2', occurredAt: now, items: [item2],
+          closureId: 'closure-2', createdAt: now, updatedAt: now,
+        ),
       ];
 
       final usecase = GetConsolidatedReport(
@@ -139,7 +145,37 @@ void main() {
       expect(report.topBox!.id, 'b1');
       expect(report.mostPurchasedProduct!.quantity, 4);
       expect(report.highestImpactProduct!.total.cents, 4000);
+      expect(report.productLines.single.quantity, 4);
       expect(report.isEmpty, isFalse);
+    });
+
+    test('ignora lançamentos abertos (sem Fechamento) — relatórios nunca refletem o estado atual da Box', () async {
+      final now = DateTime.now();
+      final boxes = [BoxEntity(id: 'b1', name: 'Mercado', createdAt: now, updatedAt: now)];
+      final item = TransactionItemEntity(
+        id: 'i1',
+        transactionId: 't1',
+        nameSnapshot: 'Item',
+        unitId: 'un',
+        quantity: 1,
+        unitPrice: Money.fromReais(50),
+      );
+      final transactions = [
+        // Sem closureId: lançamento ainda aberto, não deve entrar no relatório.
+        TransactionEntity(id: 't1', boxId: 'b1', occurredAt: now, items: [item], createdAt: now, updatedAt: now),
+      ];
+
+      final usecase = GetConsolidatedReport(
+        boxRepository: FakeBoxRepository(boxes),
+        transactionRepository: FakeTransactionRepository(transactions),
+        categoryRepository: FakeCategoryRepository([]),
+        productRepository: FakeProductRepository([]),
+      );
+
+      final result = await usecase();
+
+      expect(result.dataOrNull!.isEmpty, isTrue);
+      expect(result.dataOrNull!.transactionCount, 0);
     });
 
     test('filtra por Box específica', () async {
@@ -154,8 +190,14 @@ void main() {
         unitPrice: Money.fromReais(20),
       );
       final transactions = [
-        TransactionEntity(id: 't1', boxId: 'b1', occurredAt: now, items: [item], createdAt: now, updatedAt: now),
-        TransactionEntity(id: 't2', boxId: 'b2', occurredAt: now, items: [item], createdAt: now, updatedAt: now),
+        TransactionEntity(
+          id: 't1', boxId: 'b1', occurredAt: now, items: [item],
+          closureId: 'closure-1', createdAt: now, updatedAt: now,
+        ),
+        TransactionEntity(
+          id: 't2', boxId: 'b2', occurredAt: now, items: [item],
+          closureId: 'closure-2', createdAt: now, updatedAt: now,
+        ),
       ];
 
       final usecase = GetConsolidatedReport(

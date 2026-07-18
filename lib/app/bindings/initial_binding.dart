@@ -1,3 +1,14 @@
+import 'package:buy_control/features/auth/data/repositories/fake_auth_repository.dart';
+import 'package:buy_control/features/auth/domain/repositories/auth_repository.dart';
+import 'package:buy_control/features/auth/domain/usecases/get_current_user.dart';
+import 'package:buy_control/features/auth/domain/usecases/login.dart';
+import 'package:buy_control/features/auth/domain/usecases/logout.dart';
+import 'package:buy_control/features/auth/domain/usecases/update_profile.dart';
+import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:buy_control/features/box_closures/data/datasources/local/box_closure_hive_data_source.dart';
+import 'package:buy_control/features/box_closures/data/repositories/local_box_closure_repository.dart';
+import 'package:buy_control/features/box_closures/domain/repositories/box_closure_repository.dart';
+import 'package:buy_control/features/box_closures/domain/usecases/get_box_closures.dart';
 import 'package:buy_control/features/boxes/data/datasources/local/box_hive_data_source.dart';
 import 'package:buy_control/features/boxes/data/repositories/local_box_repository.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
@@ -39,6 +50,10 @@ class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put<BoxRepository>(LocalBoxRepository(localDataSource: BoxHiveDataSource()), permanent: true);
+    Get.put<BoxClosureRepository>(
+      LocalBoxClosureRepository(localDataSource: BoxClosureHiveDataSource()),
+      permanent: true,
+    );
     Get.put<ProductRepository>(LocalProductRepository(localDataSource: ProductHiveDataSource()), permanent: true);
     Get.put<TransactionRepository>(
       LocalTransactionRepository(localDataSource: TransactionHiveDataSource()),
@@ -62,5 +77,21 @@ class InitialBinding extends Bindings {
     Get.put(GetUnits(Get.find()), permanent: true);
     Get.put(GetTransactionsByBox(Get.find()), permanent: true);
     Get.put(GetTransactionDetails(Get.find()), permanent: true);
+    Get.put(GetBoxClosures(Get.find()), permanent: true);
+
+    Get.put<AuthRepository>(FakeAuthRepository(), permanent: true);
+    Get.put(Login(Get.find()), permanent: true);
+    Get.put(Logout(Get.find()), permanent: true);
+    Get.put(GetCurrentUser(Get.find()), permanent: true);
+    Get.put(UpdateProfile(Get.find()), permanent: true);
+    Get.put(
+      AuthController(
+        login: Get.find(),
+        logout: Get.find(),
+        getCurrentUser: Get.find(),
+        updateProfile: Get.find(),
+      ),
+      permanent: true,
+    );
   }
 }

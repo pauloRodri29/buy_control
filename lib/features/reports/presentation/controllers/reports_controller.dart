@@ -9,6 +9,7 @@ import 'package:buy_control/features/product_types/domain/entities/product_type_
 import 'package:buy_control/features/product_types/domain/usecases/get_product_types.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
 import 'package:buy_control/features/products/domain/usecases/get_products.dart';
+import 'package:buy_control/features/reports/data/repositories/report_preset_repository.dart';
 import 'package:buy_control/features/reports/domain/usecases/export_report.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_boxes_totals.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_consolidated_report.dart';
@@ -25,6 +26,7 @@ class ReportsController extends GetxController {
   final GetCategories getCategories;
   final GetProductTypes getProductTypes;
   final GetProducts getProducts;
+  final ReportPresetRepository reportPresetRepository;
 
   ReportsController({
     required this.getBoxesTotals,
@@ -34,6 +36,7 @@ class ReportsController extends GetxController {
     required this.getCategories,
     required this.getProductTypes,
     required this.getProducts,
+    required this.reportPresetRepository,
   });
 
   ViewStatus status = ViewStatus.initial;
@@ -67,6 +70,11 @@ class ReportsController extends GetxController {
     errorMessage = null;
     update();
 
+    final presets = await reportPresetRepository.getAll();
+    savedPresets
+      ..clear()
+      ..addAll(presets);
+
     final boxTotalsResult = await getBoxesTotals();
     if (boxTotalsResult.isFailure) {
       status = ViewStatus.error;
@@ -99,8 +107,8 @@ class ReportsController extends GetxController {
       categoryIds: filterA.categoryIds.toList(),
       productTypeIds: filterA.productTypeIds.toList(),
       productIds: filterA.productIds.toList(),
-      minValue: filterA.minValue == null ? null : Money.fromReais(filterA.minValue!),
-      maxValue: filterA.maxValue == null ? null : Money.fromReais(filterA.maxValue!),
+      minValue: filterA.minValue,
+      maxValue: filterA.maxValue,
     );
     resultA.fold((data) => reportA = data, (failure) {
       reportA = null;
@@ -115,8 +123,8 @@ class ReportsController extends GetxController {
         categoryIds: filterB.categoryIds.toList(),
         productTypeIds: filterB.productTypeIds.toList(),
         productIds: filterB.productIds.toList(),
-        minValue: filterB.minValue == null ? null : Money.fromReais(filterB.minValue!),
-        maxValue: filterB.maxValue == null ? null : Money.fromReais(filterB.maxValue!),
+        minValue: filterB.minValue,
+        maxValue: filterB.maxValue,
       );
       resultB.fold((data) => reportB = data, (_) => reportB = null);
     } else {
@@ -193,12 +201,12 @@ class ReportsController extends GetxController {
     _refresh();
   }
 
-  void setMinValue(ReportSide side, double? value) {
+  void setMinValue(ReportSide side, Money? value) {
     filterFor(side).minValue = value;
     _refresh();
   }
 
-  void setMaxValue(ReportSide side, double? value) {
+  void setMaxValue(ReportSide side, Money? value) {
     filterFor(side).maxValue = value;
     _refresh();
   }
@@ -216,10 +224,13 @@ class ReportsController extends GetxController {
     _refresh();
   }
 
-  void savePreset(String name) {
+  Future<void> savePreset(String name) async {
     if (name.trim().isEmpty) return;
-    savedPresets.add(SavedFilterPreset(name: name.trim(), filter: filterA.copy()));
+    final preset = SavedFilterPreset(name: name.trim(), filter: filterA.copy());
+    savedPresets.removeWhere((p) => p.name == preset.name);
+    savedPresets.add(preset);
     update();
+    await reportPresetRepository.save(preset);
   }
 
   void applyPreset(SavedFilterPreset preset, {ReportSide side = ReportSide.a}) {
@@ -244,13 +255,45 @@ class ReportsController extends GetxController {
     _refresh();
   }
 
-  void removePreset(SavedFilterPreset preset) {
+  Future<void> removePreset(SavedFilterPreset preset) async {
     savedPresets.remove(preset);
     update();
+    await reportPresetRepository.remove(preset.name);
+  }
+
+  Map<String, String> _appliedFiltersFor(ReportFilterState filter) {
+    final applied = <String, String>{};
+    if (filter.boxIds.isNotEmpty) {
+      final names = boxes.where((b) => filter.boxIds.contains(b.id)).map((b) => b.name).join(', ');
+      if (names.isNotEmpty) applied['Boxes'] = names;
+    }
+    if (filter.categoryIds.isNotEmpty) {
+      final names = categories.where((c) => filter.categoryIds.contains(c.id)).map((c) => c.name).join(', ');
+      if (names.isNotEmpty) applied['Categorias'] = names;
+    }
+    if (filter.productTypeIds.isNotEmpty) {
+      final names = productTypes.where((t) => filter.productTypeIds.contains(t.id)).map((t) => t.name).join(', ');
+      if (names.isNotEmpty) applied['Tipos de produto'] = names;
+    }
+    if (filter.productIds.isNotEmpty) {
+      final names = products.where((p) => filter.productIds.contains(p.id)).map((p) => p.name).join(', ');
+      if (names.isNotEmpty) applied['Produtos'] = names;
+    }
+    if (filter.minValue != null) applied['Valor mínimo'] = filter.minValue!.formatted;
+    if (filter.maxValue != null) applied['Valor máximo'] = filter.maxValue!.formatted;
+    return applied;
   }
 
   Future<void> export(ExportFormat format) async {
-    final result = await exportReport(format, report: reportA, title: 'Relatório');
+    final filter = filterFor(ReportSide.a);
+    final appliedFilters = _appliedFiltersFor(filter);
+    final result = await exportReport(
+      format,
+      report: reportA,
+      title: 'Relatório',
+      periodLabel: filter.periodLabel,
+      appliedFilters: appliedFilters.isEmpty ? null : appliedFilters,
+    );
     result.fold(
       (path) => Get.snackbar('Exportação', path == null ? 'Ação concluída.' : 'Arquivo gerado: $path'),
       (failure) => Get.snackbar('Em breve', FailurePresenter.present(failure)),

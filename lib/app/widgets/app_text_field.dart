@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
   final String? label;
   final bool readOnly;
   final bool autofocus;
+  final bool obscureText;
   final int maxLines;
   final int? maxLength;
   final TextInputType? keyboardType;
@@ -30,6 +31,7 @@ class AppTextField extends StatelessWidget {
     this.label,
     this.readOnly = false,
     this.autofocus = false,
+    this.obscureText = false,
     this.maxLines = 1,
     this.maxLength,
     this.keyboardType,
@@ -58,6 +60,7 @@ class AppTextField extends StatelessWidget {
           controller: controller,
           readOnly: readOnly,
           autofocus: autofocus,
+          obscureText: obscureText,
           maxLines: maxLines,
           maxLength: maxLength,
           keyboardType: keyboardType,

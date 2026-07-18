@@ -10,6 +10,7 @@ class TransactionModel {
   final int discountCents;
   final int additionalCostCents;
   final List<Map<String, dynamic>> items;
+  final String? closureId;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -25,6 +26,7 @@ class TransactionModel {
     required this.discountCents,
     required this.additionalCostCents,
     required this.items,
+    this.closureId,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -45,6 +47,7 @@ class TransactionModel {
       items: ((map['items'] as List?) ?? const [])
           .map((raw) => Map<String, dynamic>.from(raw as Map))
           .toList(),
+      closureId: map['closureId'] as String?,
       createdAt: sync.createdAt,
       updatedAt: sync.updatedAt,
       deletedAt: sync.deletedAt,
@@ -63,6 +66,7 @@ class TransactionModel {
       'discountCents': discountCents,
       'additionalCostCents': additionalCostCents,
       'items': items,
+      'closureId': closureId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'deletedAt': deletedAt?.toIso8601String(),

@@ -3,6 +3,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_dropdown.dart';
+import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
@@ -37,25 +38,20 @@ class ItemDetailsStep extends StatefulWidget {
 class _ItemFormControllers {
   final ProductEntity product;
   final TextEditingController quantity;
-  final TextEditingController unitPrice;
-  final TextEditingController discount;
-  final TextEditingController additionalCost;
+  Money unitPrice;
+  Money discount;
+  Money additionalCost;
   String unitId;
 
   _ItemFormControllers(this.product)
       : quantity = TextEditingController(text: '1'),
-        unitPrice = TextEditingController(
-          text: product.referencePrice != null ? product.referencePrice!.toDouble().toStringAsFixed(2) : '',
-        ),
-        discount = TextEditingController(),
-        additionalCost = TextEditingController(),
+        unitPrice = product.referencePrice ?? Money.zero,
+        discount = Money.zero,
+        additionalCost = Money.zero,
         unitId = product.defaultUnitId;
 
   void dispose() {
     quantity.dispose();
-    unitPrice.dispose();
-    discount.dispose();
-    additionalCost.dispose();
   }
 }
 
@@ -99,13 +95,6 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
     if (picked != null) setState(() => _occurredAt = picked);
   }
 
-  Money? _parseMoney(String raw) {
-    final trimmed = raw.trim();
-    if (trimmed.isEmpty) return null;
-    final value = double.tryParse(trimmed.replaceAll(',', '.'));
-    return value == null ? null : Money.fromReais(value);
-  }
-
   void _continue() {
     final items = <TransactionItemEntity>[];
     for (final form in _forms) {
@@ -114,7 +103,6 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
         setState(() => _errorMessage = 'Quantidade inválida para "${form.product.name}".');
         return;
       }
-      final unitPrice = _parseMoney(form.unitPrice.text) ?? Money.zero;
       items.add(TransactionItemEntity(
         id: IdGenerator.generate(),
         transactionId: '',
@@ -123,9 +111,9 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
         categoryId: form.product.categoryId,
         unitId: form.unitId,
         quantity: quantity,
-        unitPrice: unitPrice,
-        discount: _parseMoney(form.discount.text) ?? Money.zero,
-        additionalCost: _parseMoney(form.additionalCost.text) ?? Money.zero,
+        unitPrice: form.unitPrice,
+        discount: form.discount,
+        additionalCost: form.additionalCost,
       ));
     }
 
@@ -218,11 +206,10 @@ class _ItemFormState extends State<_ItemForm> {
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: AppTextField(
-                  controller: widget.form.unitPrice,
+                child: AppMoneyField(
+                  initialValue: widget.form.unitPrice,
                   label: 'Preço unitário',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (money) => widget.form.unitPrice = money,
                 ),
               ),
             ],
@@ -239,20 +226,18 @@ class _ItemFormState extends State<_ItemForm> {
           Row(
             children: [
               Expanded(
-                child: AppTextField(
-                  controller: widget.form.discount,
+                child: AppMoneyField(
+                  initialValue: widget.form.discount,
                   label: 'Desconto (opcional)',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (money) => widget.form.discount = money,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: AppTextField(
-                  controller: widget.form.additionalCost,
+                child: AppMoneyField(
+                  initialValue: widget.form.additionalCost,
                   label: 'Acréscimo (opcional)',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (money) => widget.form.additionalCost = money,
                 ),
               ),
             ],

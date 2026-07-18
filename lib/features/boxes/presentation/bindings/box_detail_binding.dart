@@ -1,3 +1,4 @@
+import 'package:buy_control/features/box_closures/domain/usecases/close_box.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/presentation/controllers/box_detail_controller.dart';
 import 'package:buy_control/features/transactions/domain/usecases/delete_transaction.dart';
@@ -13,12 +14,16 @@ class BoxDetailBinding extends Bindings {
     Get.lazyPut(() => SearchTransactions(Get.find()));
     Get.lazyPut(() => DeleteTransaction(Get.find()));
     Get.lazyPut(
+      () => CloseBox(boxRepository: Get.find(), transactionRepository: Get.find(), closureRepository: Get.find()),
+    );
+    Get.lazyPut(
       () => BoxDetailController(
         box: box,
         getBoxSummary: Get.find(),
         getTransactionsByBox: Get.find(),
         searchTransactions: Get.find(),
         deleteTransaction: Get.find(),
+        closeBoxUseCase: Get.find(),
       ),
       tag: box.id,
     );

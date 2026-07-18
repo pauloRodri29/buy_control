@@ -9,6 +9,13 @@ class UpdateTransaction {
   const UpdateTransaction(this.repository);
 
   Future<Result<void>> call(TransactionEntity transaction) async {
+    // Lançamentos que já pertencem a um Fechamento estão congelados —
+    // editá-los mudaria silenciosamente um relatório histórico já emitido.
+    if (transaction.isClosed) {
+      return const Failure(
+        ValidationFailure('Este lançamento faz parte de um Fechamento e não pode mais ser editado.'),
+      );
+    }
     if (!Validators.isNotBlank(transaction.boxId)) {
       return const Failure(ValidationFailure('Box é obrigatória.'));
     }

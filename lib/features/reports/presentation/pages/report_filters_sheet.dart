@@ -4,6 +4,7 @@ import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
+import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/app/widgets/filter_chips_bar.dart';
@@ -13,7 +14,6 @@ import 'package:buy_control/features/reports/presentation/controllers/reports_co
 import 'package:buy_control/features/reports/presentation/controllers/saved_filter_preset.dart';
 import 'package:buy_control/features/reports/presentation/pages/multi_select_picker_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -29,43 +29,17 @@ class ReportFiltersSheet extends StatefulWidget {
 }
 
 class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
-  final _controller = Get.find<ReportsController>();
   ReportSide _side = ReportSide.a;
-  late final TextEditingController _minController;
-  late final TextEditingController _maxController;
   final _presetNameController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    final f = _controller.filterFor(_side);
-    _minController = TextEditingController(text: _formatInput(f.minValue));
-    _maxController = TextEditingController(text: _formatInput(f.maxValue));
-  }
-
-  @override
   void dispose() {
-    _minController.dispose();
-    _maxController.dispose();
     _presetNameController.dispose();
     super.dispose();
   }
 
-  String _formatInput(double? value) => value == null ? '' : value.toStringAsFixed(2).replaceAll('.', ',');
-
-  double? _parseInput(String value) {
-    final normalized = value.trim().replaceAll('.', '').replaceAll(',', '.');
-    if (normalized.isEmpty) return null;
-    return double.tryParse(normalized);
-  }
-
   void _switchSide(ReportSide side) {
-    setState(() {
-      _side = side;
-      final f = _controller.filterFor(side);
-      _minController.text = _formatInput(f.minValue);
-      _maxController.text = _formatInput(f.maxValue);
-    });
+    setState(() => _side = side);
   }
 
   @override
@@ -237,22 +211,20 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: AppTextField(
-                      controller: _minController,
+                    child: AppMoneyField(
+                      key: ValueKey('min-$_side'),
+                      initialValue: f.minValue,
                       hint: 'Mínimo',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
-                      onChanged: (v) => controller.setMinValue(_side, _parseInput(v)),
+                      onChanged: (money) => controller.setMinValue(_side, money.isZero ? null : money),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: AppTextField(
-                      controller: _maxController,
+                    child: AppMoneyField(
+                      key: ValueKey('max-$_side'),
+                      initialValue: f.maxValue,
                       hint: 'Máximo',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
-                      onChanged: (v) => controller.setMaxValue(_side, _parseInput(v)),
+                      onChanged: (money) => controller.setMaxValue(_side, money.isZero ? null : money),
                     ),
                   ),
                 ],

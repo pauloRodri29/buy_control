@@ -1,4 +1,5 @@
-import 'package:buy_control/features/reports/data/exporters/stub_report_exporter.dart';
+import 'package:buy_control/features/reports/data/exporters/app_report_exporter.dart';
+import 'package:buy_control/features/reports/data/repositories/report_preset_repository.dart';
 import 'package:buy_control/features/reports/domain/repositories/report_exporter.dart';
 import 'package:buy_control/features/reports/domain/usecases/export_report.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_boxes_totals.dart';
@@ -18,8 +19,9 @@ class ReportsBinding extends Bindings {
         productRepository: Get.find(),
       ),
     );
-    Get.lazyPut<ReportExporter>(() => const StubReportExporter());
+    Get.lazyPut<ReportExporter>(() => const AppReportExporter());
     Get.lazyPut(() => ExportReport(Get.find()));
+    Get.lazyPut(() => ReportPresetRepository());
     Get.lazyPut(
       () => ReportsController(
         getBoxesTotals: Get.find(),
@@ -29,6 +31,7 @@ class ReportsBinding extends Bindings {
         getCategories: Get.find(),
         getProductTypes: Get.find(),
         getProducts: Get.find(),
+        reportPresetRepository: Get.find(),
       ),
     );
   }

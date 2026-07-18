@@ -3,6 +3,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_dropdown.dart';
+import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/core/money/money.dart';
@@ -29,12 +30,11 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
   late final nameController = TextEditingController(text: widget.product?.name);
   late final descriptionController = TextEditingController(text: widget.product?.description);
   late final brandController = TextEditingController(text: widget.product?.brand);
-  late final referencePriceController =
-      TextEditingController(text: widget.product?.referencePrice?.toDouble().toStringAsFixed(2));
 
   String? categoryId;
   String? productTypeId;
   String? defaultUnitId;
+  Money? referencePrice;
   String? errorMessage;
   bool submitting = false;
 
@@ -44,6 +44,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
     categoryId = widget.product?.categoryId;
     productTypeId = widget.product?.productTypeId;
     defaultUnitId = widget.product?.defaultUnitId;
+    referencePrice = widget.product?.referencePrice;
   }
 
   @override
@@ -53,15 +54,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
     nameController.dispose();
     descriptionController.dispose();
     brandController.dispose();
-    referencePriceController.dispose();
     super.dispose();
-  }
-
-  Money? _parseReferencePrice() {
-    final raw = referencePriceController.text.trim();
-    if (raw.isEmpty) return null;
-    final value = double.tryParse(raw.replaceAll(',', '.'));
-    return value == null ? null : Money.fromReais(value);
   }
 
   Future<void> _submit() async {
@@ -78,7 +71,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
         categoryId: categoryId,
         productTypeId: productTypeId,
         defaultUnitId: defaultUnitId,
-        referencePrice: _parseReferencePrice(),
+        referencePrice: referencePrice,
       ));
     } else {
       error = await controller.create(
@@ -90,7 +83,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
         categoryId: categoryId ?? '',
         productTypeId: productTypeId ?? '',
         defaultUnitId: defaultUnitId ?? '',
-        referencePrice: _parseReferencePrice(),
+        referencePrice: referencePrice,
       );
     }
 
@@ -158,11 +151,10 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
             onChanged: (value) => setState(() => defaultUnitId = value),
           ),
           const SizedBox(height: AppSpacing.md),
-          AppTextField(
-            controller: referencePriceController,
+          AppMoneyField(
+            initialValue: referencePrice,
             label: 'Preço de referência',
-            hint: '0,00',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (money) => referencePrice = money,
           ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(

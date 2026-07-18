@@ -1,5 +1,6 @@
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
+import 'package:buy_control/features/box_closures/domain/usecases/close_box.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/domain/usecases/get_box_summary.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
@@ -15,6 +16,7 @@ class BoxDetailController extends GetxController {
   final GetTransactionsByBox getTransactionsByBox;
   final SearchTransactions searchTransactions;
   final DeleteTransaction deleteTransaction;
+  final CloseBox closeBoxUseCase;
 
   BoxDetailController({
     required this.box,
@@ -22,6 +24,7 @@ class BoxDetailController extends GetxController {
     required this.getTransactionsByBox,
     required this.searchTransactions,
     required this.deleteTransaction,
+    required this.closeBoxUseCase,
   });
 
   ViewStatus status = ViewStatus.initial;
@@ -55,7 +58,8 @@ class BoxDetailController extends GetxController {
         : await searchTransactions(boxId: box.id, query: query);
 
     result.fold((data) {
-      transactions = query.isEmpty ? data : _sorted(data);
+      final open = data.where((t) => !t.isClosed).toList();
+      transactions = query.isEmpty ? open : _sorted(open);
       status = transactions.isEmpty ? ViewStatus.empty : ViewStatus.success;
     }, (failure) {
       status = ViewStatus.error;
@@ -103,5 +107,13 @@ class BoxDetailController extends GetxController {
   Future<void> removeTransaction(String id) async {
     await deleteTransaction(id);
     await load();
+  }
+
+  Future<String?> closeBox({String? notes}) async {
+    final result = await closeBoxUseCase(boxId: box.id, notes: notes);
+    return result.fold((_) {
+      load();
+      return null;
+    }, (failure) => FailurePresenter.present(failure));
   }
 }

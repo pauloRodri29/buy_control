@@ -3,8 +3,8 @@ import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
+import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
-import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
@@ -40,24 +40,10 @@ class PurchaseSummaryStep extends StatefulWidget {
 }
 
 class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
-  final _discountController = TextEditingController();
-  final _additionalCostController = TextEditingController();
+  Money _discount = Money.zero;
+  Money _additionalCost = Money.zero;
   bool _submitting = false;
   String? _errorMessage;
-
-  @override
-  void dispose() {
-    _discountController.dispose();
-    _additionalCostController.dispose();
-    super.dispose();
-  }
-
-  Money _parseMoney(String raw) {
-    final trimmed = raw.trim();
-    if (trimmed.isEmpty) return Money.zero;
-    final value = double.tryParse(trimmed.replaceAll(',', '.'));
-    return value == null ? Money.zero : Money.fromReais(value);
-  }
 
   TransactionEntity get _draft {
     final now = DateTime.now();
@@ -67,8 +53,8 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
       title: widget.title,
       occurredAt: widget.occurredAt,
       notes: widget.notes,
-      discount: _parseMoney(_discountController.text),
-      additionalCost: _parseMoney(_additionalCostController.text),
+      discount: _discount,
+      additionalCost: _additionalCost,
       items: widget.items,
       createdAt: now,
       updatedAt: now,
@@ -138,22 +124,18 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
           Row(
             children: [
               Expanded(
-                child: AppTextField(
-                  controller: _discountController,
+                child: AppMoneyField(
+                  initialValue: _discount,
                   label: 'Desconto (opcional)',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (money) => setState(() => _discount = money),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: AppTextField(
-                  controller: _additionalCostController,
+                child: AppMoneyField(
+                  initialValue: _additionalCost,
                   label: 'Acréscimo (opcional)',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (money) => setState(() => _additionalCost = money),
                 ),
               ),
             ],

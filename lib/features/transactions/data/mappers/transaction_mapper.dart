@@ -15,6 +15,7 @@ class TransactionMapper {
       discount: Money(model.discountCents),
       additionalCost: Money(model.additionalCostCents),
       items: model.itemModels.map(TransactionItemMapper.toEntity).toList(),
+      closureId: model.closureId,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
       deletedAt: model.deletedAt,
@@ -35,6 +36,7 @@ class TransactionMapper {
       items: entity.items
           .map((item) => TransactionItemMapper.toModel(item).toMap())
           .toList(),
+      closureId: entity.closureId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,

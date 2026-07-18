@@ -12,17 +12,19 @@ class ExportReport {
     ExportFormat format, {
     ConsolidatedReport? report,
     String title = 'Relatório',
+    String? periodLabel,
+    Map<String, String>? appliedFilters,
   }) async {
     switch (format) {
       case ExportFormat.pdf:
-        return exporter.exportToPdf(report!, title: title);
+        return exporter.exportToPdf(report!, title: title, periodLabel: periodLabel, appliedFilters: appliedFilters);
       case ExportFormat.csv:
         return exporter.exportToCsv(report!, title: title);
       case ExportFormat.share:
-        final result = await exporter.share(report!, title: title);
+        final result = await exporter.share(report!, title: title, periodLabel: periodLabel, appliedFilters: appliedFilters);
         return result.fold((_) => const Success(null), (f) => Failure(f));
       case ExportFormat.print:
-        final result = await exporter.print(report!, title: title);
+        final result = await exporter.print(report!, title: title, periodLabel: periodLabel, appliedFilters: appliedFilters);
         return result.fold((_) => const Success(null), (f) => Failure(f));
       case ExportFormat.jsonBackup:
         return exporter.backupToJson();

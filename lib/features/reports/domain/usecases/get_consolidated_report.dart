@@ -26,6 +26,14 @@ class ReportProductCount {
   const ReportProductCount({required this.id, required this.name, required this.quantity});
 }
 
+class ReportProductLine {
+  final String id;
+  final String name;
+  final double quantity;
+  final Money total;
+  const ReportProductLine({required this.id, required this.name, required this.quantity, required this.total});
+}
+
 class ConsolidatedReport {
   final Money total;
   final Money averagePerBox;
@@ -37,6 +45,7 @@ class ConsolidatedReport {
   final ReportProductCount? mostPurchasedProduct;
   final ReportNamedTotal? highestImpactProduct;
   final List<ReportEvolutionPoint> evolution;
+  final List<ReportProductLine> productLines;
 
   const ConsolidatedReport({
     required this.total,
@@ -49,6 +58,7 @@ class ConsolidatedReport {
     this.mostPurchasedProduct,
     this.highestImpactProduct,
     required this.evolution,
+    this.productLines = const [],
   });
 
   bool get isEmpty => transactionCount == 0;
@@ -94,7 +104,12 @@ class GetConsolidatedReport {
     final categoryNameById = {for (final c in categoriesResult.dataOrNull!) c.id: c.name};
     final productById = {for (final p in productsResult.dataOrNull!) p.id: p};
 
-    final boxFiltered = transactionsResult.dataOrNull!.where((t) {
+    // Relatórios consideram apenas lançamentos já congelados por um
+    // Fechamento — nunca o estado atual (ainda editável) da Box. Isso
+    // garante que um relatório emitido não mude silenciosamente depois.
+    final closedTransactions = transactionsResult.dataOrNull!.where((t) => t.isClosed);
+
+    final boxFiltered = closedTransactions.where((t) {
       if (boxIds.isNotEmpty && !boxIds.contains(t.boxId)) return false;
       if (start != null && t.occurredAt.isBefore(start)) return false;
       if (end != null && t.occurredAt.isAfter(end)) return false;
@@ -189,6 +204,16 @@ class GetConsolidatedReport {
       );
     }
 
+    final productLines = productTotals.entries.map((entry) {
+      return ReportProductLine(
+        id: entry.key,
+        name: productById[entry.key]?.name ?? 'Produto removido',
+        quantity: productQuantities[entry.key] ?? 0,
+        total: Money(entry.value),
+      );
+    }).toList()
+      ..sort((a, b) => b.total.cents.compareTo(a.total.cents));
+
     final evolution = <ReportEvolutionPoint>[];
     if (earliest != null && latest != null) {
       var cursor = DateTime(earliest.year, earliest.month, 1);
@@ -214,6 +239,7 @@ class GetConsolidatedReport {
       mostPurchasedProduct: mostPurchasedProduct,
       highestImpactProduct: highestImpactProduct,
       evolution: evolution,
+      productLines: productLines,
     ));
   }
 }

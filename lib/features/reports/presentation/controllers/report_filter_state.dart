@@ -1,3 +1,4 @@
+import 'package:buy_control/core/money/money.dart';
 import 'package:flutter/material.dart';
 
 enum ReportPeriodPreset { today, last7Days, currentMonth, previousMonth, currentYear, custom }
@@ -33,8 +34,8 @@ class ReportFilterState {
   Set<String> categoryIds;
   Set<String> productTypeIds;
   Set<String> productIds;
-  double? minValue;
-  double? maxValue;
+  Money? minValue;
+  Money? maxValue;
 
   ReportFilterState({
     this.periodPreset = ReportPeriodPreset.currentMonth,

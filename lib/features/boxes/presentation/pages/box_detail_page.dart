@@ -14,6 +14,8 @@ import 'package:buy_control/app/widgets/loading_skeleton.dart';
 import 'package:buy_control/app/widgets/search_field_debounced.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
 import 'package:buy_control/core/money/money.dart';
+import 'package:buy_control/features/box_closures/presentation/bindings/box_closures_binding.dart';
+import 'package:buy_control/features/box_closures/presentation/pages/box_closures_page.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/domain/usecases/get_box_summary.dart';
 import 'package:buy_control/features/boxes/presentation/controllers/box_detail_controller.dart';
@@ -71,10 +73,46 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
     return TransactionSort.values.firstWhere((s) => s.name == key, orElse: () => TransactionSort.newest);
   }
 
+  void _openClosures() {
+    BoxClosuresBinding(widget.box).dependencies();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => BoxClosuresPage(box: widget.box),
+    ));
+  }
+
+  Future<void> _closeBox() async {
+    if (controller.transactions.isEmpty) {
+      Get.snackbar('Nada para fechar', 'Esta Box não tem lançamentos abertos para fechar.');
+      return;
+    }
+
+    final total = controller.transactions.fold(Money.zero, (sum, t) => sum + t.total);
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'Fechar a Box "${widget.box.name}"?',
+      message:
+          'Isso vai congelar ${controller.transactions.length} lançamento(s) totalizando ${total.formatted}. '
+          'Eles deixarão de poder ser editados ou excluídos, mas continuam disponíveis no histórico de '
+          'Fechamentos. A Box continua disponível para novos lançamentos.',
+      confirmLabel: 'Fechar Box',
+      isDestructive: false,
+    );
+    if (!confirmed) return;
+
+    final error = await controller.closeBox();
+    if (error != null) Get.snackbar('Erro', error);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: AppText.title(widget.box.name, fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(
+        title: AppText.title(widget.box.name, fontSize: AppFontSizes.fz09),
+        actions: [
+          IconButton(icon: const Icon(LucideIcons.history), onPressed: _openClosures),
+          IconButton(icon: const Icon(LucideIcons.lock), onPressed: _closeBox),
+        ],
+      ),
       body: GetBuilder<BoxDetailController>(
         tag: widget.box.id,
         builder: (controller) {

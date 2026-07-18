@@ -4,6 +4,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_dropdown.dart';
+import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
@@ -35,10 +36,10 @@ class StandaloneEntrySheet extends StatefulWidget {
 class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _valueController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
   final _notesController = TextEditingController();
 
+  Money _value = Money.zero;
   String? _categoryId;
   String? _productTypeId;
   String? _unitId;
@@ -82,7 +83,6 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _valueController.dispose();
     _quantityController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -108,11 +108,6 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
       setState(() => _errorMessage = 'Cadastre ao menos uma unidade antes de lançar.');
       return;
     }
-    final value = double.tryParse(_valueController.text.trim().replaceAll(',', '.'));
-    if (value == null || value < 0) {
-      setState(() => _errorMessage = 'Informe um valor válido.');
-      return;
-    }
     final quantity = double.tryParse(_quantityController.text.trim().replaceAll(',', '.')) ?? 1;
 
     setState(() {
@@ -127,7 +122,7 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
       categoryId: _categoryId,
       unitId: _unitId!,
       quantity: quantity <= 0 ? 1 : quantity,
-      unitPrice: Money.fromReais(value),
+      unitPrice: _value,
     );
 
     final notesParts = [
@@ -180,11 +175,10 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
           Row(
             children: [
               Expanded(
-                child: AppTextField(
-                  controller: _valueController,
+                child: AppMoneyField(
+                  initialValue: _value,
                   label: 'Valor',
-                  hint: '0,00',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (money) => _value = money,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
