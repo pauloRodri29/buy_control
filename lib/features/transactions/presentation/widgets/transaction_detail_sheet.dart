@@ -3,6 +3,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
+import 'package:buy_control/core/formatters/quantity_formatter.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:buy_control/features/units/domain/entities/unit_entity.dart';
 import 'package:buy_control/features/units/domain/usecases/get_units.dart';
@@ -53,6 +54,10 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
           AppText.title(title, fontSize: AppFontSizes.fz09),
           const SizedBox(height: AppSpacing.xs),
           AppText.subtitle(DateTimeFormatter.ddMMyyyyHHmm(transaction.occurredAt)),
+          if (transaction.description != null && transaction.description!.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppText(transaction.description!),
+          ],
           if (transaction.notes != null && transaction.notes!.trim().isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
             AppText(transaction.notes!, color: AppColors.textSecondary(isDark)),
@@ -60,7 +65,8 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
           const SizedBox(height: AppSpacing.lg),
           ...transaction.items.map((item) {
             final unit = _unitsById[item.unitId];
-            final quantityLabel = unit != null ? '${item.quantity} ${unit.abbreviation}' : '${item.quantity}';
+            final quantity = QuantityFormatter.format(item.quantity);
+            final quantityLabel = unit != null ? '$quantity ${unit.abbreviation}' : quantity;
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Row(

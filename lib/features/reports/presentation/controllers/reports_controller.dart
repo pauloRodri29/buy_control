@@ -1,5 +1,6 @@
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
+import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/domain/usecases/get_boxes.dart';
@@ -296,7 +297,10 @@ class ReportsController extends GetxController {
     );
     result.fold(
       (path) => Get.snackbar('Exportação', path == null ? 'Ação concluída.' : 'Arquivo gerado: $path'),
-      (failure) => Get.snackbar('Em breve', FailurePresenter.present(failure)),
+      (failure) => Get.snackbar(
+        failure is NotImplementedFailure ? 'Em breve' : 'Erro ao exportar',
+        FailurePresenter.present(failure),
+      ),
     );
   }
 }

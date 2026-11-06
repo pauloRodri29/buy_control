@@ -17,8 +17,10 @@ class AppTextField extends StatelessWidget {
   final int? maxLength;
   final TextInputType? keyboardType;
   final TextInputAction textInputAction;
+  final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
   final Widget? prefix;
   final Widget? suffix;
@@ -36,8 +38,10 @@ class AppTextField extends StatelessWidget {
     this.maxLength,
     this.keyboardType,
     this.textInputAction = TextInputAction.done,
+    this.textCapitalization = TextCapitalization.none,
     this.inputFormatters,
     this.onChanged,
+    this.onSubmitted,
     this.onTap,
     this.prefix,
     this.suffix,
@@ -65,8 +69,10 @@ class AppTextField extends StatelessWidget {
           maxLength: maxLength,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
+          textCapitalization: textCapitalization,
           inputFormatters: inputFormatters,
           onChanged: onChanged,
+          onSubmitted: onSubmitted,
           onTap: onTap,
           style: TextStyle(fontSize: AppFontSizes.fz08, color: AppColors.textPrimary(isDark)),
           decoration: InputDecoration(

@@ -4,6 +4,7 @@ class BoxClosureModel {
   final String id;
   final String boxId;
   final String boxNameSnapshot;
+  final DateTime referenceDate;
   final DateTime closedAt;
   final String? notes;
   final int totalCents;
@@ -19,6 +20,7 @@ class BoxClosureModel {
     required this.id,
     required this.boxId,
     required this.boxNameSnapshot,
+    required this.referenceDate,
     required this.closedAt,
     this.notes,
     required this.totalCents,
@@ -33,11 +35,16 @@ class BoxClosureModel {
 
   factory BoxClosureModel.fromMap(Map<String, dynamic> map) {
     final sync = SyncableFieldsData.fromMap(map);
+    final closedAt = DateTime.parse(map['closedAt'] as String);
     return BoxClosureModel(
       id: sync.id,
       boxId: map['boxId'] as String,
       boxNameSnapshot: map['boxNameSnapshot'] as String,
-      closedAt: DateTime.parse(map['closedAt'] as String),
+      // Fechamentos anteriores a este campo usam o dia em que foram feitos.
+      referenceDate: map['referenceDate'] == null
+          ? DateTime(closedAt.year, closedAt.month, closedAt.day)
+          : DateTime.parse(map['referenceDate'] as String),
+      closedAt: closedAt,
       notes: map['notes'] as String?,
       totalCents: (map['totalCents'] as num?)?.toInt() ?? 0,
       transactionCount: (map['transactionCount'] as num?)?.toInt() ?? 0,
@@ -55,6 +62,7 @@ class BoxClosureModel {
       'id': id,
       'boxId': boxId,
       'boxNameSnapshot': boxNameSnapshot,
+      'referenceDate': referenceDate.toIso8601String(),
       'closedAt': closedAt.toIso8601String(),
       'notes': notes,
       'totalCents': totalCents,

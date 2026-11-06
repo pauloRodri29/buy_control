@@ -48,7 +48,10 @@ class GetDashboardSummary {
 
     final boxes = boxesResult.dataOrNull!;
     final boxNameById = {for (final b in boxes) b.id: b.name};
-    final transactions = transactionsResult.dataOrNull!;
+    // Balanço considera só compras fechadas (registro definitivo), datadas
+    // pela data de referência do Fechamento. Lançamentos abertos são o
+    // ciclo em andamento e ainda podem mudar.
+    final transactions = transactionsResult.dataOrNull!.where((t) => t.isClosed).toList();
 
     final now = referenceDate ?? DateTime.now();
     final currentMonthStart = DateTime(now.year, now.month, 1);
@@ -58,8 +61,8 @@ class GetDashboardSummary {
       return date.year == monthStart.year && date.month == monthStart.month;
     }
 
-    final currentMonthTransactions = transactions.where((t) => isInMonth(t.occurredAt, currentMonthStart)).toList();
-    final previousMonthTransactions = transactions.where((t) => isInMonth(t.occurredAt, previousMonthStart)).toList();
+    final currentMonthTransactions = transactions.where((t) => isInMonth(t.accountingDate, currentMonthStart)).toList();
+    final previousMonthTransactions = transactions.where((t) => isInMonth(t.accountingDate, previousMonthStart)).toList();
 
     final currentMonthTotal = currentMonthTransactions.fold(Money.zero, (sum, t) => sum + t.total);
     final previousMonthTotal = previousMonthTransactions.fold(Money.zero, (sum, t) => sum + t.total);
@@ -84,7 +87,7 @@ class GetDashboardSummary {
     }).toList()
       ..sort((a, b) => b.total.cents.compareTo(a.total.cents));
 
-    final recent = [...transactions]..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+    final recent = [...transactions]..sort((a, b) => b.accountingDate.compareTo(a.accountingDate));
 
     return Success(DashboardSummary(
       currentMonthTotal: currentMonthTotal,

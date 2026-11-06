@@ -1,5 +1,6 @@
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/app/theme/app_colors.dart';
+import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -33,18 +34,17 @@ class _BoxClosuresPageState extends State<BoxClosuresPage> {
     super.dispose();
   }
 
-  Future<void> _openDetail(BoxClosureEntity closure) async {
+  void _openDetail(BoxClosureEntity closure) {
     BoxClosureDetailBinding(closure.id).dependencies();
-    final reopened = await Navigator.of(context).push<bool>(MaterialPageRoute(
+    Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => BoxClosureDetailPage(closureId: closure.id),
     ));
-    if (reopened == true) controller.load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Fechamentos')),
+      appBar: AppBar(title: const AppText.title('Fechamentos', fontSize: AppFontSizes.fz09)),
       body: GetBuilder<BoxClosuresController>(
         tag: widget.box.id,
         builder: (controller) => _buildBody(controller),
@@ -94,9 +94,9 @@ class _ClosureCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText(DateTimeFormatter.ddMMyyyy(closure.closedAt), fontWeight: FontWeight.w600),
+                AppText('Compras de ${DateTimeFormatter.ddMMyyyy(closure.referenceDate)}', fontWeight: FontWeight.w600),
                 const SizedBox(height: AppSpacing.xs),
-                AppText.subtitle('${closure.transactionCount} lançamentos · ${closure.itemCount} itens'),
+                AppText.subtitle('${closure.itemCount} itens'),
               ],
             ),
           ),

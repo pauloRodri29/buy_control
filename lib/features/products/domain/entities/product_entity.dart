@@ -3,7 +3,10 @@ import 'package:buy_control/core/sync/syncable.dart';
 
 class ProductEntity extends SyncableFields {
   final String? code;
-  final String? barcode;
+  /// Códigos de barras do produto. Um produto pode ter vários (troca de
+  /// embalagem, mesmo item com códigos diferentes, etiqueta de balança de
+  /// cada mercado). Guardados já normalizados (`BarcodeParser.storageKey`).
+  final List<String> barcodes;
   final String name;
   final String? description;
   final String? brand;
@@ -16,7 +19,7 @@ class ProductEntity extends SyncableFields {
   const ProductEntity({
     required super.id,
     this.code,
-    this.barcode,
+    this.barcodes = const [],
     required this.name,
     this.description,
     this.brand,
@@ -32,9 +35,12 @@ class ProductEntity extends SyncableFields {
     super.version,
   });
 
+  /// Primeiro código de barras, para telas que mostram só um.
+  String? get barcode => barcodes.isEmpty ? null : barcodes.first;
+
   ProductEntity copyWith({
     String? code,
-    String? barcode,
+    List<String>? barcodes,
     String? name,
     String? description,
     String? brand,
@@ -49,7 +55,7 @@ class ProductEntity extends SyncableFields {
     return ProductEntity(
       id: id,
       code: code ?? this.code,
-      barcode: barcode ?? this.barcode,
+      barcodes: barcodes ?? this.barcodes,
       name: name ?? this.name,
       description: description ?? this.description,
       brand: brand ?? this.brand,

@@ -111,8 +111,8 @@ class GetConsolidatedReport {
 
     final boxFiltered = closedTransactions.where((t) {
       if (boxIds.isNotEmpty && !boxIds.contains(t.boxId)) return false;
-      if (start != null && t.occurredAt.isBefore(start)) return false;
-      if (end != null && t.occurredAt.isAfter(end)) return false;
+      if (start != null && t.accountingDate.isBefore(start)) return false;
+      if (end != null && t.accountingDate.isAfter(end)) return false;
       if (minValue != null && t.total.cents < minValue.cents) return false;
       if (maxValue != null && t.total.cents > maxValue.cents) return false;
       return true;
@@ -122,8 +122,11 @@ class GetConsolidatedReport {
       if (categoryIds.isNotEmpty && !categoryIds.contains(item.categoryId)) return false;
       if (productIds.isNotEmpty && !productIds.contains(item.productId)) return false;
       if (productTypeIds.isNotEmpty) {
-        final product = item.productId == null ? null : productById[item.productId];
-        if (product == null || !productTypeIds.contains(product.productTypeId)) return false;
+        // Tipo gravado no próprio item (inclusive avulso); itens antigos,
+        // sem esse campo, caem no tipo atual do produto do catálogo.
+        final typeId = item.productTypeId ??
+            (item.productId == null ? null : productById[item.productId]?.productTypeId);
+        if (typeId == null || !productTypeIds.contains(typeId)) return false;
       }
       return true;
     }
@@ -150,8 +153,8 @@ class GetConsolidatedReport {
       itemCount += matchingItems.length;
       boxTotals[t.boxId] = (boxTotals[t.boxId] ?? 0) + transactionMatchedTotal.cents;
 
-      if (earliest == null || t.occurredAt.isBefore(earliest)) earliest = t.occurredAt;
-      if (latest == null || t.occurredAt.isAfter(latest)) latest = t.occurredAt;
+      if (earliest == null || t.accountingDate.isBefore(earliest)) earliest = t.accountingDate;
+      if (latest == null || t.accountingDate.isAfter(latest)) latest = t.accountingDate;
 
       for (final item in matchingItems) {
         final categoryKey = item.categoryId ?? 'sem_categoria';
@@ -220,7 +223,7 @@ class GetConsolidatedReport {
       final lastMonth = DateTime(latest.year, latest.month, 1);
       while (!cursor.isAfter(lastMonth)) {
         final monthCents = boxFiltered
-            .where((t) => t.occurredAt.year == cursor.year && t.occurredAt.month == cursor.month)
+            .where((t) => t.accountingDate.year == cursor.year && t.accountingDate.month == cursor.month)
             .expand((t) => hasItemFilters ? t.items.where(itemMatches) : t.items)
             .fold(0, (sum, i) => sum + i.total.cents);
         evolution.add(ReportEvolutionPoint(month: cursor, total: Money(monthCents)));

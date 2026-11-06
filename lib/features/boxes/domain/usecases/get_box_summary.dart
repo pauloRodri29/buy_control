@@ -30,7 +30,10 @@ class GetBoxSummary {
     final transactionsResult = await transactionRepository.getAll(boxId: boxId);
     if (transactionsResult.isFailure) return Failure(transactionsResult.failureOrNull!);
 
-    final transactions = transactionsResult.dataOrNull!;
+    // Resumo do ciclo atual (aberto). O que já foi fechado fica no
+    // histórico de Fechamentos — somar aqui duplicaria os itens, já que o
+    // fechamento copia os produtos para o novo ciclo.
+    final transactions = transactionsResult.dataOrNull!.where((t) => !t.isClosed).toList();
     final total = transactions.fold(Money.zero, (sum, t) => sum + t.total);
     final itemCount = transactions.fold(0, (sum, t) => sum + t.itemCount);
     final lastMovementAt = transactions.isEmpty

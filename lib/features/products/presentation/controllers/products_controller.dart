@@ -112,9 +112,13 @@ class ProductsController extends GetxController {
     return '—';
   }
 
+  /// Cria o produto e devolve o erro (para o formulário) ou `null`.
+  /// [onCreated] recebe o produto salvo — usado pelo fluxo de leitura de
+  /// código de barras para já colocar o produto novo na compra.
   Future<String?> create({
     String? code,
-    String? barcode,
+    List<String> barcodes = const [],
+    void Function(ProductEntity product)? onCreated,
     required String name,
     String? description,
     String? brand,
@@ -125,7 +129,7 @@ class ProductsController extends GetxController {
   }) async {
     final result = await createProduct(
       code: code,
-      barcode: barcode,
+      barcodes: barcodes,
       name: name,
       description: description,
       brand: brand,
@@ -134,7 +138,8 @@ class ProductsController extends GetxController {
       defaultUnitId: defaultUnitId,
       referencePrice: referencePrice,
     );
-    return result.fold((_) {
+    return result.fold((product) {
+      onCreated?.call(product);
       load();
       return null;
     }, (failure) => FailurePresenter.present(failure));

@@ -20,19 +20,49 @@
 ## Boxes → Lançamento → Fechamento
 
 1. Boxes → criar/abrir uma Box.
-2. Dentro da Box: "Adicionar itens" → **Selecionar produtos** (busca + filtro por categoria, define quantidade/preço/desconto por item) **ou** "Lançamento avulso" (título, valor via `AppMoneyField`, quantidade, unidade, categoria/tipo opcionais, data, observação).
-3. Lançamento é criado com `closureId = null` (aberto — editável/excluível normalmente).
-4. Quando o ciclo de compras termina: ícone de cadeado no topo da Box → "Fechar Box".
+2. Dentro da Box: "Adicionar itens" → **Selecionar produtos** (busca + filtro por categoria) **ou** "Lançamento avulso" (título, valor via `AppMoneyField`, quantidade, unidade, promoção, categoria/tipo opcionais, data, observação).
+3. Produtos: editor de itens (`ItemDetailsStep`) → quantidade (− / +), preço, unidade, promoção, acréscimo; remover item; "Adicionar produto" reabre o catálogo. → Resumo (`PurchaseSummaryStep`): desconto/acréscimo gerais; "Editar itens" (ou tocar num item) volta ao editor sem perder nada. → "Confirmar" grava. Todo o estado em edição vive num `PurchaseDraft`.
+4. Lançamento é criado com `closureId = null` (aberto). Tocar nele no detalhe da Box reabre o mesmo fluxo para editar (`openEditTransactionFlow` → `UpdateTransaction`); avulso abre o formulário avulso preenchido.
+5. Quando o ciclo de compras termina: ícone de cadeado no topo da Box →
    - Se não há lançamentos abertos, o app avisa que não há nada para fechar.
-   - Caso contrário, mostra quantos lançamentos e qual valor total serão congelados, pedindo confirmação.
-5. Ao confirmar, `CloseBox`:
-   - Busca os lançamentos abertos da Box.
-   - Calcula total/contagens.
-   - Cria o `BoxClosureEntity` (snapshot leve).
-   - Marca `closureId` em cada lançamento envolvido.
-6. A lista de lançamentos abertos da Box fica vazia (ou só com o que veio depois do fechamento); a Box continua recebendo novos lançamentos normalmente.
-7. Ícone de histórico → `BoxClosuresPage` lista todos os Fechamentos da Box → tocar em um abre `BoxClosureDetailPage` (cabeçalho + lançamentos congelados, somente leitura).
-8. "Reabrir" (no detalhe do Fechamento) → confirmação forte → `ReopenBoxClosure` limpa `closureId` dos lançamentos (voltam a ser editáveis) e apaga logicamente o Fechamento.
+   - Escolhe a **data de referência** (só a data, padrão hoje).
+   - Diálogo de confirmação com quantidade de itens e total, avisando que é definitivo.
+6. Ao confirmar, `CloseBox` (tudo ou nada — qualquer falha desfaz o que já foi gravado):
+   - Cria o `BoxClosureEntity` com `referenceDate`, total e contagens.
+   - Marca `closureId` + `closureReferenceDate` em cada lançamento aberto (congelado para sempre).
+   - **Copia** cada lançamento fechado como novo lançamento aberto (mesmos itens, quantidades, preços e promoções; ids novos; data de hoje). A Box não esvazia: o próximo ciclo já começa com a lista de compras de sempre, e o usuário só ajusta o que mudou.
+7. Ícone de histórico → `BoxClosuresPage` lista os Fechamentos (data de referência, nº de itens, total) → tocar em um abre `BoxClosureDetailPage`: lista de produtos somente leitura.
+8. Fechamentos são definitivos: não há reabrir nem editar.
+
+### Leitura de código de barras (câmera, tudo local)
+
+Entradas: "Adicionar itens" → **Escanear produtos (câmera)**; botão **Escanear** no editor de itens (compra nova); ícone de câmera no campo "Códigos de barras" do cadastro de produto.
+
+`BarcodeScannerPage` (pacote `mobile_scanner`) lê EAN-13, EAN-8 e UPC-A, confere o dígito verificador (`BarcodeParser`) e ignora o mesmo código por 3 s. No modo carrinho (`scanIntoDraft`) cada leitura vai para o `PurchaseDraft`:
+
+- **Código conhecido** (`FindProductByBarcode`) → adiciona o produto ou soma +1.
+- **Etiqueta de balança** (EAN-13 começando com 2: `2 CCCCCC VVVVV D`) → `ScaleLabelSheet`: o usuário confirma se o número é **preço** ou **peso** (pode corrigir) e vincula a etiqueta a um produto. A parte fixa (`2CCCCCC`) fica salva no produto e as próximas etiquetas, com qualquer valor, são reconhecidas. Cada etiqueta vira um item separado.
+- **Código desconhecido** → cadastrar produto novo (formulário já com o código), vincular a produto existente (`LinkBarcodeToProduct`), lançar avulso (pede o nome) ou ignorar.
+
+Produtos têm **vários códigos** (`ProductEntity.barcodes`); um código só pode pertencer a um produto (`ProductBarcodes.findConflict`). Registros antigos com um único `barcode` continuam sendo lidos. Se as balanças do mercado usarem outra divisão da etiqueta, ajuste `BarcodeParser.scaleKeyLength`/`scaleValueLength`.
+
+### Promoções (desconto por item)
+
+`DiscountRule` (`transactions/domain/entities/discount_rule.dart`) calcula o desconto a partir de quantidade e preço — o usuário nunca faz conta de cabeça:
+
+| Tipo | Exemplo |
+|---|---|
+| Valor fixo | R$ 2,00 de desconto |
+| Percentual | 10% |
+| Leve N por R$ X | Leve 4 por R$ 10,00 (o que sobra fora do grupo sai pelo preço normal) |
+| Leve N, pague M | Leve 3, pague 2 |
+| Preço a partir de N un. | A partir de 6 un., R$ 3,49 cada |
+
+O valor calculado é gravado em `TransactionItemEntity.discount` (snapshot) junto da regra, e recalculado sempre que quantidade/preço mudam no editor.
+
+### Balanço e relatórios
+
+Dashboard, Relatórios e totais por Box consideram **só lançamentos fechados**, datados por `TransactionEntity.accountingDate` (= data de referência do Fechamento; Fechamentos antigos usam a data do lançamento). O cabeçalho da Box mostra o total do ciclo aberto.
 
 ### Guard de imutabilidade
 

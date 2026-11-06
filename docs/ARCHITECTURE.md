@@ -66,7 +66,9 @@ Todo valor monetário passa por `Money` (`lib/core/money/money.dart`), que guard
 
 Uma Box é um contexto de gasto que nunca "fecha" de verdade — ela continua recebendo lançamentos para sempre. Quando o usuário termina um ciclo de compras, ele pode "Fechar a Box": isso cria um `BoxClosureEntity` (um cabeçalho leve: data, total, contadores) e marca `closureId` em cada `TransactionEntity` aberto daquele momento.
 
-A partir daí, um guard no domínio (`UpdateTransaction`/`DeleteTransaction`) rejeita qualquer tentativa de editar/excluir um lançamento com `closureId != null`. Isso significa que o "detalhe" de um Fechamento nunca precisa duplicar os lançamentos — ele é sempre obtido consultando `TransactionRepository` pelos registros com aquele `closureId`, que a essa altura são garantidamente imutáveis. `ReopenBoxClosure` desfaz o processo (limpa `closureId`, soft-delete no Fechamento).
+A partir daí, um guard no domínio (`UpdateTransaction`/`DeleteTransaction`) rejeita qualquer tentativa de editar/excluir um lançamento com `closureId != null`. Isso significa que o "detalhe" de um Fechamento nunca precisa duplicar os lançamentos — ele é sempre obtido consultando `TransactionRepository` pelos registros com aquele `closureId`, que a essa altura são garantidamente imutáveis. Fechamentos são definitivos: não existe reabertura.
+
+O usuário escolhe a data de referência do Fechamento (`referenceDate`), que também é copiada para cada lançamento (`closureReferenceDate`) para que balanço e relatórios agrupem pelo período fechado sem consultar os Fechamentos. Ao fechar, `CloseBox` copia os lançamentos para um novo ciclo aberto (ids novos), e reverte tudo se alguma gravação falhar.
 
 Esse mesmo `closureId` é o que garante a regra "relatórios nunca refletem o estado atual da Box": `GetConsolidatedReport` filtra exclusivamente `transaction.isClosed`, então editar um lançamento aberto jamais altera um relatório já gerado.
 

@@ -4,6 +4,7 @@ import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/utils/id_generator.dart';
 import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
+import 'package:buy_control/features/products/domain/product_barcodes.dart';
 import 'package:buy_control/features/products/domain/repositories/product_repository.dart';
 
 class CreateProduct {
@@ -12,7 +13,7 @@ class CreateProduct {
 
   Future<Result<ProductEntity>> call({
     String? code,
-    String? barcode,
+    List<String> barcodes = const [],
     required String name,
     String? description,
     String? brand,
@@ -38,28 +39,23 @@ class CreateProduct {
     }
 
     final trimmedCode = code?.trim();
-    final trimmedBarcode = barcode?.trim();
+    final normalizedBarcodes = ProductBarcodes.normalize(barcodes);
 
-    if ((trimmedCode != null && trimmedCode.isNotEmpty) ||
-        (trimmedBarcode != null && trimmedBarcode.isNotEmpty)) {
-      final existingResult = await repository.getAll();
+    if ((trimmedCode != null && trimmedCode.isNotEmpty) || normalizedBarcodes.isNotEmpty) {
+      final existingResult = await repository.getAll(includeInactive: true);
       if (existingResult.isFailure) {
         return Failure(existingResult.failureOrNull!);
       }
       final existing = existingResult.dataOrNull!;
-      final duplicate = existing.any((p) {
-        final sameCode = trimmedCode != null &&
-            trimmedCode.isNotEmpty &&
-            p.code != null &&
-            p.code!.trim().toLowerCase() == trimmedCode.toLowerCase();
-        final sameBarcode = trimmedBarcode != null &&
-            trimmedBarcode.isNotEmpty &&
-            p.barcode != null &&
-            p.barcode!.trim().toLowerCase() == trimmedBarcode.toLowerCase();
-        return sameCode || sameBarcode;
-      });
-      if (duplicate) {
-        return const Failure(ValidationFailure('Já existe um produto com este código ou código de barras.'));
+      final sameCode = trimmedCode != null &&
+          trimmedCode.isNotEmpty &&
+          existing.any((p) => !p.isDeleted && p.code?.trim().toLowerCase() == trimmedCode.toLowerCase());
+      if (sameCode) {
+        return const Failure(ValidationFailure('Já existe um produto com este código.'));
+      }
+      final conflict = ProductBarcodes.findConflict(existing, barcodes: normalizedBarcodes);
+      if (conflict != null) {
+        return Failure(ValidationFailure(ProductBarcodes.conflictMessage(conflict)));
       }
     }
 
@@ -67,7 +63,7 @@ class CreateProduct {
     final product = ProductEntity(
       id: IdGenerator.generate(),
       code: trimmedCode == null || trimmedCode.isEmpty ? null : trimmedCode,
-      barcode: trimmedBarcode == null || trimmedBarcode.isEmpty ? null : trimmedBarcode,
+      barcodes: normalizedBarcodes,
       name: name.trim(),
       description: description,
       brand: brand,

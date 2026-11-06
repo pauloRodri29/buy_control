@@ -1,19 +1,15 @@
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/features/box_closures/domain/usecases/get_box_closure_details.dart';
-import 'package:buy_control/features/box_closures/domain/usecases/reopen_box_closure.dart';
 import 'package:get/get.dart';
 
+/// Detalhe somente leitura de um Fechamento. Fechamentos são definitivos:
+/// não há ação de reabrir nem de editar.
 class BoxClosureDetailController extends GetxController {
   final String closureId;
   final GetBoxClosureDetails getBoxClosureDetails;
-  final ReopenBoxClosure reopenBoxClosure;
 
-  BoxClosureDetailController({
-    required this.closureId,
-    required this.getBoxClosureDetails,
-    required this.reopenBoxClosure,
-  });
+  BoxClosureDetailController({required this.closureId, required this.getBoxClosureDetails});
 
   ViewStatus status = ViewStatus.initial;
   BoxClosureDetails? details;
@@ -38,10 +34,5 @@ class BoxClosureDetailController extends GetxController {
       errorMessage = FailurePresenter.present(failure);
     });
     update();
-  }
-
-  Future<String?> reopen() async {
-    final result = await reopenBoxClosure(closureId);
-    return result.fold((_) => null, (failure) => FailurePresenter.present(failure));
   }
 }

@@ -62,6 +62,13 @@ class _SearchFieldDebouncedState extends State<SearchFieldDebounced> {
               style: TextStyle(color: AppColors.textPrimary(isDark)),
               decoration: InputDecoration(
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                filled: false,
+                contentPadding: EdgeInsets.zero,
                 isDense: true,
                 hintText: widget.hint,
                 hintStyle: TextStyle(color: AppColors.textSecondary(isDark)),

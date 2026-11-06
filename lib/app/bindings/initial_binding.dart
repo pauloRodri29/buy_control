@@ -26,7 +26,9 @@ import 'package:buy_control/features/product_types/domain/usecases/get_product_t
 import 'package:buy_control/features/products/data/datasources/local/product_hive_data_source.dart';
 import 'package:buy_control/features/products/data/repositories/local_product_repository.dart';
 import 'package:buy_control/features/products/domain/repositories/product_repository.dart';
+import 'package:buy_control/features/products/domain/usecases/find_product_by_barcode.dart';
 import 'package:buy_control/features/products/domain/usecases/get_products.dart';
+import 'package:buy_control/features/products/domain/usecases/link_barcode_to_product.dart';
 import 'package:buy_control/features/products/domain/usecases/get_products_by_category.dart';
 import 'package:buy_control/features/products/domain/usecases/search_products.dart';
 import 'package:buy_control/features/transactions/data/datasources/local/transaction_hive_data_source.dart';
@@ -72,6 +74,8 @@ class InitialBinding extends Bindings {
     Get.put(GetProducts(Get.find()), permanent: true);
     Get.put(SearchProducts(Get.find()), permanent: true);
     Get.put(GetProductsByCategory(Get.find()), permanent: true);
+    Get.put(FindProductByBarcode(Get.find()), permanent: true);
+    Get.put(LinkBarcodeToProduct(Get.find()), permanent: true);
     Get.put(GetCategories(Get.find()), permanent: true);
     Get.put(GetProductTypes(Get.find()), permanent: true);
     Get.put(GetUnits(Get.find()), permanent: true);

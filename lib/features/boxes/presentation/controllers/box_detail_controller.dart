@@ -8,6 +8,7 @@ import 'package:buy_control/features/transactions/domain/usecases/delete_transac
 import 'package:buy_control/features/transactions/domain/usecases/get_transactions_by_box.dart';
 import 'package:buy_control/features/transactions/domain/usecases/search_transactions.dart';
 import 'package:buy_control/features/transactions/domain/usecases/transaction_sort.dart';
+import 'package:buy_control/features/transactions/domain/usecases/update_transaction.dart';
 import 'package:get/get.dart';
 
 class BoxDetailController extends GetxController {
@@ -16,6 +17,7 @@ class BoxDetailController extends GetxController {
   final GetTransactionsByBox getTransactionsByBox;
   final SearchTransactions searchTransactions;
   final DeleteTransaction deleteTransaction;
+  final UpdateTransaction updateTransaction;
   final CloseBox closeBoxUseCase;
 
   BoxDetailController({
@@ -24,6 +26,7 @@ class BoxDetailController extends GetxController {
     required this.getTransactionsByBox,
     required this.searchTransactions,
     required this.deleteTransaction,
+    required this.updateTransaction,
     required this.closeBoxUseCase,
   });
 
@@ -104,13 +107,43 @@ class BoxDetailController extends GetxController {
     _loadTransactions();
   }
 
+  /// Ajuste rápido de quantidade direto na lista da Box (botões − / +),
+  /// sem abrir o editor. Atualiza a tela na hora e grava em seguida; se a
+  /// gravação falhar, recarrega do armazenamento e devolve a mensagem.
+  /// Quantidade mínima é 1 — remover um item continua sendo pela edição.
+  Future<String?> changeItemQuantity(TransactionEntity transaction, String itemId, double delta) async {
+    final items = transaction.items.map((item) {
+      if (item.id != itemId) return item;
+      final next = item.quantity + delta;
+      return item.copyWith(quantity: next < 1 ? 1 : next).withRecalculatedDiscount();
+    }).toList();
+    final updated = transaction.copyWith(items: items, updatedAt: DateTime.now());
+
+    final index = transactions.indexWhere((t) => t.id == transaction.id);
+    if (index >= 0) {
+      transactions[index] = updated;
+      update();
+    }
+
+    final result = await updateTransaction(updated);
+    return result.fold((_) async {
+      final summaryResult = await getBoxSummary(box.id);
+      summary = summaryResult.dataOrNull ?? summary;
+      update();
+      return null;
+    }, (failure) async {
+      await load();
+      return FailurePresenter.present(failure);
+    });
+  }
+
   Future<void> removeTransaction(String id) async {
     await deleteTransaction(id);
     await load();
   }
 
-  Future<String?> closeBox({String? notes}) async {
-    final result = await closeBoxUseCase(boxId: box.id, notes: notes);
+  Future<String?> closeBox({required DateTime referenceDate, String? notes}) async {
+    final result = await closeBoxUseCase(boxId: box.id, referenceDate: referenceDate, notes: notes);
     return result.fold((_) {
       load();
       return null;

@@ -63,12 +63,16 @@ TransactionEntity _transaction({
   required DateTime occurredAt,
   String? categoryId,
   required double price,
+  bool closed = true,
+  DateTime? closureReferenceDate,
 }) {
   final now = DateTime.now();
   return TransactionEntity(
     id: 'tx-$boxId-${occurredAt.toIso8601String()}-$price',
     boxId: boxId,
     occurredAt: occurredAt,
+    closureId: closed ? 'closure-$boxId' : null,
+    closureReferenceDate: closed ? closureReferenceDate : null,
     items: [
       TransactionItemEntity(
         id: 'item-$boxId-${occurredAt.toIso8601String()}',
@@ -124,6 +128,36 @@ void main() {
       expect(charts.spendingByCategory.first.name, 'Alimentação');
       expect(charts.monthlyEvolution.length, 6);
       expect(charts.isEmpty, isFalse);
+    });
+
+    test('considera só compras fechadas, pela data de referência do Fechamento', () async {
+      final now = DateTime.now();
+      final thisMonthStart = DateTime(now.year, now.month, 1);
+      final lastMonthEnd = DateTime(now.year, now.month, 0);
+
+      final transactions = [
+        // Ciclo aberto (ainda editável) não entra no balanço.
+        _transaction(boxId: 'b1', occurredAt: thisMonthStart, price: 40, closed: false),
+        // Lançado neste mês, mas fechado com referência no mês anterior.
+        _transaction(
+          boxId: 'b1',
+          occurredAt: thisMonthStart.add(const Duration(days: 1)),
+          price: 70,
+          closureReferenceDate: lastMonthEnd,
+        ),
+      ];
+
+      final usecase = GetDashboardCharts(
+        boxRepository: FakeBoxRepository([BoxEntity(id: 'b1', name: 'Mercado', createdAt: now, updatedAt: now)]),
+        transactionRepository: FakeTransactionRepository(transactions),
+        categoryRepository: FakeCategoryRepository([]),
+      );
+
+      final thisMonth = await usecase(periodStart: thisMonthStart, periodEnd: DateTime(now.year, now.month + 1, 0));
+      expect(thisMonth.dataOrNull!.periodTotal, Money.zero);
+
+      final lastMonth = await usecase(periodStart: DateTime(now.year, now.month - 1, 1), periodEnd: lastMonthEnd);
+      expect(lastMonth.dataOrNull!.periodTotal, Money.fromReais(70));
     });
 
     test('sem transações no período resulta em isEmpty', () async {

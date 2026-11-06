@@ -31,7 +31,7 @@ class GetBoxesTotals {
     final transactionsResult = await transactionRepository.getAll();
     if (transactionsResult.isFailure) return Failure(transactionsResult.failureOrNull!);
 
-    final transactions = transactionsResult.dataOrNull!;
+    final transactions = transactionsResult.dataOrNull!.where((t) => t.isClosed).toList();
 
     final totals = boxesResult.dataOrNull!.map((box) {
       final boxTransactions = transactions.where((t) => t.boxId == box.id);

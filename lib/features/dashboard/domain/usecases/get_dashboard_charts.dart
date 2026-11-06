@@ -66,10 +66,10 @@ class GetDashboardCharts {
 
     final boxNameById = {for (final b in boxesResult.dataOrNull!) b.id: b.name};
     final categoryNameById = {for (final c in categoriesResult.dataOrNull!) c.id: c.name};
-    final allTransactions = transactionsResult.dataOrNull!;
+    final allTransactions = transactionsResult.dataOrNull!.where((t) => t.isClosed).toList();
 
     bool inPeriod(TransactionEntity t) =>
-        !t.occurredAt.isBefore(periodStart) && !t.occurredAt.isAfter(periodEnd);
+        !t.accountingDate.isBefore(periodStart) && !t.accountingDate.isAfter(periodEnd);
 
     Money itemsTotalForCategory(TransactionEntity t, String? forCategoryId) {
       final items = forCategoryId == null ? t.items : t.items.where((i) => i.categoryId == forCategoryId);
@@ -90,7 +90,7 @@ class GetDashboardCharts {
     });
     final monthlyEvolution = months.map((month) {
       final total = allTransactions
-          .where((t) => t.occurredAt.year == month.year && t.occurredAt.month == month.month)
+          .where((t) => t.accountingDate.year == month.year && t.accountingDate.month == month.month)
           .fold(Money.zero, (sum, t) => sum + itemsTotalForCategory(t, categoryId));
       return MonthlyPoint(month: month, total: total);
     }).toList();

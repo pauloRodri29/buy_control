@@ -3,7 +3,7 @@ import 'package:buy_control/core/sync/syncable.dart';
 class ProductModel {
   final String id;
   final String? code;
-  final String? barcode;
+  final List<String> barcodes;
   final String name;
   final String? description;
   final String? brand;
@@ -21,7 +21,7 @@ class ProductModel {
   const ProductModel({
     required this.id,
     this.code,
-    this.barcode,
+    this.barcodes = const [],
     required this.name,
     this.description,
     this.brand,
@@ -42,7 +42,7 @@ class ProductModel {
     return ProductModel(
       id: sync.id,
       code: map['code'] as String?,
-      barcode: map['barcode'] as String?,
+      barcodes: _readBarcodes(map),
       name: map['name'] as String,
       description: map['description'] as String?,
       brand: map['brand'] as String?,
@@ -59,11 +59,23 @@ class ProductModel {
     );
   }
 
+  /// Lê a lista `barcodes`; registros antigos só têm o campo único `barcode`.
+  static List<String> _readBarcodes(Map<String, dynamic> map) {
+    final list = map['barcodes'];
+    if (list is List) {
+      return list.whereType<String>().where((c) => c.trim().isNotEmpty).toList();
+    }
+    final single = map['barcode'] as String?;
+    return single == null || single.trim().isEmpty ? const [] : [single.trim()];
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'code': code,
-      'barcode': barcode,
+      'barcodes': barcodes,
+      // Mantido para backups lidos por versões anteriores do app.
+      'barcode': barcodes.isEmpty ? null : barcodes.first,
       'name': name,
       'description': description,
       'brand': brand,

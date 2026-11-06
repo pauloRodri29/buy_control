@@ -15,10 +15,12 @@ class CreateTransaction {
     required String boxId,
     String? title,
     required DateTime occurredAt,
+    String? description,
     String? notes,
     Money discount = Money.zero,
     Money additionalCost = Money.zero,
     required List<TransactionItemEntity> items,
+    bool carryOver = true,
   }) async {
     if (!Validators.isNotBlank(boxId)) {
       return const Failure(ValidationFailure('Box é obrigatória.'));
@@ -42,15 +44,18 @@ class CreateTransaction {
     }
 
     final now = DateTime.now();
+    final id = IdGenerator.generate();
     final draft = TransactionEntity(
-      id: IdGenerator.generate(),
+      id: id,
       boxId: boxId.trim(),
       title: title?.trim(),
       occurredAt: occurredAt,
-      notes: notes?.trim(),
+      description: _blankToNull(description),
+      notes: _blankToNull(notes),
       discount: discount,
       additionalCost: additionalCost,
-      items: items,
+      items: items.map((item) => item.copyWith(transactionId: id)).toList(),
+      carryOver: carryOver,
       createdAt: now,
       updatedAt: now,
     );
@@ -65,5 +70,10 @@ class CreateTransaction {
 
     final result = await repository.create(draft);
     return result.fold((_) => Success(draft), (f) => Failure(f));
+  }
+
+  static String? _blankToNull(String? value) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 }

@@ -6,17 +6,28 @@ import 'package:buy_control/app/widgets/app_dropdown.dart';
 import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
+import 'package:buy_control/app/widgets/barcode_scanner_page.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
+import 'package:buy_control/features/products/domain/product_barcodes.dart';
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Formulário de criação/edição de produto. Todo o estado fica local ao
 /// widget (rascunho) — nada é persistido até o usuário tocar em Salvar.
 class ProductFormSheet extends StatefulWidget {
   final ProductEntity? product;
-  const ProductFormSheet({super.key, this.product});
+
+  /// Códigos já preenchidos num produto novo (ex.: código que acabou de ser
+  /// lido e não estava cadastrado).
+  final List<String> initialBarcodes;
+
+  /// Chamado com o produto criado (só na criação).
+  final void Function(ProductEntity product)? onCreated;
+
+  const ProductFormSheet({super.key, this.product, this.initialBarcodes = const [], this.onCreated});
 
   @override
   State<ProductFormSheet> createState() => _ProductFormSheetState();
@@ -26,7 +37,8 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
   final controller = Get.find<ProductsController>();
 
   late final codeController = TextEditingController(text: widget.product?.code);
-  late final barcodeController = TextEditingController(text: widget.product?.barcode);
+  late final barcodeController =
+      TextEditingController(text: (widget.product?.barcodes ?? widget.initialBarcodes).join(', '));
   late final nameController = TextEditingController(text: widget.product?.name);
   late final descriptionController = TextEditingController(text: widget.product?.description);
   late final brandController = TextEditingController(text: widget.product?.brand);
@@ -57,14 +69,23 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
     super.dispose();
   }
 
+  Future<void> _scanBarcode() async {
+    final code = await BarcodeScannerPage.scanOnce(context);
+    if (code == null || !mounted) return;
+    final codes = ProductBarcodes.parseList(barcodeController.text);
+    if (!codes.contains(code.lookupKey)) codes.add(code.lookupKey);
+    setState(() => barcodeController.text = codes.join(', '));
+  }
+
   Future<void> _submit() async {
     setState(() => submitting = true);
+    final barcodes = ProductBarcodes.parseList(barcodeController.text);
 
     final String? error;
     if (widget.product != null) {
       error = await controller.edit(widget.product!.copyWith(
         code: codeController.text.trim().isEmpty ? null : codeController.text.trim(),
-        barcode: barcodeController.text.trim().isEmpty ? null : barcodeController.text.trim(),
+        barcodes: barcodes,
         name: nameController.text,
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
         brand: brandController.text.trim().isEmpty ? null : brandController.text.trim(),
@@ -76,7 +97,8 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
     } else {
       error = await controller.create(
         code: codeController.text.trim().isEmpty ? null : codeController.text.trim(),
-        barcode: barcodeController.text.trim().isEmpty ? null : barcodeController.text.trim(),
+        barcodes: barcodes,
+        onCreated: widget.onCreated,
         name: nameController.text,
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
         brand: brandController.text.trim().isEmpty ? null : brandController.text.trim(),
@@ -119,12 +141,18 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
           const SizedBox(height: AppSpacing.md),
           AppTextField(controller: brandController, label: 'Marca', hint: 'Camil'),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(child: AppTextField(controller: codeController, label: 'Código', hint: 'Opcional')),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(child: AppTextField(controller: barcodeController, label: 'Código de barras', hint: 'Opcional')),
-            ],
+          AppTextField(controller: codeController, label: 'Código interno', hint: 'Opcional'),
+          const SizedBox(height: AppSpacing.md),
+          AppTextField(
+            controller: barcodeController,
+            label: 'Códigos de barras',
+            hint: 'Opcional — separe vários com vírgula',
+            keyboardType: TextInputType.number,
+            suffix: IconButton(
+              tooltip: 'Ler com a câmera',
+              icon: const Icon(LucideIcons.scanBarcode, size: 20),
+              onPressed: _scanBarcode,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           AppDropdown<String>(

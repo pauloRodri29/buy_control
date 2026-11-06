@@ -18,7 +18,10 @@ class LocalBoxClosureRepository implements BoxClosureRepository {
           .where((c) => includeDeleted || !c.isDeleted)
           .where((c) => boxId == null || c.boxId == boxId)
           .toList()
-        ..sort((a, b) => b.closedAt.compareTo(a.closedAt));
+        ..sort((a, b) {
+          final byReference = b.referenceDate.compareTo(a.referenceDate);
+          return byReference != 0 ? byReference : b.closedAt.compareTo(a.closedAt);
+        });
       return Success(entities);
     } catch (_) {
       return const Failure(CacheFailure());

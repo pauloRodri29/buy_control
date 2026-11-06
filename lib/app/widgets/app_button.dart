@@ -1,15 +1,19 @@
 import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
+import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 
-enum AppButtonVariant { primary, secondary, danger }
+/// `text` é o botão sem fundo (ação secundária discreta, ex.: "Cancelar",
+/// "Trocar"); por padrão não ocupa a largura toda.
+enum AppButtonVariant { primary, secondary, danger, text }
 
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
+  final IconData? icon;
   final double height;
   final bool expanded;
 
@@ -18,6 +22,7 @@ class AppButton extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.variant = AppButtonVariant.primary,
+    this.icon,
     this.height = 48,
     this.expanded = true,
   });
@@ -26,6 +31,7 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
+    this.icon,
     this.height = 48,
     this.expanded = true,
   }) : variant = AppButtonVariant.danger;
@@ -34,9 +40,19 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
+    this.icon,
     this.height = 48,
     this.expanded = true,
   }) : variant = AppButtonVariant.secondary;
+
+  const AppButton.text({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.height = 40,
+    this.expanded = false,
+  }) : variant = AppButtonVariant.text;
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +74,24 @@ class AppButton extends StatelessWidget {
         background = AppColors.error;
         foreground = AppColors.textOnDarkButton;
         break;
+      case AppButtonVariant.text:
+        background = Colors.transparent;
+        foreground = AppColors.accent;
+        break;
     }
+    final effectiveForeground = disabled && variant == AppButtonVariant.text
+        ? foreground.withValues(alpha: 0.5)
+        : foreground;
+
+    final labelText = AppText(
+      label,
+      fontSize: AppFontSizes.fz08,
+      fontWeight: FontWeight.w600,
+      color: effectiveForeground,
+    );
 
     final button = Material(
-      color: disabled ? background.withValues(alpha: 0.5) : background,
+      color: disabled && variant != AppButtonVariant.text ? background.withValues(alpha: 0.5) : background,
       borderRadius: AppRadius.borderMd,
       child: InkWell(
         borderRadius: AppRadius.borderMd,
@@ -69,13 +99,19 @@ class AppButton extends StatelessWidget {
         child: Container(
           height: height,
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AppText(
-            label,
-            fontSize: AppFontSizes.fz08,
-            fontWeight: FontWeight.w600,
-            color: foreground,
+          padding: EdgeInsets.symmetric(
+            horizontal: variant == AppButtonVariant.text ? AppSpacing.sm : AppSpacing.lg,
           ),
+          child: icon == null
+              ? labelText
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 18, color: effectiveForeground),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(child: labelText),
+                  ],
+                ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
+import 'package:buy_control/core/formatters/quantity_formatter.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_consolidated_report.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -131,8 +132,5 @@ class PdfReportBuilder {
     );
   }
 
-  String _formatQuantity(double quantity) {
-    if (quantity == quantity.roundToDouble()) return quantity.toStringAsFixed(0);
-    return quantity.toStringAsFixed(2);
-  }
+  String _formatQuantity(double quantity) => QuantityFormatter.format(quantity);
 }

@@ -41,7 +41,7 @@ class MorePage extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColors.accent,
-                  child: const Icon(LucideIcons.userCircle, color: Colors.white),
+                  child: const Icon(LucideIcons.userCircle, color: AppColors.textOnDarkButton),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

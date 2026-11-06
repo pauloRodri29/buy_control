@@ -8,7 +8,7 @@ class ProductMapper {
     return ProductEntity(
       id: model.id,
       code: model.code,
-      barcode: model.barcode,
+      barcodes: model.barcodes,
       name: model.name,
       description: model.description,
       brand: model.brand,
@@ -29,7 +29,7 @@ class ProductMapper {
     return ProductModel(
       id: entity.id,
       code: entity.code,
-      barcode: entity.barcode,
+      barcodes: entity.barcodes,
       name: entity.name,
       description: entity.description,
       brand: entity.brand,

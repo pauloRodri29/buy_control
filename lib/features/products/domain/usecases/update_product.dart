@@ -2,6 +2,7 @@ import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
+import 'package:buy_control/features/products/domain/product_barcodes.dart';
 import 'package:buy_control/features/products/domain/repositories/product_repository.dart';
 
 class UpdateProduct {
@@ -26,31 +27,32 @@ class UpdateProduct {
     }
 
     final code = product.code?.trim();
-    final barcode = product.barcode?.trim();
+    final barcodes = ProductBarcodes.normalize(product.barcodes);
 
-    if ((code != null && code.isNotEmpty) || (barcode != null && barcode.isNotEmpty)) {
-      final existingResult = await repository.getAll();
+    if ((code != null && code.isNotEmpty) || barcodes.isNotEmpty) {
+      final existingResult = await repository.getAll(includeInactive: true);
       if (existingResult.isFailure) {
         return Failure(existingResult.failureOrNull!);
       }
       final existing = existingResult.dataOrNull!;
-      final duplicate = existing.any((p) {
-        if (p.id == product.id) return false;
-        final sameCode = code != null &&
-            code.isNotEmpty &&
-            p.code != null &&
-            p.code!.trim().toLowerCase() == code.toLowerCase();
-        final sameBarcode = barcode != null &&
-            barcode.isNotEmpty &&
-            p.barcode != null &&
-            p.barcode!.trim().toLowerCase() == barcode.toLowerCase();
-        return sameCode || sameBarcode;
-      });
-      if (duplicate) {
-        return const Failure(ValidationFailure('Já existe um produto com este código ou código de barras.'));
+      final sameCode = code != null &&
+          code.isNotEmpty &&
+          existing.any(
+            (p) => p.id != product.id && !p.isDeleted && p.code?.trim().toLowerCase() == code.toLowerCase(),
+          );
+      if (sameCode) {
+        return const Failure(ValidationFailure('Já existe um produto com este código.'));
+      }
+      final conflict = ProductBarcodes.findConflict(existing, barcodes: barcodes, exceptProductId: product.id);
+      if (conflict != null) {
+        return Failure(ValidationFailure(ProductBarcodes.conflictMessage(conflict)));
       }
     }
 
-    return repository.update(product);
+    // copyWith incrementa a versão; só usa quando a normalização mudou algo.
+    final alreadyNormalized = barcodes.join('|') == product.barcodes.join('|');
+    return repository.update(
+      alreadyNormalized ? product : product.copyWith(barcodes: barcodes, updatedAt: product.updatedAt),
+    );
   }
 }

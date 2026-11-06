@@ -4,7 +4,7 @@ import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 
-enum AddItemsChoice { products, standalone }
+enum AddItemsChoice { scan, products, standalone }
 
 /// Ponto de entrada do fluxo "Adicionar itens": só devolve a escolha do
 /// usuário via `Navigator.pop`, nada é lido ou gravado aqui.
@@ -20,6 +20,11 @@ class AddItemsChoiceSheet extends StatelessWidget {
         AppText.title('Adicionar itens', fontSize: AppFontSizes.fz09),
         const SizedBox(height: AppSpacing.lg),
         AppButton(
+          label: 'Escanear produtos (câmera)',
+          onPressed: () => Navigator.of(context).pop(AddItemsChoice.scan),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppButton.secondary(
           label: 'Selecionar produtos',
           onPressed: () => Navigator.of(context).pop(AddItemsChoice.products),
         ),

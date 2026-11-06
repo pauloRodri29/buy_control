@@ -34,7 +34,7 @@ class SearchProducts {
   bool _matches(ProductEntity product, String query) {
     return product.id.containsSearchTerm(query) ||
         (product.code?.containsSearchTerm(query) ?? false) ||
-        (product.barcode?.containsSearchTerm(query) ?? false) ||
+        product.barcodes.any((code) => code.containsSearchTerm(query)) ||
         product.name.containsSearchTerm(query) ||
         (product.brand?.containsSearchTerm(query) ?? false);
   }
