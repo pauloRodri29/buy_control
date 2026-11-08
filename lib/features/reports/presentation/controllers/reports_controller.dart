@@ -300,9 +300,10 @@ class ReportsController extends GetxController {
     );
     result.fold(
       (path) => AppFeedback.success(path == null ? 'Ação concluída.' : 'Arquivo gerado: $path', title: 'Exportação'),
-      (failure) => failure is NotImplementedFailure
-          ? AppFeedback.info(FailurePresenter.present(failure), title: 'Em breve')
-          : AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao exportar'),
+      (failure) => FailurePresenter.show(
+        failure,
+        title: failure is NotImplementedFailure ? null : 'Erro ao exportar',
+      ),
     );
   }
 }

@@ -138,7 +138,7 @@ class BoxDetailController extends GetxController {
   }
 
   Future<void> removeTransaction(String id) async {
-    await deleteTransaction(id);
+    FailurePresenter.showIfFailure(await deleteTransaction(id));
     await load();
   }
 

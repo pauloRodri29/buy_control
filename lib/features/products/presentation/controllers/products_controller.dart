@@ -154,7 +154,7 @@ class ProductsController extends GetxController {
   }
 
   Future<void> delete(String id) async {
-    await deleteProduct(id);
+    FailurePresenter.showIfFailure(await deleteProduct(id));
     await load();
   }
 }

@@ -73,7 +73,7 @@ Future<void> runExportBackup(BuildContext context) async {
         AppFeedback.error('Não foi possível salvar ou compartilhar o arquivo de backup.');
       }
     },
-    (failure) async => AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao exportar'),
+    (failure) async => FailurePresenter.show(failure, title: 'Erro ao exportar'),
   );
 }
 
@@ -104,7 +104,7 @@ Future<void> runImportBackup(BuildContext context) async {
       // entre as abas do shell principal já atualiza a maior parte na
       // prática, mas reiniciar é a garantia completa.
       (_) => AppFeedback.success('Dados restaurados com sucesso. Recomenda-se reiniciar o app para ver tudo atualizado.', title: 'Backup importado'),
-      (failure) => AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao importar'),
+      (failure) => FailurePresenter.show(failure, title: 'Erro ao importar'),
     );
   } catch (_) {
     AppFeedback.error('Não foi possível ler o arquivo selecionado.');

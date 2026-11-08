@@ -62,7 +62,7 @@ class UnitsController extends GetxController {
   }
 
   Future<void> delete(String id) async {
-    await deleteUnit(id);
+    FailurePresenter.showIfFailure(await deleteUnit(id));
     await load();
   }
 }

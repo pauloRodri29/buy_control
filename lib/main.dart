@@ -1,5 +1,6 @@
 import 'package:buy_control/app/bindings/initial_binding.dart';
 import 'package:buy_control/app/bootstrap/app_bootstrap.dart';
+import 'package:buy_control/app/errors/app_error_handler.dart';
 import 'package:buy_control/app/routes/pages.dart';
 import 'package:buy_control/app/theme/app_theme.dart';
 import 'package:buy_control/app/theme/theme_controller.dart';
@@ -11,6 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppErrorHandler.install();
   await initializeDateFormatting('pt_BR');
   await AppBootstrap.run();
   // Registrado antes do runApp: o app precisa do modo de tema já no

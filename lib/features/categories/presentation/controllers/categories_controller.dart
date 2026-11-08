@@ -62,7 +62,7 @@ class CategoriesController extends GetxController {
   }
 
   Future<void> delete(String id) async {
-    await deleteCategory(id);
+    FailurePresenter.showIfFailure(await deleteCategory(id));
     await load();
   }
 }

@@ -62,7 +62,7 @@ class ProductTypesController extends GetxController {
   }
 
   Future<void> delete(String id) async {
-    await deleteProductType(id);
+    FailurePresenter.showIfFailure(await deleteProductType(id));
     await load();
   }
 }

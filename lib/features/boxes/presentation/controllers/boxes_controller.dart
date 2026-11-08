@@ -130,12 +130,12 @@ class BoxesController extends GetxController {
   }
 
   Future<void> delete(String id) async {
-    await deleteBox(id);
+    FailurePresenter.showIfFailure(await deleteBox(id));
     await load();
   }
 
   Future<void> archive(String id, {bool archived = true}) async {
-    await archiveBox(id, archived: archived);
+    FailurePresenter.showIfFailure(await archiveBox(id, archived: archived));
     await load();
   }
 }
