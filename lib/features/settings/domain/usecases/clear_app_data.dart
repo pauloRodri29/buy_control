@@ -1,4 +1,5 @@
 import 'package:buy_control/app/bootstrap/seed_defaults.dart';
+import 'package:buy_control/app/theme/theme_controller.dart';
 import 'package:buy_control/core/database/app_meta_store.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:buy_control/features/box_closures/data/datasources/local/box_closure_hive_data_source.dart';
@@ -13,6 +14,7 @@ import 'package:buy_control/features/reports/data/repositories/report_preset_rep
 import 'package:buy_control/features/transactions/data/datasources/local/transaction_hive_data_source.dart';
 import 'package:buy_control/features/units/data/datasources/local/unit_hive_data_source.dart';
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:get/get.dart';
 
 enum ClearDataScope { boxes, products, history, planning, reports, preferences, all }
@@ -67,16 +69,14 @@ class ClearAppData {
       case ClearDataScope.reports:
         await reportPresetRepository.clear();
       case ClearDataScope.preferences:
-        // Nenhuma preferência persistida existe ainda nesta etapa (o Tema em
-        // Configurações é só um placeholder), então não há nada para
-        // limpar até essa funcionalidade ser implementada.
-        break;
+        await _resetPreferences();
       case ClearDataScope.all:
         await _clearBoxes();
         await productDataSource.clear();
         await _clearHistory();
         await _clearPlanning();
         await reportPresetRepository.clear();
+        await _resetPreferences();
         await _resetCatalogsAndReseed();
         await Get.find<AuthController>().logout();
     }
@@ -91,6 +91,11 @@ class ClearAppData {
   Future<void> _clearHistory() async {
     await transactionDataSource.clear();
     await boxClosureDataSource.clear();
+  }
+
+  /// Preferências de aparência voltam ao padrão (tema do sistema).
+  Future<void> _resetPreferences() async {
+    await Get.find<ThemeController>().setMode(ThemeMode.system);
   }
 
   Future<void> _clearPlanning() async {

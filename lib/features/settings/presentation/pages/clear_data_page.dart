@@ -129,7 +129,8 @@ class ClearDataPage extends StatelessWidget {
                     ClearDataScope.all,
                     title: 'Restaurar o app para o estado inicial?',
                     message: 'Isso apaga TODAS as Boxes, produtos, histórico de compras, planejamento e '
-                        'relatórios salvos, recria as categorias, tipos e unidades padrão e encerra sua sessão. '
+                        'relatórios salvos, volta o tema para o automático, recria as categorias, tipos e '
+                        'unidades padrão e encerra sua sessão. '
                         'Esta ação não pode ser desfeita.',
                   ),
                 ),

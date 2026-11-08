@@ -1,14 +1,14 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
-import 'package:buy_control/app/widgets/app_card.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
+import 'package:buy_control/app/theme/theme_controller.dart';
+import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:buy_control/features/auth/presentation/pages/profile_page.dart';
 import 'package:buy_control/features/backup/presentation/backup_actions.dart';
 import 'package:buy_control/features/settings/presentation/bindings/settings_binding.dart';
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
+import 'package:buy_control/features/settings/presentation/widgets/theme_mode_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -42,105 +42,87 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const chevron = Icon(LucideIcons.chevronRight, size: 18);
 
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Configurações', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const Text('Configurações')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          _SectionHeader('Conta'),
-          const SizedBox(height: AppSpacing.sm),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: Column(
+          _Section(
+            title: 'Conta',
+            children: [
+              _Tile(
+                icon: LucideIcons.userCircle,
+                title: 'Perfil',
+                trailing: chevron,
+                onTap: () => Get.to(() => const ProfilePage()),
+              ),
+              _Tile(icon: LucideIcons.logOut, title: 'Sair', onTap: () => _logout(context)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Section(
+            title: 'Dados',
+            children: [
+              _Tile(
+                icon: LucideIcons.uploadCloud,
+                title: 'Exportar dados',
+                trailing: chevron,
+                onTap: () => runExportBackup(context),
+              ),
+              _Tile(
+                icon: LucideIcons.downloadCloud,
+                title: 'Importar dados',
+                trailing: chevron,
+                onTap: () => runImportBackup(context),
+              ),
+              _Tile(
+                icon: LucideIcons.trash2,
+                title: 'Limpar dados',
+                destructive: true,
+                trailing: chevron,
+                onTap: () => Get.to(() => const ClearDataPage(), binding: SettingsBinding()),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          GetBuilder<ThemeController>(
+            builder: (themeController) => _Section(
+              title: 'Preferências',
               children: [
-                ListTile(
-                  leading: const Icon(LucideIcons.userCircle),
-                  title: const AppText('Perfil', fontWeight: FontWeight.w600),
-                  trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                  onTap: () => Get.to(() => const ProfilePage()),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(LucideIcons.logOut),
-                  title: const AppText('Sair', fontWeight: FontWeight.w600),
-                  onTap: () => _logout(context),
+                _Tile(
+                  icon: LucideIcons.palette,
+                  title: 'Tema',
+                  subtitle: themeController.mode.label,
+                  trailing: chevron,
+                  onTap: () => AppBottomSheet.show(context, child: const ThemeModeSheet()),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          _SectionHeader('Dados'),
-          const SizedBox(height: AppSpacing.sm),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(LucideIcons.uploadCloud),
-                  title: const AppText('Exportar dados', fontWeight: FontWeight.w600),
-                  trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                  onTap: () => runExportBackup(context),
+          _Section(
+            title: 'Sobre',
+            children: [
+              _Tile(
+                icon: LucideIcons.info,
+                title: 'Versão',
+                trailing: FutureBuilder<PackageInfo>(
+                  future: _packageInfoFuture,
+                  builder: (context, snapshot) {
+                    final info = snapshot.data;
+                    return Text(info == null ? '...' : '${info.version}+${info.buildNumber}');
+                  },
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(LucideIcons.downloadCloud),
-                  title: const AppText('Importar dados', fontWeight: FontWeight.w600),
-                  trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                  onTap: () => runImportBackup(context),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(LucideIcons.trash2, color: AppColors.error),
-                  title: AppText('Limpar dados', fontWeight: FontWeight.w600, color: AppColors.error),
-                  trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                  onTap: () => Get.to(() => const ClearDataPage(), binding: SettingsBinding()),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _SectionHeader('Preferências'),
-          const SizedBox(height: AppSpacing.sm),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: ListTile(
-              leading: Icon(LucideIcons.palette, color: AppColors.textSecondary(isDark)),
-              title: AppText('Tema', fontWeight: FontWeight.w600, color: AppColors.textSecondary(isDark)),
-              subtitle: AppText.subtitle('Automático (do sistema)', color: AppColors.textSecondary(isDark)),
-              trailing: AppText.subtitle('Em breve', color: AppColors.textSecondary(isDark)),
-              onTap: () => Get.snackbar('Em breve', 'Este recurso ainda não está disponível.'),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _SectionHeader('Sobre'),
-          const SizedBox(height: AppSpacing.sm),
-          AppCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(LucideIcons.info),
-                  title: const AppText('Versão', fontWeight: FontWeight.w600),
-                  trailing: FutureBuilder<PackageInfo>(
-                    future: _packageInfoFuture,
-                    builder: (context, snapshot) {
-                      final info = snapshot.data;
-                      final label = info == null ? '...' : '${info.version}+${info.buildNumber}';
-                      return AppText.subtitle(label, color: AppColors.textSecondary(isDark));
-                    },
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(LucideIcons.scrollText),
-                  title: const AppText('Licenças', fontWeight: FontWeight.w600),
-                  trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                  onTap: () => showLicensePage(context: context, applicationName: 'Buy Control'),
-                ),
-              ],
-            ),
+              ),
+              _Tile(
+                icon: LucideIcons.scrollText,
+                title: 'Licenças',
+                trailing: chevron,
+                onTap: () => showLicensePage(context: context, applicationName: 'Buy Control'),
+              ),
+            ],
           ),
         ],
       ),
@@ -148,14 +130,62 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String label;
+/// Grupo de opções: título em caixa alta e um [Card] com os itens
+/// separados por divisória.
+class _Section extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
 
-  const _SectionHeader(this.label);
+  const _Section({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return AppText.subtitle(label.toUpperCase(), color: AppColors.textSecondary(isDark));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title.toUpperCase(), style: context.text.labelMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Card(
+          child: Column(
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const Divider(height: 1),
+                children[i],
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool destructive;
+
+  const _Tile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.destructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = destructive ? context.colors.error : null;
+    return ListTile(
+      leading: Icon(icon, color: color),
+      title: Text(title, style: color == null ? null : TextStyle(color: color)),
+      subtitle: subtitle == null ? null : Text(subtitle!),
+      trailing: trailing,
+      onTap: onTap,
+    );
   }
 }

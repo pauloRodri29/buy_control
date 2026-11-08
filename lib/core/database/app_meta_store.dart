@@ -13,4 +13,10 @@ class AppMetaStore {
   bool get defaultsSeeded => _box.get('defaultsSeeded', defaultValue: false) as bool;
 
   Future<void> setDefaultsSeeded(bool value) => _box.put('defaultsSeeded', value);
+
+  /// Preferência de tema ("system", "light" ou "dark"). `null` = nunca
+  /// escolhida, o app segue o sistema.
+  String? get themeMode => _box.get('themeMode') as String?;
+
+  Future<void> setThemeMode(String value) => _box.put('themeMode', value);
 }
