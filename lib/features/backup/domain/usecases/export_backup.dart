@@ -5,6 +5,7 @@ import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/box_closures/data/datasources/local/box_closure_hive_data_source.dart';
 import 'package:buy_control/features/boxes/data/datasources/local/box_hive_data_source.dart';
 import 'package:buy_control/features/categories/data/datasources/local/category_hive_data_source.dart';
+import 'package:buy_control/features/planning/data/datasources/local/plan_hive_data_sources.dart';
 import 'package:buy_control/features/product_types/data/datasources/local/product_type_hive_data_source.dart';
 import 'package:buy_control/features/products/data/datasources/local/product_hive_data_source.dart';
 import 'package:buy_control/features/transactions/data/datasources/local/transaction_hive_data_source.dart';
@@ -15,7 +16,7 @@ import 'package:buy_control/features/units/data/datasources/local/unit_hive_data
 /// distinguir.
 const backupFormatVersion = 1;
 
-/// Gera um dump completo dos dados do app (todos os 7 boxes do Hive, via
+/// Gera um dump completo dos dados do app (todos os boxes de dados do Hive, via
 /// os Models de cada feature) como uma única string JSON, pronta para ser
 /// salva em arquivo e compartilhada. Trabalha direto nos data sources (não
 /// nos repositórios) porque isso é um dump bruto de armazenamento, não uma
@@ -29,6 +30,8 @@ class ExportBackup {
   final UnitHiveDataSource unitDataSource;
   final TransactionHiveDataSource transactionDataSource;
   final BoxClosureHiveDataSource boxClosureDataSource;
+  final PlanBoardHiveDataSource planBoardDataSource;
+  final PlanItemHiveDataSource planItemDataSource;
 
   const ExportBackup({
     required this.boxDataSource,
@@ -38,6 +41,8 @@ class ExportBackup {
     required this.unitDataSource,
     required this.transactionDataSource,
     required this.boxClosureDataSource,
+    required this.planBoardDataSource,
+    required this.planItemDataSource,
   });
 
   Future<Result<String>> call() async {
@@ -49,6 +54,8 @@ class ExportBackup {
       final units = await unitDataSource.getAll();
       final transactions = await transactionDataSource.getAll();
       final boxClosures = await boxClosureDataSource.getAll();
+      final planBoards = await planBoardDataSource.getAll();
+      final planItems = await planItemDataSource.getAll();
 
       final payload = {
         'version': backupFormatVersion,
@@ -60,6 +67,8 @@ class ExportBackup {
         'units': units.map((m) => m.toMap()).toList(),
         'transactions': transactions.map((m) => m.toMap()).toList(),
         'boxClosures': boxClosures.map((m) => m.toMap()).toList(),
+        'planBoards': planBoards.map((m) => m.toMap()).toList(),
+        'planItems': planItems.map((m) => m.toMap()).toList(),
       };
 
       return Success(jsonEncode(payload));

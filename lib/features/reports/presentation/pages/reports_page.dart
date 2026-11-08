@@ -8,6 +8,7 @@ import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
 import 'package:buy_control/app/widgets/error_state_view.dart';
 import 'package:buy_control/app/widgets/loading_skeleton.dart';
+import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_consolidated_report.dart';
 import 'package:buy_control/features/reports/presentation/controllers/report_filter_state.dart';
 import 'package:buy_control/features/reports/presentation/controllers/reports_controller.dart';
@@ -166,6 +167,14 @@ class _ReportSection extends StatelessWidget {
                   fontSize: AppFontSizes.fz06,
                   color: AppColors.textSecondary(isDark),
                 ),
+                if (r.planning != null && r.planning!.purchasedCount > 0) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  AppText(
+                    'Boxes ${r.boxesTotal.formatted} · Planejamento ${r.planning!.purchasedTotal.formatted}',
+                    fontSize: AppFontSizes.fz06,
+                    color: AppColors.textSecondary(isDark),
+                  ),
+                ],
               ],
             ),
           ),
@@ -219,10 +228,92 @@ class _ReportSection extends StatelessWidget {
               ],
             ),
           ],
+          if (r.planning != null && !r.planning!.isEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _PlanningCard(planning: r.planning!, realized: r.total),
+          ],
           const SizedBox(height: AppSpacing.sm),
           ReportEvolutionChart(points: r.evolution),
         ],
       ],
+    );
+  }
+}
+
+/// Realizado × previsto vindo do Planejamento no período do relatório.
+class _PlanningCard extends StatelessWidget {
+  final PlanningReportSummary planning;
+  final Money realized;
+
+  const _PlanningCard({required this.planning, required this.realized});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = AppColors.textSecondary(isDark);
+    final projected = realized + planning.forecastPending;
+    final hasGoal = !planning.goalTotal.isZero;
+    final overGoal = hasGoal && planning.plannedInBoards > planning.goalTotal;
+
+    Widget row(String label, String value, {Color? color, bool bold = false}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            Expanded(child: AppText(label, fontSize: AppFontSizes.fz06, color: secondary)),
+            AppText(
+              value,
+              fontSize: AppFontSizes.fz06,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+              color: color,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.squareKanban, size: 16, color: secondary),
+              const SizedBox(width: AppSpacing.xs),
+              const AppText('Planejamento', fontWeight: FontWeight.bold),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          row('Comprado (${planning.purchasedCount} itens)', planning.purchasedTotal.formatted),
+          row('Ainda previsto (${planning.pendingCount} itens)', planning.forecastPending.formatted),
+          row('Projeção de gasto do período', projected.formatted, bold: true),
+          if (hasGoal) ...[
+            const SizedBox(height: AppSpacing.sm),
+            row('Metas dos quadros (${planning.boardsInPeriod})', planning.goalTotal.formatted),
+            row('Planejado nesses quadros', planning.plannedInBoards.formatted),
+            row(
+              overGoal ? 'Acima das metas' : 'Margem até as metas',
+              (overGoal
+                      ? planning.plannedInBoards - planning.goalTotal
+                      : planning.goalTotal - planning.plannedInBoards)
+                  .formatted,
+              color: overGoal ? AppColors.error : AppColors.success,
+            ),
+          ],
+          if (planning.purchasedByBoard.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppText.subtitle('Comprado por quadro', color: secondary),
+            const SizedBox(height: AppSpacing.xs),
+            for (final b in planning.purchasedByBoard) row(b.name, b.total.formatted),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          AppText.subtitle(
+            'Projeção = total realizado no período (Boxes + Planejamento) + itens pendentes dos quadros '
+            'com previsão no período.',
+            color: secondary,
+          ),
+        ],
+      ),
     );
   }
 }

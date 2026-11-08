@@ -96,7 +96,9 @@ class ReportsController extends GetxController {
 
     await _runReports();
 
-    status = boxTotals.isEmpty ? ViewStatus.empty : ViewStatus.success;
+    // Sem Boxes, o relatório ainda pode ter dados do Planejamento.
+    final hasPlanning = !(reportA?.planning?.isEmpty ?? true);
+    status = boxTotals.isEmpty && !hasPlanning ? ViewStatus.empty : ViewStatus.success;
     update();
   }
 

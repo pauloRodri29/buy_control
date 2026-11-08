@@ -19,6 +19,10 @@ import 'package:buy_control/features/categories/data/datasources/local/category_
 import 'package:buy_control/features/categories/data/repositories/local_category_repository.dart';
 import 'package:buy_control/features/categories/domain/repositories/category_repository.dart';
 import 'package:buy_control/features/categories/domain/usecases/get_categories.dart';
+import 'package:buy_control/features/planning/data/datasources/local/plan_hive_data_sources.dart';
+import 'package:buy_control/features/planning/data/repositories/local_plan_repositories.dart';
+import 'package:buy_control/features/planning/domain/repositories/plan_board_repository.dart';
+import 'package:buy_control/features/planning/domain/repositories/plan_item_repository.dart';
 import 'package:buy_control/features/product_types/data/datasources/local/product_type_hive_data_source.dart';
 import 'package:buy_control/features/product_types/data/repositories/local_product_type_repository.dart';
 import 'package:buy_control/features/product_types/domain/repositories/product_type_repository.dart';
@@ -67,6 +71,14 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
     Get.put<UnitRepository>(LocalUnitRepository(localDataSource: UnitHiveDataSource()), permanent: true);
+    Get.put<PlanBoardRepository>(
+      LocalPlanBoardRepository(localDataSource: PlanBoardHiveDataSource()),
+      permanent: true,
+    );
+    Get.put<PlanItemRepository>(
+      LocalPlanItemRepository(localDataSource: PlanItemHiveDataSource()),
+      permanent: true,
+    );
 
     Get.put(GetBoxes(Get.find()), permanent: true);
     Get.put(GetBoxById(Get.find()), permanent: true);

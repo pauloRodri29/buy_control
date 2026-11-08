@@ -4,6 +4,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_circle_button.dart';
+import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -95,13 +96,14 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
     }
 
     final now = DateTime.now();
-    final referenceDate = await showDatePicker(
-      context: context,
-      helpText: 'Data de referência do fechamento',
-      confirmText: 'Continuar',
+    final referenceDate = await AppDatePicker.show(
+      context,
+      title: 'Data de referência do fechamento',
+      confirmLabel: 'Continuar',
       initialDate: now,
       firstDate: DateTime(2000),
       lastDate: DateTime(now.year + 1, 12, 31),
+      shortcuts: AppDatePicker.recentShortcuts(),
     );
     if (referenceDate == null || !mounted) return;
 

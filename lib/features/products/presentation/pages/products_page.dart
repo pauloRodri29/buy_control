@@ -3,6 +3,7 @@ import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_circle_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
@@ -87,25 +88,101 @@ class ProductsPage extends StatelessWidget {
         );
       case ViewStatus.success:
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
           itemCount: controller.products.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (_, i) {
             final product = controller.products[i];
-            return ListTile(
-              title: AppText(product.name, fontWeight: FontWeight.w600),
-              subtitle: AppText.subtitle(
-                '${controller.categoryName(product.categoryId)} • ${controller.productTypeName(product.productTypeId)} • '
-                '${product.referencePrice?.formatted ?? '—'}',
-              ),
+            return _ProductCard(
+              product: product,
+              categoryName: controller.categoryName(product.categoryId),
+              productTypeName: controller.productTypeName(product.productTypeId),
+              unitAbbreviation: controller.unitAbbreviation(product.defaultUnitId),
               onTap: () => _openForm(context, product: product),
-              trailing: IconButton(
-                icon: const Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
-                onPressed: () => _delete(context, controller, product),
-              ),
+              onDelete: () => _delete(context, controller, product),
             );
           },
         );
     }
+  }
+}
+
+/// Card de produto no padrão das listas do app (mesmo layout de `_BoxCard`):
+/// nome em destaque, preço de referência em verde, metadados em subtítulo e
+/// ações no menu ⋮.
+class _ProductCard extends StatelessWidget {
+  final ProductEntity product;
+  final String categoryName;
+  final String productTypeName;
+  final String unitAbbreviation;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _ProductCard({
+    required this.product,
+    required this.categoryName,
+    required this.productTypeName,
+    required this.unitAbbreviation,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final price = product.referencePrice;
+    final brand = product.brand;
+
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  product.name,
+                  fontWeight: FontWeight.bold,
+                  fontSize: AppFontSizes.fz08,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (brand != null && brand.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  AppText.subtitle(brand, color: AppColors.textSecondary(isDark)),
+                ],
+                const SizedBox(height: AppSpacing.xs),
+                price == null
+                    ? AppText('Sem preço de referência', color: AppColors.textSecondary(isDark))
+                    : AppText(
+                        unitAbbreviation.isEmpty || unitAbbreviation == '—'
+                            ? price.formatted
+                            : '${price.formatted} / $unitAbbreviation',
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.accent,
+                      ),
+                const SizedBox(height: AppSpacing.xs),
+                AppText.subtitle('$categoryName • $productTypeName', color: AppColors.textSecondary(isDark)),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'edit':
+                  onTap();
+                case 'delete':
+                  onDelete();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'edit', child: Text('Editar')),
+              PopupMenuItem(value: 'delete', child: Text('Excluir')),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

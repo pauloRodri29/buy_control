@@ -5,12 +5,12 @@ import 'package:buy_control/features/dashboard/presentation/bindings/dashboard_b
 import 'package:buy_control/features/dashboard/presentation/controllers/dashboard_controller.dart';
 import 'package:buy_control/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:buy_control/features/more/presentation/pages/more_page.dart';
+import 'package:buy_control/features/planning/presentation/bindings/planning_binding.dart';
+import 'package:buy_control/features/planning/presentation/controllers/planning_controller.dart';
+import 'package:buy_control/features/planning/presentation/pages/planning_page.dart';
 import 'package:buy_control/features/products/presentation/bindings/products_binding.dart';
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/pages/products_page.dart';
-import 'package:buy_control/features/reports/presentation/bindings/reports_binding.dart';
-import 'package:buy_control/features/reports/presentation/controllers/reports_controller.dart';
-import 'package:buy_control/features/reports/presentation/pages/reports_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -34,7 +34,7 @@ class _MainShellState extends State<MainShell> {
     DashboardBinding().dependencies();
     BoxesBinding().dependencies();
     ProductsBinding().dependencies();
-    ReportsBinding().dependencies();
+    PlanningBinding().dependencies();
     _bound = true;
   }
 
@@ -49,7 +49,7 @@ class _MainShellState extends State<MainShell> {
           DashboardPage(),
           BoxesPage(),
           ProductsPage(),
-          ReportsPage(),
+          PlanningPage(),
           MorePage(),
         ],
       ),
@@ -68,14 +68,14 @@ class _MainShellState extends State<MainShell> {
             case 2:
               Get.find<ProductsController>().load();
             case 3:
-              Get.find<ReportsController>().load();
+              Get.find<PlanningController>().load(silent: true);
           }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(LucideIcons.house), label: 'Início'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.box), label: 'Boxes'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.shoppingBasket), label: 'Produtos'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.chartBar), label: 'Relatórios'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.squareKanban), label: 'Planejar'),
           BottomNavigationBarItem(icon: Icon(LucideIcons.menu), label: 'Mais'),
         ],
       ),

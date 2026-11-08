@@ -3,6 +3,7 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
+import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_money_field.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -114,11 +115,13 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      final range = await showDateRangePicker(
-                        context: context,
+                      final range = await AppDatePicker.showRange(
+                        context,
+                        title: 'Período personalizado',
                         firstDate: DateTime(2000),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
-                        initialDateRange: f.customRange,
+                        initialRange: f.customRange,
+                        shortcuts: AppDatePicker.rangeShortcuts(),
                       );
                       if (range != null) controller.setCustomRange(_side, range);
                     },

@@ -1,5 +1,6 @@
 import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/filter_chips_bar.dart';
 import 'package:buy_control/features/dashboard/presentation/controllers/dashboard_controller.dart';
@@ -59,11 +60,13 @@ class DashboardFiltersSection extends StatelessWidget {
     if (key == null) return;
     if (key == 'custom') {
       final now = DateTime.now();
-      final range = await showDateRangePicker(
-        context: context,
+      final range = await AppDatePicker.showRange(
+        context,
+        title: 'Período personalizado',
         firstDate: DateTime(now.year - 5),
         lastDate: DateTime(now.year + 1),
-        initialDateRange: controller.customRange,
+        initialRange: controller.customRange,
+        shortcuts: AppDatePicker.rangeShortcuts(),
       );
       if (range != null) await controller.setCustomRange(range);
       return;

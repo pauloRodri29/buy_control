@@ -18,6 +18,8 @@ class HiveBoxRegistry {
   static const boxClosures = 'box_closures';
   static const authSession = 'auth_session';
   static const reportPresets = 'report_presets';
+  static const planBoards = 'plan_boards';
+  static const planItems = 'plan_items';
 
   static const _allBoxNames = [
     legacyBox,
@@ -32,6 +34,8 @@ class HiveBoxRegistry {
     boxClosures,
     authSession,
     reportPresets,
+    planBoards,
+    planItems,
   ];
 
   static Future<void> initHive() async {

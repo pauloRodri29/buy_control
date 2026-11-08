@@ -9,6 +9,8 @@ import 'package:buy_control/features/categories/presentation/bindings/categories
 import 'package:buy_control/features/categories/presentation/pages/categories_page.dart';
 import 'package:buy_control/features/product_types/presentation/bindings/product_types_binding.dart';
 import 'package:buy_control/features/product_types/presentation/pages/product_types_page.dart';
+import 'package:buy_control/features/reports/presentation/bindings/reports_binding.dart';
+import 'package:buy_control/features/reports/presentation/pages/reports_page.dart';
 import 'package:buy_control/features/settings/presentation/bindings/settings_binding.dart';
 import 'package:buy_control/features/settings/presentation/pages/settings_page.dart';
 import 'package:buy_control/features/units/presentation/bindings/units_binding.dart';
@@ -59,6 +61,13 @@ class MorePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+          ListTile(
+            leading: const Icon(LucideIcons.chartBar),
+            title: const AppText('Relatórios', fontWeight: FontWeight.w600),
+            subtitle: AppText.subtitle('Gastos realizados, previsão e metas', color: AppColors.textSecondary(isDark)),
+            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            onTap: () => Get.to(() => const ReportsPage(), binding: ReportsBinding()),
+          ),
           ListTile(
             leading: const Icon(LucideIcons.tag),
             title: const AppText('Categorias', fontWeight: FontWeight.w600),

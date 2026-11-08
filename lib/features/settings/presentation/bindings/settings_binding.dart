@@ -2,6 +2,7 @@ import 'package:buy_control/core/database/app_meta_store.dart';
 import 'package:buy_control/features/box_closures/data/datasources/local/box_closure_hive_data_source.dart';
 import 'package:buy_control/features/boxes/data/datasources/local/box_hive_data_source.dart';
 import 'package:buy_control/features/categories/data/datasources/local/category_hive_data_source.dart';
+import 'package:buy_control/features/planning/data/datasources/local/plan_hive_data_sources.dart';
 import 'package:buy_control/features/product_types/data/datasources/local/product_type_hive_data_source.dart';
 import 'package:buy_control/features/products/data/datasources/local/product_hive_data_source.dart';
 import 'package:buy_control/features/reports/data/repositories/report_preset_repository.dart';
@@ -22,6 +23,8 @@ class SettingsBinding extends Bindings {
         unitDataSource: UnitHiveDataSource(),
         transactionDataSource: TransactionHiveDataSource(),
         boxClosureDataSource: BoxClosureHiveDataSource(),
+        planBoardDataSource: PlanBoardHiveDataSource(),
+        planItemDataSource: PlanItemHiveDataSource(),
         reportPresetRepository: ReportPresetRepository(),
         metaStore: AppMetaStore(),
         categoryRepository: Get.find(),

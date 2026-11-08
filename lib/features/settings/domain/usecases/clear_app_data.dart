@@ -5,6 +5,7 @@ import 'package:buy_control/features/box_closures/data/datasources/local/box_clo
 import 'package:buy_control/features/boxes/data/datasources/local/box_hive_data_source.dart';
 import 'package:buy_control/features/categories/data/datasources/local/category_hive_data_source.dart';
 import 'package:buy_control/features/categories/domain/repositories/category_repository.dart';
+import 'package:buy_control/features/planning/data/datasources/local/plan_hive_data_sources.dart';
 import 'package:buy_control/features/product_types/data/datasources/local/product_type_hive_data_source.dart';
 import 'package:buy_control/features/product_types/domain/repositories/product_type_repository.dart';
 import 'package:buy_control/features/products/data/datasources/local/product_hive_data_source.dart';
@@ -14,7 +15,7 @@ import 'package:buy_control/features/units/data/datasources/local/unit_hive_data
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
 import 'package:get/get.dart';
 
-enum ClearDataScope { boxes, products, history, reports, preferences, all }
+enum ClearDataScope { boxes, products, history, planning, reports, preferences, all }
 
 /// Operação de manutenção que apaga coleções inteiras do Hive. Opera
 /// diretamente sobre os data sources (e não sobre repositórios/casos de
@@ -28,6 +29,8 @@ class ClearAppData {
   final UnitHiveDataSource unitDataSource;
   final TransactionHiveDataSource transactionDataSource;
   final BoxClosureHiveDataSource boxClosureDataSource;
+  final PlanBoardHiveDataSource planBoardDataSource;
+  final PlanItemHiveDataSource planItemDataSource;
   final ReportPresetRepository reportPresetRepository;
   final AppMetaStore metaStore;
   final CategoryRepository categoryRepository;
@@ -42,6 +45,8 @@ class ClearAppData {
     required this.unitDataSource,
     required this.transactionDataSource,
     required this.boxClosureDataSource,
+    required this.planBoardDataSource,
+    required this.planItemDataSource,
     required this.reportPresetRepository,
     required this.metaStore,
     required this.categoryRepository,
@@ -57,6 +62,8 @@ class ClearAppData {
         await productDataSource.clear();
       case ClearDataScope.history:
         await _clearHistory();
+      case ClearDataScope.planning:
+        await _clearPlanning();
       case ClearDataScope.reports:
         await reportPresetRepository.clear();
       case ClearDataScope.preferences:
@@ -68,6 +75,7 @@ class ClearAppData {
         await _clearBoxes();
         await productDataSource.clear();
         await _clearHistory();
+        await _clearPlanning();
         await reportPresetRepository.clear();
         await _resetCatalogsAndReseed();
         await Get.find<AuthController>().logout();
@@ -83,6 +91,11 @@ class ClearAppData {
   Future<void> _clearHistory() async {
     await transactionDataSource.clear();
     await boxClosureDataSource.clear();
+  }
+
+  Future<void> _clearPlanning() async {
+    await planItemDataSource.clear();
+    await planBoardDataSource.clear();
   }
 
   Future<void> _resetCatalogsAndReseed() async {

@@ -75,6 +75,14 @@ class PdfReportBuilder {
   pw.Widget _buildSummarySection(ConsolidatedReport report) {
     final rows = <List<String>>[
       ['Total', report.total.formatted],
+      if (report.planning != null && report.planning!.purchasedCount > 0) ...[
+        ['Total das Boxes', report.boxesTotal.formatted],
+        ['Comprado pelo Planejamento', report.planning!.purchasedTotal.formatted],
+      ],
+      if (report.planning != null && report.planning!.pendingCount > 0)
+        ['Ainda previsto no Planejamento', report.planning!.forecastPending.formatted],
+      if (report.planning != null && !report.planning!.goalTotal.isZero)
+        ['Metas dos quadros no período', report.planning!.goalTotal.formatted],
       ['Média por Box', report.averagePerBox.formatted],
       ['Média por dia', report.averagePerDay.formatted],
       ['Lançamentos', report.transactionCount.toString()],

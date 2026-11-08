@@ -1,3 +1,5 @@
+import 'package:buy_control/features/planning/domain/repositories/plan_board_repository.dart';
+import 'package:buy_control/features/planning/domain/repositories/plan_item_repository.dart';
 import 'package:buy_control/features/reports/data/exporters/app_report_exporter.dart';
 import 'package:buy_control/features/reports/data/repositories/report_preset_repository.dart';
 import 'package:buy_control/features/reports/domain/repositories/report_exporter.dart';
@@ -17,6 +19,10 @@ class ReportsBinding extends Bindings {
         transactionRepository: Get.find(),
         categoryRepository: Get.find(),
         productRepository: Get.find(),
+        // Tipo explícito: os parâmetros são anuláveis, e sem ele o GetX
+        // procuraria por "PlanBoardRepository?".
+        planBoardRepository: Get.find<PlanBoardRepository>(),
+        planItemRepository: Get.find<PlanItemRepository>(),
       ),
     );
     Get.lazyPut<ReportExporter>(() => const AppReportExporter());

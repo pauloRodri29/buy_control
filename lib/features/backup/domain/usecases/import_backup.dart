@@ -8,6 +8,9 @@ import 'package:buy_control/features/boxes/data/datasources/local/box_hive_data_
 import 'package:buy_control/features/boxes/data/models/box_model.dart';
 import 'package:buy_control/features/categories/data/datasources/local/category_hive_data_source.dart';
 import 'package:buy_control/features/categories/data/models/category_model.dart';
+import 'package:buy_control/features/planning/data/datasources/local/plan_hive_data_sources.dart';
+import 'package:buy_control/features/planning/data/models/plan_board_model.dart';
+import 'package:buy_control/features/planning/data/models/plan_item_model.dart';
 import 'package:buy_control/features/product_types/data/datasources/local/product_type_hive_data_source.dart';
 import 'package:buy_control/features/product_types/data/models/product_type_model.dart';
 import 'package:buy_control/features/products/data/datasources/local/product_hive_data_source.dart';
@@ -18,7 +21,7 @@ import 'package:buy_control/features/units/data/datasources/local/unit_hive_data
 import 'package:buy_control/features/units/data/models/unit_model.dart';
 
 /// Restaura um backup gerado por `ExportBackup`, substituindo por completo
-/// (não mesclando) os dados de cada um dos 7 boxes do Hive. Substituir em
+/// (não mesclando) os dados de cada box de dados do Hive. Substituir em
 /// vez de mesclar é a escolha deliberada aqui: mesclar exigiria resolver
 /// conflitos de id/versão entre o arquivo e o que já existe localmente, o
 /// que é ambíguo e imprevisível; a UI já avisa claramente o usuário antes
@@ -31,6 +34,8 @@ class ImportBackup {
   final UnitHiveDataSource unitDataSource;
   final TransactionHiveDataSource transactionDataSource;
   final BoxClosureHiveDataSource boxClosureDataSource;
+  final PlanBoardHiveDataSource planBoardDataSource;
+  final PlanItemHiveDataSource planItemDataSource;
 
   const ImportBackup({
     required this.boxDataSource,
@@ -40,6 +45,8 @@ class ImportBackup {
     required this.unitDataSource,
     required this.transactionDataSource,
     required this.boxClosureDataSource,
+    required this.planBoardDataSource,
+    required this.planItemDataSource,
   });
 
   Future<Result<void>> call(String jsonString) async {
@@ -79,6 +86,17 @@ class ImportBackup {
 
       await boxClosureDataSource.clear();
       await boxClosureDataSource.putAll(_listOf(data['boxClosures']).map(BoxClosureModel.fromMap).toList());
+
+      // Backups gerados antes do Planejamento existir não têm estas chaves:
+      // nesse caso o planejamento local é mantido em vez de apagado.
+      if (data.containsKey('planBoards')) {
+        await planBoardDataSource.clear();
+        await planBoardDataSource.putAll(_listOf(data['planBoards']).map(PlanBoardModel.fromMap).toList());
+      }
+      if (data.containsKey('planItems')) {
+        await planItemDataSource.clear();
+        await planItemDataSource.putAll(_listOf(data['planItems']).map(PlanItemModel.fromMap).toList());
+      }
 
       return const Success(null);
     } catch (_) {

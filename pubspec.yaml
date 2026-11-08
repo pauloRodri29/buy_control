@@ -48,6 +48,7 @@ dependencies:
   file_picker: ^8.1.6
   share_plus: ^10.1.4
   mobile_scanner: ^7.5.0
+  table_calendar: ^3.3.0
 
 dev_dependencies:
   flutter_test:

@@ -85,6 +85,18 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
+                  icon: LucideIcons.squareKanban,
+                  label: 'Planejamento',
+                  onTap: () => _run(
+                    context,
+                    ClearDataScope.planning,
+                    title: 'Apagar todo o planejamento?',
+                    message: 'Isso remove todos os quadros de planejamento e seus itens. '
+                        'Esta ação não pode ser desfeita.',
+                  ),
+                ),
+                const Divider(height: 1),
+                _ClearTile(
                   icon: LucideIcons.fileText,
                   label: 'Relatórios salvos',
                   onTap: () => _run(
@@ -116,8 +128,8 @@ class ClearDataPage extends StatelessWidget {
                     context,
                     ClearDataScope.all,
                     title: 'Restaurar o app para o estado inicial?',
-                    message: 'Isso apaga TODAS as Boxes, produtos, histórico de compras e relatórios '
-                        'salvos, recria as categorias, tipos e unidades padrão e encerra sua sessão. '
+                    message: 'Isso apaga TODAS as Boxes, produtos, histórico de compras, planejamento e '
+                        'relatórios salvos, recria as categorias, tipos e unidades padrão e encerra sua sessão. '
                         'Esta ação não pode ser desfeita.',
                   ),
                 ),
