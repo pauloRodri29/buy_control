@@ -1,14 +1,12 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
+import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/text_input_dialog.dart';
 import 'package:buy_control/core/barcode/barcode_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -132,7 +130,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
     final code = BarcodeParser.parse(typed);
     if (code == null) {
-      Get.snackbar('Código inválido', 'Confira os números (o último dígito é de verificação).');
+      AppFeedback.error('Confira os números (o último dígito é de verificação).', title: 'Código inválido');
       return;
     }
     _lastDigits = null; // digitado à mão sempre conta
@@ -151,7 +149,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: AppText.title(widget.title, fontSize: AppFontSizes.fz09),
+        title: Text(widget.title),
         actions: [
           IconButton(
             tooltip: 'Lanterna',
@@ -175,7 +173,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.textOnDarkButton, width: 2),
+                  border: Border.all(color: Colors.white, width: 2),
                   borderRadius: AppRadius.borderLg,
                 ),
               ),
@@ -222,7 +220,7 @@ class _Banner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.7), borderRadius: AppRadius.borderLg),
-      child: AppText(text, textAlign: TextAlign.center, color: AppColors.textOnDarkButton),
+      child: AppText(text, textAlign: TextAlign.center, color: Colors.white),
     );
   }
 }
@@ -240,7 +238,7 @@ class _CameraError extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: AppText(message, textAlign: TextAlign.center, color: AppColors.textOnDarkButton),
+        child: AppText(message, textAlign: TextAlign.center, color: Colors.white),
       ),
     );
   }

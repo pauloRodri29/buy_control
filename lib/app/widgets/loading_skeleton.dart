@@ -1,7 +1,7 @@
-import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_durations.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
 class LoadingSkeleton extends StatefulWidget {
@@ -29,8 +29,7 @@ class _LoadingSkeletonState extends State<LoadingSkeleton> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = AppColors.surfaceVariant(isDark);
+    final base = context.colors.surfaceContainerHighest;
 
     return AnimatedBuilder(
       animation: _controller,

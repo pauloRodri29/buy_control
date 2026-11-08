@@ -1,15 +1,8 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
-import 'package:buy_control/app/theme/app_radius.dart';
-import 'package:buy_control/app/theme/app_spacing.dart';
-import 'package:buy_control/app/widgets/app_button.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
-import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 
-/// Diálogo padrão para pedir um único texto ao usuário (ex.: nome de um
-/// item, código digitado). Mesmo visual do [ConfirmDialog]. Devolve o
-/// texto sem espaços nas pontas, ou `null` se o usuário cancelar.
+/// Diálogo padrão ([AlertDialog] nativo) para pedir um único texto ao
+/// usuário (ex.: nome de um item, código digitado). Devolve o texto sem
+/// espaços nas pontas, ou `null` se o usuário cancelar.
 class TextInputDialog extends StatefulWidget {
   final String title;
   final String? hint;
@@ -63,40 +56,22 @@ class _TextInputDialogState extends State<TextInputDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const compact = ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(64, 44)));
 
-    return Dialog(
-      backgroundColor: AppColors.surface(isDark),
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText.title(widget.title, fontSize: AppFontSizes.fz09),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              controller: _controller,
-              hint: widget.hint,
-              autofocus: true,
-              keyboardType: widget.keyboardType,
-              textCapitalization: widget.textCapitalization,
-              onSubmitted: (_) => _confirm(),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton.secondary(label: 'Cancelar', onPressed: () => Navigator.of(context).pop()),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: AppButton(label: widget.confirmLabel, onPressed: _confirm)),
-              ],
-            ),
-          ],
-        ),
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: widget.keyboardType,
+        textCapitalization: widget.textCapitalization,
+        decoration: InputDecoration(hintText: widget.hint),
+        onSubmitted: (_) => _confirm(),
       ),
+      actions: [
+        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+        FilledButton(style: compact, onPressed: _confirm, child: Text(widget.confirmLabel)),
+      ],
     );
   }
 }

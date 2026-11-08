@@ -1,9 +1,9 @@
-import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_durations.dart';
-import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
+/// [Card] nativo (cor, borda e raio vêm do `cardTheme`) com toque opcional
+/// e um leve "afundar" ao pressionar.
 class AppCard extends StatefulWidget {
   final Widget child;
   final double? width;
@@ -29,35 +29,37 @@ class AppCard extends StatefulWidget {
 class _AppCardState extends State<AppCard> {
   bool _pressed = false;
 
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final interactive = widget.onTap != null || widget.onLongPress != null;
+    final content = SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Padding(
+        padding: widget.padding ?? const EdgeInsets.all(AppSpacing.md),
+        child: widget.child,
+      ),
+    );
 
     return AnimatedScale(
       scale: _pressed ? 0.97 : 1,
       duration: AppDurations.fast,
       curve: Curves.easeOut,
-      child: Material(
-        color: AppColors.surface(isDark),
-        borderRadius: AppRadius.borderLg,
-        child: InkWell(
-          borderRadius: AppRadius.borderLg,
-          onTap: widget.onTap,
-          onLongPress: widget.onLongPress,
-          onTapDown: (_) => setState(() => _pressed = true),
-          onTapCancel: () => setState(() => _pressed = false),
-          onTapUp: (_) => setState(() => _pressed = false),
-          child: Container(
-            width: widget.width,
-            height: widget.height,
-            padding: widget.padding ?? const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.borderLg,
-              border: Border.all(color: AppColors.border(isDark)),
-            ),
-            child: widget.child,
-          ),
-        ),
+      child: Card(
+        child: interactive
+            ? InkWell(
+                onTap: widget.onTap,
+                onLongPress: widget.onLongPress,
+                onTapDown: (_) => _setPressed(true),
+                onTapCancel: () => _setPressed(false),
+                onTapUp: (_) => _setPressed(false),
+                child: content,
+              )
+            : content,
       ),
     );
   }

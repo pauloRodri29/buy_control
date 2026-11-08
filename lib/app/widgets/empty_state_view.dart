@@ -1,9 +1,6 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
-import 'package:buy_control/app/widgets/app_icon.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -25,28 +22,21 @@ class EmptyStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AppIcon(icon, size: 48, color: AppColors.textSecondary(isDark)),
+            Icon(icon, size: 48, color: context.colors.onSurfaceVariant),
             const SizedBox(height: AppSpacing.lg),
-            AppText.title(
-              title,
-              fontSize: AppFontSizes.fz09,
-              textAlign: TextAlign.center,
-              color: AppColors.textPrimary(isDark),
-            ),
+            Text(title, textAlign: TextAlign.center, style: context.text.titleLarge),
             if (message != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              AppText(
+              Text(
                 message!,
                 textAlign: TextAlign.center,
-                color: AppColors.textSecondary(isDark),
+                style: context.text.bodyLarge?.copyWith(color: context.colors.onSurfaceVariant),
               ),
             ],
             if (actionLabel != null && onAction != null) ...[

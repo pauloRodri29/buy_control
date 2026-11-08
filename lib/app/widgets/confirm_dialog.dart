@@ -1,14 +1,9 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
-import 'package:buy_control/app/theme/app_radius.dart';
-import 'package:buy_control/app/theme/app_spacing.dart';
-import 'package:buy_control/app/widgets/app_button.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
-/// Diálogo de confirmação padrão para ações destrutivas: título explícito
-/// com o nome do item e um corpo que explica o impacto da ação, nunca
-/// apenas "Excluir?".
+/// Diálogo de confirmação padrão ([AlertDialog] nativo) para ações
+/// destrutivas: título explícito com o nome do item e um corpo que explica
+/// o impacto da ação, nunca apenas "Excluir?".
 class ConfirmDialog extends StatelessWidget {
   final String title;
   final String message;
@@ -44,46 +39,24 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
+    final confirmStyle = isDestructive
+        ? FilledButton.styleFrom(backgroundColor: colors.error, foregroundColor: colors.onError)
+        : null;
+    // Botões do diálogo mais compactos que os de tela cheia.
+    const compact = ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(64, 44)));
 
-    return Dialog(
-      backgroundColor: AppColors.surface(isDark),
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText.title(title, fontSize: AppFontSizes.fz09),
-            const SizedBox(height: AppSpacing.sm),
-            AppText(message, color: AppColors.textSecondary(isDark)),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton.secondary(
-                    label: 'Cancelar',
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: isDestructive
-                      ? AppButton.danger(
-                          label: confirmLabel,
-                          onPressed: () => Navigator.of(context).pop(true),
-                        )
-                      : AppButton(
-                          label: confirmLabel,
-                          onPressed: () => Navigator.of(context).pop(true),
-                        ),
-                ),
-              ],
-            ),
-          ],
+    return AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+        FilledButton(
+          style: (confirmStyle ?? const ButtonStyle()).merge(compact),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(confirmLabel),
         ),
-      ),
+      ],
     );
   }
 }

@@ -1,7 +1,7 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
-import 'package:buy_control/app/widgets/app_icon.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
@@ -36,10 +36,7 @@ class _LoginPageState extends State<LoginPage> {
       errorMessage = null;
     });
 
-    final error = await controller.login(
-      email: emailController.text,
-      password: passwordController.text,
-    );
+    final error = await controller.login(email: emailController.text, password: passwordController.text);
 
     if (!mounted) return;
     setState(() {
@@ -62,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const AppIcon(LucideIcons.box, size: 48, color: AppColors.accent),
+                Icon(LucideIcons.box, size: 48, color: context.colors.primary),
                 const SizedBox(height: AppSpacing.md),
                 const AppText.title('Buy Control', textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.xs),

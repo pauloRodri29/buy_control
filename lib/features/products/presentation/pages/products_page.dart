@@ -4,7 +4,6 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
-import 'package:buy_control/app/widgets/app_circle_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -30,7 +29,8 @@ class ProductsPage extends StatelessWidget {
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Excluir o produto "${product.name}"?',
-      message: 'O produto deixará de aparecer no catálogo, mas lançamentos antigos que já usam ele '
+      message:
+          'O produto deixará de aparecer no catálogo, mas lançamentos antigos que já usam ele '
           'continuam mostrando o nome e preço registrados na época.',
     );
     if (confirmed) await controller.delete(product.id);
@@ -54,9 +54,7 @@ class ProductsPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   child: FilterChipsBar(
-                    options: controller.categories
-                        .map((c) => FilterChipOption(key: c.id, label: c.name))
-                        .toList(),
+                    options: controller.categories.map((c) => FilterChipOption(key: c.id, label: c.name)).toList(),
                     selectedKey: controller.selectedCategoryId,
                     onSelected: controller.filterByCategory,
                   ),
@@ -67,7 +65,11 @@ class ProductsPage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: AppCircleButton(icon: LucideIcons.plus, onPressed: () => _openForm(context)),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: () => _openForm(context),
+        child: const Icon(LucideIcons.plus),
+      ),
     );
   }
 

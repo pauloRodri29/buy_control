@@ -4,7 +4,6 @@ import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
-import 'package:buy_control/app/widgets/app_circle_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -38,12 +37,14 @@ class BoxesPage extends StatelessWidget {
   }
 
   void _openDetail(BuildContext context, BoxEntity box) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) {
-        BoxDetailBinding(box).dependencies();
-        return BoxDetailPage(box: box);
-      },
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          BoxDetailBinding(box).dependencies();
+          return BoxDetailPage(box: box);
+        },
+      ),
+    );
   }
 
   Future<void> _delete(BuildContext context, BoxesController controller, BoxEntity box) async {
@@ -52,7 +53,8 @@ class BoxesPage extends StatelessWidget {
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Excluir a caixa "${box.name}"?',
-      message: 'Isso não apaga o histórico: os $count lançamentos registrados nela deixam de '
+      message:
+          'Isso não apaga o histórico: os $count lançamentos registrados nela deixam de '
           'aparecer nas listagens, mas continuam preservados.',
     );
     if (confirmed) await controller.delete(box.id);
@@ -110,7 +112,11 @@ class BoxesPage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: AppCircleButton(icon: LucideIcons.plus, onPressed: () => _openForm(context)),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: () => _openForm(context),
+        child: const Icon(LucideIcons.plus),
+      ),
     );
   }
 

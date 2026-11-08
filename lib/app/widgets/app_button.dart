@@ -1,14 +1,15 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
-import 'package:buy_control/app/theme/app_radius.dart';
-import 'package:buy_control/app/theme/app_spacing.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
 /// `text` é o botão sem fundo (ação secundária discreta, ex.: "Cancelar",
 /// "Trocar"); por padrão não ocupa a largura toda.
 enum AppButtonVariant { primary, secondary, danger, text }
 
+/// Botão do app sobre os botões nativos do Material:
+/// - primary → [FilledButton] (estilo do `filledButtonTheme`)
+/// - secondary → [FilledButton] tonal (superfície neutra)
+/// - danger → [FilledButton] na cor de erro
+/// - text → [TextButton]
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -54,67 +55,42 @@ class AppButton extends StatelessWidget {
     this.expanded = false,
   }) : variant = AppButtonVariant.text;
 
+  ButtonStyle? _style(ColorScheme colors) {
+    final size = WidgetStatePropertyAll(Size(64, height));
+    return switch (variant) {
+      AppButtonVariant.primary => ButtonStyle(minimumSize: size),
+      AppButtonVariant.secondary => FilledButton.styleFrom(
+          backgroundColor: colors.surfaceContainerHighest,
+          foregroundColor: colors.onSurface,
+          disabledBackgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+          disabledForegroundColor: colors.onSurface.withValues(alpha: 0.5),
+        ).copyWith(minimumSize: size),
+      AppButtonVariant.danger => FilledButton.styleFrom(
+          backgroundColor: colors.error,
+          foregroundColor: colors.onError,
+          disabledBackgroundColor: colors.error.withValues(alpha: 0.5),
+          disabledForegroundColor: colors.onError,
+        ).copyWith(minimumSize: size),
+      AppButtonVariant.text => ButtonStyle(minimumSize: size),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final disabled = onPressed == null;
+    final style = _style(context.colors);
+    final text = Text(label, maxLines: 1, overflow: TextOverflow.ellipsis);
+    final iconWidget = icon == null ? null : Icon(icon, size: 18);
 
-    final Color background;
-    final Color foreground;
-    switch (variant) {
-      case AppButtonVariant.primary:
-        background = AppColors.accent;
-        foreground = AppColors.textOnDarkButton;
-        break;
-      case AppButtonVariant.secondary:
-        background = AppColors.surfaceVariant(isDark);
-        foreground = AppColors.textPrimary(isDark);
-        break;
-      case AppButtonVariant.danger:
-        background = AppColors.error;
-        foreground = AppColors.textOnDarkButton;
-        break;
-      case AppButtonVariant.text:
-        background = Colors.transparent;
-        foreground = AppColors.accent;
-        break;
+    final Widget button;
+    if (variant == AppButtonVariant.text) {
+      button = iconWidget == null
+          ? TextButton(onPressed: onPressed, style: style, child: text)
+          : TextButton.icon(onPressed: onPressed, style: style, icon: iconWidget, label: text);
+    } else {
+      button = iconWidget == null
+          ? FilledButton(onPressed: onPressed, style: style, child: text)
+          : FilledButton.icon(onPressed: onPressed, style: style, icon: iconWidget, label: text);
     }
-    final effectiveForeground = disabled && variant == AppButtonVariant.text
-        ? foreground.withValues(alpha: 0.5)
-        : foreground;
-
-    final labelText = AppText(
-      label,
-      fontSize: AppFontSizes.fz08,
-      fontWeight: FontWeight.w600,
-      color: effectiveForeground,
-    );
-
-    final button = Material(
-      color: disabled && variant != AppButtonVariant.text ? background.withValues(alpha: 0.5) : background,
-      borderRadius: AppRadius.borderMd,
-      child: InkWell(
-        borderRadius: AppRadius.borderMd,
-        onTap: onPressed,
-        child: Container(
-          height: height,
-          alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(
-            horizontal: variant == AppButtonVariant.text ? AppSpacing.sm : AppSpacing.lg,
-          ),
-          child: icon == null
-              ? labelText
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, size: 18, color: effectiveForeground),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(child: labelText),
-                  ],
-                ),
-        ),
-      ),
-    );
 
     return expanded ? SizedBox(width: double.infinity, child: button) : button;
   }

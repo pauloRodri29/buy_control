@@ -1,10 +1,8 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -195,27 +193,23 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryText = AppColors.textPrimary(isDark);
-    final secondaryText = AppColors.textSecondary(isDark);
+    final colors = context.colors;
+    final secondaryText = colors.onSurfaceVariant;
 
     // Todas as decorações com o mesmo formato: o table_calendar anima entre
     // elas e não aceita misturar círculo com borda arredondada.
     BoxDecoration cell([Color? color, Border? border]) =>
         BoxDecoration(color: color, borderRadius: AppRadius.borderMd, border: border);
-    final dayStyle = TextStyle(fontSize: AppFontSizes.fz07, color: primaryText, fontWeight: FontWeight.w500);
-    const onAccent = TextStyle(
-      fontSize: AppFontSizes.fz07,
-      color: AppColors.textOnDarkButton,
-      fontWeight: FontWeight.bold,
-    );
+    final dayStyle = context.text.titleSmall!.copyWith(fontWeight: FontWeight.w500);
+    final onAccent = dayStyle.copyWith(color: colors.onPrimary, fontWeight: FontWeight.bold);
+    final weekdayStyle = context.text.labelSmall!.copyWith(fontWeight: FontWeight.w600);
 
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title(widget.title, fontSize: AppFontSizes.fz09),
+          Text(widget.title, style: context.text.titleLarge),
           if (widget.shortcuts.isNotEmpty || widget.rangeShortcuts.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             SingleChildScrollView(
@@ -251,7 +245,7 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
           Container(
             padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant(isDark),
+              color: colors.surfaceContainerHighest,
               borderRadius: AppRadius.borderLg,
             ),
             child: Column(
@@ -307,16 +301,8 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
                   daysOfWeekStyle: DaysOfWeekStyle(
                     dowTextFormatter: (date, locale) =>
                         DateFormat.E(locale).format(date).substring(0, 1).toUpperCase(),
-                    weekdayStyle: TextStyle(
-                      fontSize: AppFontSizes.fz05,
-                      fontWeight: FontWeight.w600,
-                      color: secondaryText,
-                    ),
-                    weekendStyle: TextStyle(
-                      fontSize: AppFontSizes.fz05,
-                      fontWeight: FontWeight.w600,
-                      color: secondaryText,
-                    ),
+                    weekdayStyle: weekdayStyle,
+                    weekendStyle: weekdayStyle,
                   ),
                   calendarStyle: CalendarStyle(
                     cellMargin: const EdgeInsets.all(3),
@@ -329,21 +315,18 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
                     holidayDecoration: cell(),
                     outsideDecoration: cell(),
                     disabledDecoration: cell(),
-                    disabledTextStyle: TextStyle(
-                      fontSize: AppFontSizes.fz07,
-                      color: secondaryText.withValues(alpha: 0.35),
-                    ),
-                    todayDecoration: cell(null, Border.all(color: AppColors.accent, width: 1.5)),
-                    todayTextStyle: dayStyle.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
-                    selectedDecoration: cell(AppColors.accent),
+                    disabledTextStyle: dayStyle.copyWith(color: secondaryText.withValues(alpha: 0.35)),
+                    todayDecoration: cell(null, Border.all(color: colors.primary, width: 1.5)),
+                    todayTextStyle: dayStyle.copyWith(color: colors.primary, fontWeight: FontWeight.bold),
+                    selectedDecoration: cell(colors.primary),
                     selectedTextStyle: onAccent,
-                    rangeStartDecoration: cell(AppColors.accent),
+                    rangeStartDecoration: cell(colors.primary),
                     rangeStartTextStyle: onAccent,
-                    rangeEndDecoration: cell(AppColors.accent),
+                    rangeEndDecoration: cell(colors.primary),
                     rangeEndTextStyle: onAccent,
                     withinRangeDecoration: cell(),
                     withinRangeTextStyle: dayStyle,
-                    rangeHighlightColor: AppColors.accent.withValues(alpha: 0.15),
+                    rangeHighlightColor: colors.primary.withValues(alpha: 0.15),
                     rangeHighlightScale: 0.82,
                   ),
                 ),
@@ -355,7 +338,7 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
             children: [
               Icon(LucideIcons.calendarCheck, size: 16, color: secondaryText),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(child: AppText(_summary, fontSize: AppFontSizes.fz06, fontWeight: FontWeight.w600)),
+              Expanded(child: Text(_summary, style: context.text.labelMedium?.copyWith(color: colors.onSurface))),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -393,23 +376,18 @@ class _MonthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     Widget arrow(IconData icon, bool enabled, VoidCallback onTap) {
-      return Material(
-        color: AppColors.surface(isDark),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Icon(
-              icon,
-              size: 18,
-              color: enabled ? AppColors.textPrimary(isDark) : AppColors.textSecondary(isDark).withValues(alpha: 0.4),
-            ),
-          ),
+      return IconButton.filled(
+        onPressed: enabled ? onTap : null,
+        icon: Icon(icon, size: 18),
+        visualDensity: VisualDensity.compact,
+        style: IconButton.styleFrom(
+          backgroundColor: colors.surface,
+          foregroundColor: colors.onSurface,
+          disabledBackgroundColor: colors.surface,
+          disabledForegroundColor: colors.onSurfaceVariant.withValues(alpha: 0.4),
         ),
       );
     }
@@ -418,11 +396,11 @@ class _MonthHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       child: Row(
         children: [
-          Expanded(child: AppText(title, fontSize: AppFontSizes.fz08, fontWeight: FontWeight.bold)),
+          Expanded(child: Text(title, style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
           if (onToday != null)
             TextButton(
               onPressed: onToday,
-              style: TextButton.styleFrom(foregroundColor: AppColors.accent, visualDensity: VisualDensity.compact),
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
               child: const Text('Hoje'),
             ),
           arrow(LucideIcons.chevronLeft, canGoBack, onPrevious),
@@ -443,27 +421,9 @@ class _ShortcutChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.sm),
-      child: Material(
-        color: selected ? AppColors.accent : AppColors.surfaceVariant(isDark),
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            child: AppText(
-              label,
-              fontSize: AppFontSizes.fz06,
-              fontWeight: FontWeight.w600,
-              color: selected ? AppColors.textOnDarkButton : AppColors.textPrimary(isDark),
-            ),
-          ),
-        ),
-      ),
+      child: ChoiceChip(label: Text(label), selected: selected, onSelected: (_) => onTap()),
     );
   }
 }

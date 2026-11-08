@@ -3,7 +3,6 @@ import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
-import 'package:buy_control/app/widgets/app_circle_button.dart';
 import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
@@ -84,9 +83,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
 
   void _openClosures() {
     BoxClosuresBinding(widget.box).dependencies();
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => BoxClosuresPage(box: widget.box),
-    ));
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => BoxClosuresPage(box: widget.box)));
   }
 
   Future<void> _closeBox() async {
@@ -114,13 +111,14 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
     final carryOverMessage = carriedOver == 0
         ? 'Nenhum lançamento está marcado para repetir: a Box fica vazia para a próxima compra.'
         : carriedOver == openCount
-            ? 'Os mesmos lançamentos continuam na Box para a próxima compra — é só ajustar o que mudar.'
-            : '$carriedOver de $openCount lançamentos estão marcados para repetir e continuam na Box '
-                'para a próxima compra; os outros ficam só no histórico.';
+        ? 'Os mesmos lançamentos continuam na Box para a próxima compra — é só ajustar o que mudar.'
+        : '$carriedOver de $openCount lançamentos estão marcados para repetir e continuam na Box '
+              'para a próxima compra; os outros ficam só no histórico.';
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Fechar compras de ${DateTimeFormatter.ddMMyyyy(referenceDate)}?',
-      message: '$itemCount itens totalizando ${total.formatted} viram registro definitivo e entram no '
+      message:
+          '$itemCount itens totalizando ${total.formatted} viram registro definitivo e entram no '
           'balanço e nos relatórios. Depois de fechado não é possível reabrir nem editar.\n\n'
           '$carryOverMessage',
       confirmLabel: 'Fechar Box',
@@ -178,7 +176,11 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
           );
         },
       ),
-      floatingActionButton: AppCircleButton(icon: LucideIcons.plus, onPressed: _addItems),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: _addItems,
+        child: const Icon(LucideIcons.plus),
+      ),
     );
   }
 
@@ -297,11 +299,13 @@ class _TransactionCard extends StatelessWidget {
             ],
           ),
           const Divider(height: AppSpacing.md),
-          ...transaction.items.map((item) => _QuickQuantityRow(
-                item: item,
-                onDecrease: item.quantity > 1 ? () => onChangeQuantity(item, -1) : null,
-                onIncrease: () => onChangeQuantity(item, 1),
-              )),
+          ...transaction.items.map(
+            (item) => _QuickQuantityRow(
+              item: item,
+              onDecrease: item.quantity > 1 ? () => onChangeQuantity(item, -1) : null,
+              onIncrease: () => onChangeQuantity(item, 1),
+            ),
+          ),
         ],
       ),
     );
@@ -354,10 +358,7 @@ class _QuickQuantityRow extends StatelessWidget {
           icon: const Icon(LucideIcons.plus, size: 16),
           onPressed: onIncrease,
         ),
-        SizedBox(
-          width: 84,
-          child: AppText(item.total.formatted, textAlign: TextAlign.right),
-        ),
+        SizedBox(width: 84, child: AppText(item.total.formatted, textAlign: TextAlign.right)),
       ],
     );
   }

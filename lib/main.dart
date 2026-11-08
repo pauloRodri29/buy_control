@@ -3,6 +3,7 @@ import 'package:buy_control/app/bootstrap/app_bootstrap.dart';
 import 'package:buy_control/app/routes/pages.dart';
 import 'package:buy_control/app/theme/app_theme.dart';
 import 'package:buy_control/app/theme/theme_controller.dart';
+import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/core/database/app_meta_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,6 +27,7 @@ class BuyControlApp extends StatelessWidget {
     return GetBuilder<ThemeController>(
       builder: (themeController) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
+        scaffoldMessengerKey: appScaffoldMessengerKey,
         title: 'BuyControl',
         initialBinding: InitialBinding(),
         initialRoute: Routes.INITIAL,

@@ -2,7 +2,6 @@ import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
-import 'package:buy_control/app/widgets/app_circle_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -26,7 +25,8 @@ class UnitsPage extends StatelessWidget {
     final confirmed = await ConfirmDialog.show(
       context,
       title: 'Excluir a unidade "${unit.name}"?',
-      message: 'Esta unidade deixará de aparecer para novos produtos e lançamentos. '
+      message:
+          'Esta unidade deixará de aparecer para novos produtos e lançamentos. '
           'Itens já cadastrados com ela continuam funcionando normalmente.',
     );
     if (confirmed) await controller.delete(unit.id);
@@ -73,7 +73,11 @@ class UnitsPage extends StatelessWidget {
           }
         },
       ),
-      floatingActionButton: AppCircleButton(icon: LucideIcons.plus, onPressed: () => _openForm(context)),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: () => _openForm(context),
+        child: const Icon(LucideIcons.plus),
+      ),
     );
   }
 }

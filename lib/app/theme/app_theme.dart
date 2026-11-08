@@ -263,7 +263,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         modalElevation: 0,
-        showDragHandle: false,
+        showDragHandle: true,
+        dragHandleColor: scheme.outline,
+        dragHandleSize: const Size(40, 4),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         ),
