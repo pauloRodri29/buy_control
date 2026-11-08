@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -21,12 +20,11 @@ class PlanItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = AppColors.textSecondary(isDark);
+    final secondary = context.colors.onSurfaceVariant;
     final value = item.estimatedValue;
 
     return Material(
-      color: AppColors.surface(isDark),
+      color: context.colors.surface,
       borderRadius: AppRadius.borderMd,
       child: InkWell(
         borderRadius: AppRadius.borderMd,
@@ -35,7 +33,7 @@ class PlanItemCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: AppRadius.borderMd,
-            border: Border.all(color: AppColors.border(isDark)),
+            border: Border.all(color: context.colors.outlineVariant),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +44,7 @@ class PlanItemCard extends StatelessWidget {
                 icon: Icon(
                   item.isPurchased ? LucideIcons.circleCheck : LucideIcons.circle,
                   size: 20,
-                  color: item.isPurchased ? AppColors.success : secondary,
+                  color: item.isPurchased ? context.semantic.success : secondary,
                 ),
                 onPressed: onTogglePurchased,
               ),
@@ -60,10 +58,8 @@ class PlanItemCard extends StatelessWidget {
                         item.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: AppFontSizes.fz07,
-                          fontWeight: FontWeight.w600,
-                          color: item.isPurchased ? secondary : AppColors.textPrimary(isDark),
+                        style: context.text.titleSmall!.copyWith(
+                          color: item.isPurchased ? secondary : context.colors.onSurface,
                           decoration: item.isPurchased ? TextDecoration.lineThrough : null,
                         ),
                       ),
@@ -77,9 +73,9 @@ class PlanItemCard extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: AppSpacing.xs),
-                      AppText(
+                      AppText.small(
                         value == null || value.isZero ? 'Sem valor' : value.formatted,
-                        fontSize: AppFontSizes.fz06,
+                        
                         fontWeight: value == null ? FontWeight.normal : FontWeight.bold,
                         color: value == null ? secondary : null,
                       ),

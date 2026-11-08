@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -56,12 +55,12 @@ class _BoxFormSheetState extends State<BoxFormSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title(widget.box != null ? 'Editar caixa' : 'Nova caixa', fontSize: AppFontSizes.fz09),
+        AppText.heading(widget.box != null ? 'Editar caixa' : 'Nova caixa', ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(controller: nameController, label: 'Nome', hint: 'Mercado do mês', autofocus: true),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          AppText(errorMessage!, color: AppColors.error),
+          AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
         AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),

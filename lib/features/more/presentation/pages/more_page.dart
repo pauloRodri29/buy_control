@@ -1,5 +1,5 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/widgets/app_feedback.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -23,16 +23,15 @@ class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
   void _comingSoon() {
-    Get.snackbar('Em breve', 'Este recurso ainda não está disponível.');
+    AppFeedback.info('Este recurso ainda não está disponível.', title: 'Em breve');
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = Get.find<AuthController>().currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Mais', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Mais', )),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -42,17 +41,17 @@ class MorePage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: AppColors.accent,
-                  child: const Icon(LucideIcons.userCircle, color: AppColors.textOnDarkButton),
+                  backgroundColor: context.colors.primary,
+                  child: Icon(LucideIcons.userCircle, color: context.colors.onPrimary),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppText(currentUser?.name ?? 'Usuário', fontWeight: FontWeight.bold, fontSize: AppFontSizes.fz08),
+                      AppText(currentUser?.name ?? 'Usuário', fontWeight: FontWeight.bold, ),
                       const SizedBox(height: AppSpacing.xs),
-                      AppText.subtitle(currentUser?.email ?? '', color: AppColors.textSecondary(isDark)),
+                      AppText.subtitle(currentUser?.email ?? ''),
                     ],
                   ),
                 ),
@@ -64,7 +63,7 @@ class MorePage extends StatelessWidget {
           ListTile(
             leading: const Icon(LucideIcons.chartBar),
             title: const AppText('Relatórios', fontWeight: FontWeight.w600),
-            subtitle: AppText.subtitle('Gastos realizados, previsão e metas', color: AppColors.textSecondary(isDark)),
+            subtitle: AppText.subtitle('Gastos realizados, previsão e metas'),
             trailing: const Icon(LucideIcons.chevronRight, size: 18),
             onTap: () => Get.to(() => const ReportsPage(), binding: ReportsBinding()),
           ),
@@ -96,11 +95,11 @@ class MorePage extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Divider(),
           ),
-          AppText.subtitle('Em breve', color: AppColors.textSecondary(isDark)),
+          AppText.subtitle('Em breve'),
           const SizedBox(height: AppSpacing.sm),
           ListTile(
-            leading: Icon(LucideIcons.refreshCw, color: AppColors.textSecondary(isDark)),
-            title: AppText('Sincronização', fontWeight: FontWeight.w600, color: AppColors.textSecondary(isDark)),
+            leading: Icon(LucideIcons.refreshCw, color: context.colors.onSurfaceVariant),
+            title: AppText('Sincronização', fontWeight: FontWeight.w600, color: context.colors.onSurfaceVariant),
             onTap: _comingSoon,
           ),
         ],

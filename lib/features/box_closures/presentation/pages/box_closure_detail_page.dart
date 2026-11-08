@@ -1,6 +1,5 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -40,7 +39,7 @@ class _BoxClosureDetailPageState extends State<BoxClosureDetailPage> {
     return GetBuilder<BoxClosureDetailController>(
       tag: widget.closureId,
       builder: (controller) => Scaffold(
-        appBar: AppBar(title: const AppText.title('Fechamento', fontSize: AppFontSizes.fz09)),
+        appBar: AppBar(title: const AppText.heading('Fechamento', )),
         body: _buildBody(controller),
       ),
     );
@@ -71,7 +70,6 @@ class _ClosureDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final closure = details.closure;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final items = details.transactions.expand((t) => t.items).toList()
       ..sort((a, b) => a.nameSnapshot.toLowerCase().compareTo(b.nameSnapshot.toLowerCase()));
     final generalDiscount = details.transactions.fold(0, (sum, t) => sum + t.discount.cents);
@@ -92,22 +90,20 @@ class _ClosureDetailBody extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
-              AppText.title(
+              AppText.heading(
                 'Compras de ${DateTimeFormatter.ddMMyyyy(closure.referenceDate)}',
-                fontSize: AppFontSizes.fz09,
+                
               ),
               const SizedBox(height: AppSpacing.xs),
               AppText.subtitle('${items.length} itens · fechado em ${DateTimeFormatter.ddMMyyyy(closure.closedAt)}'),
               const SizedBox(height: AppSpacing.sm),
-              AppText(
+              AppText.title(
                 closure.total.formatted,
-                fontWeight: FontWeight.bold,
-                fontSize: AppFontSizes.fz11,
-                color: AppColors.accent,
+                color: context.colors.primary,
               ),
               if (closure.notes != null && closure.notes!.trim().isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
-                AppText(closure.notes!, color: AppColors.textSecondary(isDark)),
+                AppText(closure.notes!, color: context.colors.onSurfaceVariant),
               ],
             ],
           ),
@@ -168,10 +164,10 @@ class _ItemRow extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               AppText.subtitle('$_quantity × ${item.unitPrice.formatted}'),
               if (!item.discount.isZero)
-                AppText(
+                AppText.small(
                   '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
-                  color: AppColors.accent,
-                  fontSize: AppFontSizes.fz06,
+                  color: context.colors.primary,
+                  
                 ),
             ],
           ),

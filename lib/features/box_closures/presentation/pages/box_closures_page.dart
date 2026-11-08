@@ -1,6 +1,5 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -44,7 +43,7 @@ class _BoxClosuresPageState extends State<BoxClosuresPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Fechamentos', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Fechamentos', )),
       body: GetBuilder<BoxClosuresController>(
         tag: widget.box.id,
         builder: (controller) => _buildBody(controller),
@@ -100,7 +99,7 @@ class _ClosureCard extends StatelessWidget {
               ],
             ),
           ),
-          AppText(closure.total.formatted, fontWeight: FontWeight.w600, color: AppColors.accent),
+          AppText(closure.total.formatted, fontWeight: FontWeight.w600, color: context.colors.primary),
         ],
       ),
     );

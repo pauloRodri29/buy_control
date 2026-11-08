@@ -1,4 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
 
@@ -13,19 +13,16 @@ class CarryOverSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return SwitchListTile.adaptive(
       contentPadding: EdgeInsets.zero,
       value: value,
-      activeTrackColor: AppColors.accent,
+      activeTrackColor: context.colors.primary,
       onChanged: onChanged,
       title: const AppText('Repetir no próximo ciclo', fontWeight: FontWeight.w600),
       subtitle: AppText.subtitle(
         value
             ? 'Ao fechar a Box, este lançamento continua nela para a próxima compra.'
             : 'Ao fechar a Box, este lançamento vai só para o histórico.',
-        color: AppColors.textSecondary(isDark),
       ),
     );
   }

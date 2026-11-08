@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -22,7 +21,6 @@ class ReportEvolutionChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppCard(
       child: Column(
@@ -34,17 +32,17 @@ class ReportEvolutionChart extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Center(
-                child: AppText(
+                child: AppText.small(
                   'Sem dados no período.',
-                  fontSize: AppFontSizes.fz06,
-                  color: AppColors.textSecondary(isDark),
+                  
+                  color: context.colors.onSurfaceVariant,
                 ),
               ),
             )
           else if (points.length == 1)
-            _EvolutionRow(point: points.first, isDark: isDark)
+            _EvolutionRow(point: points.first)
           else
-            SizedBox(height: 180, child: _Chart(points: points, isDark: isDark)),
+            SizedBox(height: 180, child: _Chart(points: points)),
         ],
       ),
     );
@@ -53,9 +51,8 @@ class ReportEvolutionChart extends StatelessWidget {
 
 class _EvolutionRow extends StatelessWidget {
   final ReportEvolutionPoint point;
-  final bool isDark;
 
-  const _EvolutionRow({required this.point, required this.isDark});
+  const _EvolutionRow({required this.point});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +61,7 @@ class _EvolutionRow extends StatelessWidget {
       children: [
         AppText(
           '${_monthAbbreviations[point.month.month - 1]}/${point.month.year}',
-          color: AppColors.textSecondary(isDark),
+          color: context.colors.onSurfaceVariant,
         ),
         AppText(point.total.formatted, fontWeight: FontWeight.w600),
       ],
@@ -74,9 +71,8 @@ class _EvolutionRow extends StatelessWidget {
 
 class _Chart extends StatelessWidget {
   final List<ReportEvolutionPoint> points;
-  final bool isDark;
 
-  const _Chart({required this.points, required this.isDark});
+  const _Chart({required this.points});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +89,7 @@ class _Chart extends StatelessWidget {
         gridData: FlGridData(
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
-          getDrawingHorizontalLine: (_) => FlLine(color: AppColors.border(isDark), strokeWidth: 1),
+          getDrawingHorizontalLine: (_) => FlLine(color: context.colors.outlineVariant, strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
@@ -110,10 +106,10 @@ class _Chart extends StatelessWidget {
                 final month = points[index].month;
                 return Padding(
                   padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: AppText(
+                  child: AppText.caption(
                     _monthAbbreviations[month.month - 1],
-                    fontSize: AppFontSizes.fz05,
-                    color: AppColors.textSecondary(isDark),
+                    
+                    color: context.colors.onSurfaceVariant,
                   ),
                 );
               },
@@ -122,12 +118,12 @@ class _Chart extends StatelessWidget {
         ),
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => AppColors.surfaceVariant(isDark),
+            getTooltipColor: (_) => context.colors.surfaceContainerHighest,
             getTooltipItems: (spots) => spots.map((spot) {
               final point = points[spot.x.toInt()];
               return LineTooltipItem(
                 point.total.formatted,
-                TextStyle(color: AppColors.textPrimary(isDark), fontSize: AppFontSizes.fz06, fontWeight: FontWeight.w600),
+                context.text.labelMedium!.copyWith(color: context.colors.onSurface, fontWeight: FontWeight.w600),
               );
             }).toList(),
           ),
@@ -136,10 +132,10 @@ class _Chart extends StatelessWidget {
           LineChartBarData(
             spots: [for (var i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].total.toDouble())],
             isCurved: true,
-            color: AppColors.accent,
+            color: context.colors.primary,
             barWidth: 3,
             dotData: const FlDotData(show: true),
-            belowBarData: BarAreaData(show: true, color: AppColors.accent.withValues(alpha: 0.12)),
+            belowBarData: BarAreaData(show: true, color: context.colors.primary.withValues(alpha: 0.12)),
           ),
         ],
       ),

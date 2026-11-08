@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -51,8 +50,6 @@ class PlanColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return DragTarget<PlanItemEntity>(
       onAcceptWithDetails: (details) => onDropItem(details.data, null),
       builder: (context, candidates, _) {
@@ -62,10 +59,10 @@ class PlanColumn extends StatelessWidget {
           width: width,
           margin: const EdgeInsets.only(right: AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant(isDark),
+            color: context.colors.surfaceContainerHighest,
             borderRadius: AppRadius.borderLg,
             border: Border.all(
-              color: highlighted ? AppColors.accent : Colors.transparent,
+              color: highlighted ? context.colors.primary : Colors.transparent,
               width: 2,
             ),
           ),
@@ -83,7 +80,6 @@ class PlanColumn extends StatelessWidget {
                                 ? 'Itens sem contexto ficam aqui. Arraste-os para um quadro.'
                                 : 'Nenhum item ainda.',
                             textAlign: TextAlign.center,
-                            color: AppColors.textSecondary(isDark),
                           ),
                         ),
                       )
@@ -156,7 +152,7 @@ class _DraggableItem extends StatelessWidget {
               duration: const Duration(milliseconds: 120),
               height: candidates.isNotEmpty ? 4 : 0,
               margin: EdgeInsets.only(bottom: candidates.isNotEmpty ? AppSpacing.xs : 0),
-              decoration: BoxDecoration(color: AppColors.accent, borderRadius: AppRadius.borderSm),
+              decoration: BoxDecoration(color: context.colors.primary, borderRadius: AppRadius.borderSm),
             ),
             LongPressDraggable<PlanItemEntity>(
               data: item,
@@ -187,8 +183,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = AppColors.textSecondary(isDark);
+    final secondary = context.colors.onSurfaceVariant;
     final board = this.board;
 
     return Padding(
@@ -205,7 +200,7 @@ class _Header extends StatelessWidget {
               Expanded(
                 child: AppText(
                   board?.title ?? 'Sem quadro',
-                  fontSize: AppFontSizes.fz08,
+                  
                   fontWeight: FontWeight.bold,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -248,11 +243,11 @@ class _Header extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
-                  const Icon(LucideIcons.badgeCheck, size: 14, color: AppColors.success),
+                  Icon(LucideIcons.badgeCheck, size: 14, color: context.semantic.success),
                   const SizedBox(width: AppSpacing.xs),
                   AppText.subtitle(
                     'Fechado em ${DateTimeFormatter.ddMMyyyy(board.closedAt!)}',
-                    color: AppColors.success,
+                    color: context.semantic.success,
                   ),
                 ],
               ),
@@ -277,17 +272,16 @@ class _ProgressSummary extends StatelessWidget {
   final PlanBoardProgress progress;
   const _ProgressSummary({required this.progress});
 
-  Color _barColor() {
+  Color _barColor(BuildContext context) {
     final ratio = progress.goalRatio ?? 0;
-    if (progress.isOverGoal) return AppColors.error;
-    if (ratio >= 0.9) return AppColors.warning;
-    return AppColors.accent;
+    if (progress.isOverGoal) return context.colors.error;
+    if (ratio >= 0.9) return context.semantic.warning;
+    return context.colors.primary;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = AppColors.textSecondary(isDark);
+    final secondary = context.colors.onSurfaceVariant;
 
     final counts = '${progress.purchasedCount}/${progress.itemCount} comprados'
         '${progress.itemsWithoutValue > 0 ? ' · ${progress.itemsWithoutValue} sem valor' : ''}';
@@ -296,7 +290,7 @@ class _ProgressSummary extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText('Planejado: ${progress.planned.formatted}', fontSize: AppFontSizes.fz06, fontWeight: FontWeight.w600),
+          AppText.small('Planejado: ${progress.planned.formatted}',  fontWeight: FontWeight.w600),
           AppText.subtitle(counts, color: secondary),
         ],
       );
@@ -308,12 +302,12 @@ class _ProgressSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(LucideIcons.target, size: 14, color: _barColor()),
+            Icon(LucideIcons.target, size: 14, color: _barColor(context)),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: AppText(
+              child: AppText.small(
                 '${progress.planned.formatted} de ${progress.goal!.formatted}',
-                fontSize: AppFontSizes.fz06,
+                
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -325,8 +319,8 @@ class _ProgressSummary extends StatelessWidget {
           child: LinearProgressIndicator(
             value: (progress.goalRatio ?? 0).clamp(0, 1).toDouble(),
             minHeight: 6,
-            color: _barColor(),
-            backgroundColor: AppColors.border(isDark),
+            color: _barColor(context),
+            backgroundColor: context.colors.outlineVariant,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -334,7 +328,7 @@ class _ProgressSummary extends StatelessWidget {
           progress.isOverGoal
               ? '${(progress.planned - progress.goal!).formatted} acima da meta'
               : 'Ainda cabe ${remaining.formatted}',
-          color: progress.isOverGoal ? AppColors.error : secondary,
+          color: progress.isOverGoal ? context.colors.error : secondary,
         ),
         AppText.subtitle(counts, color: secondary),
       ],

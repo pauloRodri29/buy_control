@@ -1,6 +1,5 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
@@ -24,7 +23,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Buy Control', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Buy Control', )),
       body: GetBuilder<DashboardController>(
         builder: (controller) {
           switch (controller.status) {
@@ -41,8 +40,6 @@ class DashboardPage extends StatelessWidget {
               );
             case ViewStatus.success:
               final summary = controller.summary!;
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-
               return RefreshIndicator(
                 onRefresh: controller.load,
                 child: ListView(
@@ -52,16 +49,16 @@ class DashboardPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppText.subtitle('Total no mês', color: AppColors.textSecondary(isDark)),
+                          AppText.subtitle('Total no mês'),
                           const SizedBox(height: AppSpacing.xs),
-                          AppText.title(summary.currentMonthTotal.formatted, fontSize: AppFontSizes.fz12),
+                          Text(summary.currentMonthTotal.formatted, style: context.text.headlineLarge),
                           const SizedBox(height: AppSpacing.xs),
                           if (summary.percentChangeVsPreviousMonth != null)
-                            AppText(
+                            AppText.small(
                               '${summary.percentChangeVsPreviousMonth! >= 0 ? '+' : ''}'
                               '${summary.percentChangeVsPreviousMonth!.toStringAsFixed(1)}% vs. mês anterior',
-                              color: summary.percentChangeVsPreviousMonth! > 0 ? AppColors.error : AppColors.success,
-                              fontSize: AppFontSizes.fz06,
+                              color: summary.percentChangeVsPreviousMonth! > 0 ? context.colors.error : context.semantic.success,
+                              
                             ),
                         ],
                       ),
@@ -74,7 +71,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Média diária', color: AppColors.textSecondary(isDark)),
+                                AppText.subtitle('Média diária'),
                                 AppText(summary.dailyAverageCurrentMonth.formatted, fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -86,7 +83,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Lançamentos', color: AppColors.textSecondary(isDark)),
+                                AppText.subtitle('Lançamentos'),
                                 AppText('${summary.transactionCountCurrentMonth}', fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -98,7 +95,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Boxes ativas', color: AppColors.textSecondary(isDark)),
+                                AppText.subtitle('Boxes ativas'),
                                 AppText('${summary.activeBoxCount}', fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -143,7 +140,7 @@ class DashboardPage extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                AppText(DateTimeFormatter.relative(t.occurredAt), fontSize: AppFontSizes.fz05),
+                                AppText.caption(DateTimeFormatter.relative(t.occurredAt), ),
                                 const SizedBox(width: AppSpacing.sm),
                                 AppText(t.total.formatted, fontWeight: FontWeight.w600),
                               ],

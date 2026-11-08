@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/features/reports/domain/usecases/export_report.dart';
@@ -32,19 +31,18 @@ class ReportExportSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = Get.find<ReportsController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppText.title('Exportar relatório', fontSize: AppFontSizes.fz09),
+        AppText.heading('Exportar relatório', ),
         const SizedBox(height: AppSpacing.md),
         ..._options.map(
           (option) => ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(option.icon, color: AppColors.textPrimary(isDark)),
+            leading: Icon(option.icon, color: context.colors.onSurface),
             title: AppText(option.label, fontWeight: FontWeight.w600),
             onTap: () {
               Navigator.of(context).pop();

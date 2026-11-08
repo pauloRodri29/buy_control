@@ -1,5 +1,4 @@
 import 'package:buy_control/app/theme/theme_context.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -47,10 +46,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: AppColors.background(isDark),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -65,7 +62,6 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: AppSpacing.xs),
                 AppText.subtitle(
                   'Entre para continuar',
-                  color: AppColors.textSecondary(isDark),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xxl),
@@ -84,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 if (errorMessage != null) ...[
                   const SizedBox(height: AppSpacing.sm),
-                  AppText(errorMessage!, color: AppColors.error),
+                  AppText(errorMessage!, color: context.colors.error),
                 ],
                 const SizedBox(height: AppSpacing.lg),
                 AppButton(label: 'Entrar', onPressed: submitting ? null : _submit),

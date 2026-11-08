@@ -1,4 +1,3 @@
-import 'package:buy_control/app/theme/app_colors.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -20,12 +19,10 @@ class DashboardFiltersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.subtitle('Período', color: AppColors.textSecondary(isDark)),
+        AppText.subtitle('Período'),
         const SizedBox(height: AppSpacing.sm),
         FilterChipsBar(
           options: _periodOptions,
@@ -34,7 +31,7 @@ class DashboardFiltersSection extends StatelessWidget {
         ),
         if (controller.boxes.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          AppText.subtitle('Box', color: AppColors.textSecondary(isDark)),
+          AppText.subtitle('Box'),
           const SizedBox(height: AppSpacing.sm),
           FilterChipsBar(
             options: controller.boxes.map((b) => FilterChipOption(key: b.id, label: b.name)).toList(),
@@ -44,7 +41,7 @@ class DashboardFiltersSection extends StatelessWidget {
         ],
         if (controller.categories.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          AppText.subtitle('Categoria', color: AppColors.textSecondary(isDark)),
+          AppText.subtitle('Categoria'),
           const SizedBox(height: AppSpacing.sm),
           FilterChipsBar(
             options: controller.categories.map((c) => FilterChipOption(key: c.id, label: c.name)).toList(),

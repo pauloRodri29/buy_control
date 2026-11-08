@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -39,11 +38,10 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = controller.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Perfil', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Perfil', )),
       body: user == null
           ? const SizedBox.shrink()
           : ListView(
@@ -54,12 +52,10 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 28,
-                        backgroundColor: AppColors.accent,
-                        child: AppText(
+                        backgroundColor: context.colors.primary,
+                        child: AppText.heading(
                           _initials(user.name),
-                          fontSize: AppFontSizes.fz09,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textOnDarkButton,
+                          color: context.colors.onPrimary,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
@@ -69,7 +65,7 @@ class ProfilePage extends StatelessWidget {
                           children: [
                             AppText(user.name, fontWeight: FontWeight.w600),
                             const SizedBox(height: AppSpacing.xs),
-                            AppText.subtitle(user.email, color: AppColors.textSecondary(isDark)),
+                            AppText.subtitle(user.email),
                           ],
                         ),
                       ),
@@ -81,7 +77,7 @@ class ProfilePage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AppText.subtitle('Membro desde', color: AppColors.textSecondary(isDark)),
+                      AppText.subtitle('Membro desde'),
                       AppText(DateTimeFormatter.ddMMyyyy(user.createdAt)),
                     ],
                   ),
@@ -140,14 +136,14 @@ class _ProfileEditFormState extends State<_ProfileEditForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title('Editar perfil', fontSize: AppFontSizes.fz09),
+        AppText.heading('Editar perfil', ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(controller: nameController, label: 'Nome'),
         const SizedBox(height: AppSpacing.md),
         AppTextField(controller: emailController, label: 'E-mail', keyboardType: TextInputType.emailAddress),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          AppText(errorMessage!, color: AppColors.error),
+          AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
         AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),

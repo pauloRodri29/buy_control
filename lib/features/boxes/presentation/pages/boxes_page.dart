@@ -1,9 +1,7 @@
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
-import 'package:buy_control/app/widgets/app_card.dart';
+import 'package:buy_control/app/widgets/app_list_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -85,7 +83,7 @@ class BoxesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Caixas', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Caixas', )),
       body: GetBuilder<BoxesController>(
         builder: (controller) {
           return Column(
@@ -180,46 +178,21 @@ class _BoxCard extends StatelessWidget {
     final transactionCount = summary?.transactionCount ?? 0;
     final lastMovement = summary?.lastMovementAt;
 
-    return AppCard(
+    return AppListCard(
+      title: box.name,
+      highlight: total,
+      details: [
+        '$transactionCount lançamentos',
+        lastMovement == null
+            ? 'Sem movimentações'
+            : 'Última movimentação: ${DateTimeFormatter.relative(lastMovement)}',
+      ],
       onTap: onTap,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(box.name, fontWeight: FontWeight.bold, fontSize: AppFontSizes.fz08),
-                const SizedBox(height: AppSpacing.xs),
-                AppText(total, fontWeight: FontWeight.w600, color: AppColors.accent),
-                const SizedBox(height: AppSpacing.xs),
-                AppText.subtitle('$transactionCount lançamentos'),
-                AppText.subtitle(
-                  lastMovement == null
-                      ? 'Sem movimentações'
-                      : 'Última movimentação: ${DateTimeFormatter.relative(lastMovement)}',
-                ),
-              ],
-            ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  onEdit();
-                case 'archive':
-                  onArchive();
-                case 'delete':
-                  onDelete();
-              }
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: 'edit', child: Text('Editar')),
-              PopupMenuItem(value: 'archive', child: Text(box.isArchived ? 'Desarquivar' : 'Arquivar')),
-              const PopupMenuItem(value: 'delete', child: Text('Excluir')),
-            ],
-          ),
-        ],
-      ),
+      actions: [
+        AppListCardAction('Editar', onEdit),
+        AppListCardAction(box.isArchived ? 'Desarquivar' : 'Arquivar', onArchive),
+        AppListCardAction('Excluir', onDelete, destructive: true),
+      ],
     );
   }
 }

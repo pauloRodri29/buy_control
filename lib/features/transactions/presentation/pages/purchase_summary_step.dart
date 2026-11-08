@@ -1,6 +1,5 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/errors/failure_presenter.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_money_field.dart';
@@ -97,7 +96,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
         children: [
           Row(
             children: [
-              Expanded(child: AppText.title('Resumo da compra', fontSize: AppFontSizes.fz09)),
+              Expanded(child: AppText.heading('Resumo da compra', )),
               AppButton.text(
                 label: 'Editar itens',
                 icon: LucideIcons.pencil,
@@ -120,10 +119,10 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
                             AppText(item.nameSnapshot, fontWeight: FontWeight.w600),
                             AppText.subtitle('${QuantityFormatter.format(item.quantity)} × ${item.unitPrice.formatted}'),
                             if (!item.discount.isZero)
-                              AppText(
+                              AppText.small(
                                 '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
-                                color: AppColors.accent,
-                                fontSize: AppFontSizes.fz06,
+                                color: context.colors.primary,
+                                
                               ),
                           ],
                         ),
@@ -158,19 +157,14 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const AppText('Total', fontWeight: FontWeight.bold),
-              AppText(
-                _draft.total.formatted,
-                fontWeight: FontWeight.bold,
-                color: AppColors.accent,
-                fontSize: AppFontSizes.fz09,
-              ),
+              AppText.heading(_draft.total.formatted, color: context.colors.primary),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           CarryOverSwitch(value: _draft.carryOver, onChanged: (v) => setState(() => _draft.carryOver = v)),
           if (_errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(_errorMessage!, color: AppColors.error),
+            AppText(_errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(

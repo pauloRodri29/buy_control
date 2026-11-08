@@ -1,7 +1,7 @@
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:buy_control/app/widgets/app_list_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -33,7 +33,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Categorias', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Categorias', )),
       body: GetBuilder<CategoriesController>(
         builder: (controller) {
           switch (controller.status) {
@@ -57,13 +57,13 @@ class CategoriesPage extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (_, i) {
                   final category = controller.categories[i];
-                  return ListTile(
-                    title: AppText(category.name, fontWeight: FontWeight.w600),
+                  return AppListCard(
+                    title: category.name,
                     onTap: () => _openForm(context, category: category),
-                    trailing: IconButton(
-                      icon: const Icon(LucideIcons.trash2, size: 18),
-                      onPressed: () => _delete(context, controller, category),
-                    ),
+                    actions: [
+                      AppListCardAction('Editar', () => _openForm(context, category: category)),
+                      AppListCardAction('Excluir', () => _delete(context, controller, category), destructive: true),
+                    ],
                   );
                 },
               );

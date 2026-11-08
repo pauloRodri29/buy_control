@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -16,7 +15,6 @@ class SpendingByBoxChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final entries = (items.where((e) => !e.total.isZero).toList()
           ..sort((a, b) => b.total.cents.compareTo(a.total.cents)))
         .take(_maxBars)
@@ -32,15 +30,15 @@ class SpendingByBoxChart extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
               child: Center(
-                child: AppText(
+                child: AppText.small(
                   'Sem dados no período.',
-                  fontSize: AppFontSizes.fz06,
-                  color: AppColors.textSecondary(isDark),
+                  
+                  color: context.colors.onSurfaceVariant,
                 ),
               ),
             )
           else
-            SizedBox(height: 220, child: _Chart(entries: entries, isDark: isDark)),
+            SizedBox(height: 220, child: _Chart(entries: entries)),
         ],
       ),
     );
@@ -49,9 +47,8 @@ class SpendingByBoxChart extends StatelessWidget {
 
 class _Chart extends StatelessWidget {
   final List<NamedSpend> entries;
-  final bool isDark;
 
-  const _Chart({required this.entries, required this.isDark});
+  const _Chart({required this.entries});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +65,7 @@ class _Chart extends StatelessWidget {
         gridData: FlGridData(
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
-          getDrawingHorizontalLine: (_) => FlLine(color: AppColors.border(isDark), strokeWidth: 1),
+          getDrawingHorizontalLine: (_) => FlLine(color: context.colors.outlineVariant, strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
@@ -88,10 +85,10 @@ class _Chart extends StatelessWidget {
                   padding: const EdgeInsets.only(top: AppSpacing.xs),
                   child: Transform.rotate(
                     angle: -0.5,
-                    child: AppText(
+                    child: AppText.caption(
                       label,
-                      fontSize: AppFontSizes.fz05,
-                      color: AppColors.textSecondary(isDark),
+                      
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -101,12 +98,12 @@ class _Chart extends StatelessWidget {
         ),
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (_) => AppColors.surfaceVariant(isDark),
+            getTooltipColor: (_) => context.colors.surfaceContainerHighest,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final entry = entries[group.x.toInt()];
               return BarTooltipItem(
                 '${entry.name}\n${entry.total.formatted}',
-                TextStyle(color: AppColors.textPrimary(isDark), fontSize: AppFontSizes.fz06, fontWeight: FontWeight.w600),
+                context.text.labelMedium!.copyWith(color: context.colors.onSurface, fontWeight: FontWeight.w600),
               );
             },
           ),
@@ -118,7 +115,7 @@ class _Chart extends StatelessWidget {
               barRods: [
                 BarChartRodData(
                   toY: entries[i].total.toDouble(),
-                  color: AppColors.accent,
+                  color: context.colors.primary,
                   width: 22,
                   borderRadius: BorderRadius.circular(4),
                 ),

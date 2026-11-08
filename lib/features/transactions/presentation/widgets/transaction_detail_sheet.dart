@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
@@ -40,7 +39,6 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final transaction = widget.transaction;
     final title = (transaction.title != null && transaction.title!.trim().isNotEmpty)
         ? transaction.title!
@@ -51,7 +49,7 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title(title, fontSize: AppFontSizes.fz09),
+          AppText.heading(title, ),
           const SizedBox(height: AppSpacing.xs),
           AppText.subtitle(DateTimeFormatter.ddMMyyyyHHmm(transaction.occurredAt)),
           if (transaction.description != null && transaction.description!.trim().isNotEmpty) ...[
@@ -60,7 +58,7 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
           ],
           if (transaction.notes != null && transaction.notes!.trim().isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(transaction.notes!, color: AppColors.textSecondary(isDark)),
+            AppText(transaction.notes!, color: context.colors.onSurfaceVariant),
           ],
           const SizedBox(height: AppSpacing.lg),
           ...transaction.items.map((item) {
@@ -107,7 +105,6 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -116,12 +113,12 @@ class _SummaryRow extends StatelessWidget {
           AppText(
             label,
             fontWeight: emphasize ? FontWeight.bold : FontWeight.normal,
-            color: emphasize ? null : AppColors.textSecondary(isDark),
+            color: emphasize ? null : context.colors.onSurfaceVariant,
           ),
           AppText(
             value,
             fontWeight: emphasize ? FontWeight.bold : FontWeight.w600,
-            color: emphasize ? AppColors.accent : null,
+            color: emphasize ? context.colors.primary : null,
           ),
         ],
       ),

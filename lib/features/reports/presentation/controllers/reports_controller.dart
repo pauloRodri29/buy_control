@@ -1,3 +1,4 @@
+import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
@@ -298,11 +299,10 @@ class ReportsController extends GetxController {
       appliedFilters: appliedFilters.isEmpty ? null : appliedFilters,
     );
     result.fold(
-      (path) => Get.snackbar('Exportação', path == null ? 'Ação concluída.' : 'Arquivo gerado: $path'),
-      (failure) => Get.snackbar(
-        failure is NotImplementedFailure ? 'Em breve' : 'Erro ao exportar',
-        FailurePresenter.present(failure),
-      ),
+      (path) => AppFeedback.success(path == null ? 'Ação concluída.' : 'Arquivo gerado: $path', title: 'Exportação'),
+      (failure) => failure is NotImplementedFailure
+          ? AppFeedback.info(FailurePresenter.present(failure), title: 'Em breve')
+          : AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao exportar'),
     );
   }
 }

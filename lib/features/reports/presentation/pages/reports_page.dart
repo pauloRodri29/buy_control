@@ -1,6 +1,5 @@
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
@@ -38,13 +37,13 @@ class ReportsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.title('Relatórios', fontSize: AppFontSizes.fz09),
+        title: const AppText.heading('Relatórios', ),
         actions: [
           GetBuilder<ReportsController>(
             builder: (controller) => IconButton(
               icon: Icon(
                 LucideIcons.gitCompare,
-                color: controller.compareMode ? AppColors.accent : null,
+                color: controller.compareMode ? context.colors.primary : null,
               ),
               tooltip: 'Comparar',
               onPressed: controller.toggleCompareMode,
@@ -126,23 +125,22 @@ class _ReportSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final r = report;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null) ...[
-          AppText.title(title!, fontSize: AppFontSizes.fz09),
+          AppText.heading(title!, ),
           const SizedBox(height: AppSpacing.xs),
         ],
         GestureDetector(
           onTap: onOpenFilters,
           child: Row(
             children: [
-              Icon(LucideIcons.calendar, size: 14, color: AppColors.textSecondary(isDark)),
+              Icon(LucideIcons.calendar, size: 14, color: context.colors.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
-              AppText(periodLabel, fontSize: AppFontSizes.fz06, color: AppColors.textSecondary(isDark)),
+              AppText.small(periodLabel,  color: context.colors.onSurfaceVariant),
             ],
           ),
         ),
@@ -158,21 +156,21 @@ class _ReportSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText.subtitle('Total consolidado', color: AppColors.textSecondary(isDark)),
+                AppText.subtitle('Total consolidado'),
                 const SizedBox(height: AppSpacing.xs),
-                AppText.title(r.total.formatted, fontSize: AppFontSizes.fz11),
+                AppText.title(r.total.formatted, ),
                 const SizedBox(height: AppSpacing.xs),
-                AppText(
+                AppText.small(
                   '${r.transactionCount} lançamentos · ${r.itemCount} itens',
-                  fontSize: AppFontSizes.fz06,
-                  color: AppColors.textSecondary(isDark),
+                  
+                  color: context.colors.onSurfaceVariant,
                 ),
                 if (r.planning != null && r.planning!.purchasedCount > 0) ...[
                   const SizedBox(height: AppSpacing.xs),
-                  AppText(
+                  AppText.small(
                     'Boxes ${r.boxesTotal.formatted} · Planejamento ${r.planning!.purchasedTotal.formatted}',
-                    fontSize: AppFontSizes.fz06,
-                    color: AppColors.textSecondary(isDark),
+                    
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ],
               ],
@@ -249,8 +247,7 @@ class _PlanningCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = AppColors.textSecondary(isDark);
+    final secondary = context.colors.onSurfaceVariant;
     final projected = realized + planning.forecastPending;
     final hasGoal = !planning.goalTotal.isZero;
     final overGoal = hasGoal && planning.plannedInBoards > planning.goalTotal;
@@ -260,10 +257,10 @@ class _PlanningCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           children: [
-            Expanded(child: AppText(label, fontSize: AppFontSizes.fz06, color: secondary)),
-            AppText(
+            Expanded(child: AppText.small(label,  color: secondary)),
+            AppText.small(
               value,
-              fontSize: AppFontSizes.fz06,
+              
               fontWeight: bold ? FontWeight.bold : FontWeight.w600,
               color: color,
             ),
@@ -297,7 +294,7 @@ class _PlanningCard extends StatelessWidget {
                       ? planning.plannedInBoards - planning.goalTotal
                       : planning.goalTotal - planning.plannedInBoards)
                   .formatted,
-              color: overGoal ? AppColors.error : AppColors.success,
+              color: overGoal ? context.colors.error : context.semantic.success,
             ),
           ],
           if (planning.purchasedByBoard.isNotEmpty) ...[
@@ -327,18 +324,16 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.subtitle(label, color: AppColors.textSecondary(isDark)),
+          AppText.subtitle(label),
           const SizedBox(height: AppSpacing.xs),
           AppText(value, fontWeight: FontWeight.w600, overflow: TextOverflow.ellipsis),
           if (hint != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            AppText(hint!, fontSize: AppFontSizes.fz05, color: AppColors.textSecondary(isDark)),
+            AppText.caption(hint!,  color: context.colors.onSurfaceVariant),
           ],
         ],
       ),

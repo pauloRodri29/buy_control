@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_date_picker.dart';
@@ -104,7 +103,7 @@ class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title(widget.board != null ? 'Editar quadro' : 'Novo quadro', fontSize: AppFontSizes.fz09),
+          AppText.heading(widget.board != null ? 'Editar quadro' : 'Novo quadro', ),
           const SizedBox(height: AppSpacing.lg),
           AppTextField(
             controller: titleController,
@@ -137,7 +136,7 @@ class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
           ),
           if (errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(errorMessage!, color: AppColors.error),
+            AppText(errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),

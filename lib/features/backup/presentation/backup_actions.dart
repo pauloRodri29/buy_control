@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/features/backup/domain/usecases/export_backup.dart';
@@ -14,7 +15,6 @@ import 'package:buy_control/features/transactions/data/datasources/local/transac
 import 'package:buy_control/features/units/data/datasources/local/unit_hive_data_source.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -68,12 +68,12 @@ Future<void> runExportBackup(BuildContext context) async {
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(json);
         await Share.shareXFiles([XFile(file.path)], text: 'Backup Buy Control');
-        Get.snackbar('Backup exportado', 'Arquivo gerado: ${file.path}');
+        AppFeedback.success('Arquivo gerado: ${file.path}', title: 'Backup exportado');
       } catch (_) {
-        Get.snackbar('Erro', 'Não foi possível salvar ou compartilhar o arquivo de backup.');
+        AppFeedback.error('Não foi possível salvar ou compartilhar o arquivo de backup.');
       }
     },
-    (failure) async => Get.snackbar('Erro ao exportar', FailurePresenter.present(failure)),
+    (failure) async => AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao exportar'),
   );
 }
 
@@ -103,13 +103,10 @@ Future<void> runImportBackup(BuildContext context) async {
       // dados antigos em memória) reflitam o backup restaurado. Navegar
       // entre as abas do shell principal já atualiza a maior parte na
       // prática, mas reiniciar é a garantia completa.
-      (_) => Get.snackbar(
-        'Backup importado',
-        'Dados restaurados com sucesso. Recomenda-se reiniciar o app para ver tudo atualizado.',
-      ),
-      (failure) => Get.snackbar('Erro ao importar', FailurePresenter.present(failure)),
+      (_) => AppFeedback.success('Dados restaurados com sucesso. Recomenda-se reiniciar o app para ver tudo atualizado.', title: 'Backup importado'),
+      (failure) => AppFeedback.error(FailurePresenter.present(failure), title: 'Erro ao importar'),
     );
   } catch (_) {
-    Get.snackbar('Erro', 'Não foi possível ler o arquivo selecionado.');
+    AppFeedback.error('Não foi possível ler o arquivo selecionado.');
   }
 }

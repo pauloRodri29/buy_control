@@ -1,5 +1,5 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/widgets/app_feedback.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -25,22 +25,19 @@ class ClearDataPage extends StatelessWidget {
     await clearAppData(scope);
 
     if (context.mounted) {
-      Get.snackbar('Dados apagados', 'A operação foi concluída.');
+      AppFeedback.success('A operação foi concluída.', title: 'Dados apagados');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Limpar dados', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Limpar dados', )),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           AppText.subtitle(
             'Cada opção abaixo apaga permanentemente uma parte dos seus dados. Não é possível desfazer.',
-            color: AppColors.textSecondary(isDark),
           ),
           const SizedBox(height: AppSpacing.lg),
           AppCard(
@@ -158,7 +155,7 @@ class _ClearTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? AppColors.error : null;
+    final color = destructive ? context.colors.error : null;
     return ListTile(
       leading: Icon(icon, color: color),
       title: AppText(label, fontWeight: FontWeight.w600, color: color),

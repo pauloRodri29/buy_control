@@ -1,3 +1,4 @@
+import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
@@ -113,7 +114,7 @@ class BoxesController extends GetxController {
     final result = await createBox(name: name);
     return result.fold((outcome) {
       if (outcome.hasDuplicateName) {
-        Get.snackbar('Nome duplicado', 'Já existe uma caixa chamada "${outcome.box.name}".');
+        AppFeedback.error('Já existe uma caixa chamada "${outcome.box.name}".', title: 'Nome duplicado');
       }
       load();
       return null;

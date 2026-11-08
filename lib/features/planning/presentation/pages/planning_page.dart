@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:buy_control/app/widgets/app_feedback.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -36,7 +36,7 @@ class PlanningPage extends StatelessWidget {
   PlanningController get _controller => Get.find<PlanningController>();
 
   void _showError(String? error) {
-    if (error != null) Get.snackbar('Não foi possível concluir', error);
+    if (error != null) AppFeedback.error(error, title: 'Não foi possível concluir');
   }
 
   void _openBoardForm(BuildContext context, {PlanBoardEntity? board}) {
@@ -101,7 +101,7 @@ class PlanningPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(_DeleteBoardChoice.deleteItems),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            style: TextButton.styleFrom(foregroundColor: context.colors.error),
             child: const Text('Excluir tudo'),
           ),
         ],
@@ -128,7 +128,6 @@ class PlanningPage extends StatelessWidget {
   }
 
   Future<void> _showMoveSheet(BuildContext context, PlanItemEntity item) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final destinations = <({String? id, String title, String? subtitle})>[
       (id: null, title: 'Sem quadro', subtitle: null),
       for (final b in _controller.activeBoards)
@@ -141,7 +140,7 @@ class PlanningPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title('Mover "${item.title}" para', fontSize: AppFontSizes.fz09, maxLines: 2),
+          AppText.heading('Mover "${item.title}" para',  maxLines: 2),
           const SizedBox(height: AppSpacing.md),
           Flexible(
             child: ListView(
@@ -155,8 +154,8 @@ class PlanningPage extends StatelessWidget {
                       title: AppText(d.title, fontWeight: FontWeight.w600),
                       subtitle: d.subtitle == null
                           ? null
-                          : AppText.subtitle(d.subtitle!, color: AppColors.textSecondary(isDark)),
-                      trailing: isCurrent ? const Icon(LucideIcons.circleCheck, color: AppColors.accent) : null,
+                          : AppText.subtitle(d.subtitle!),
+                      trailing: isCurrent ? Icon(LucideIcons.circleCheck, color: context.colors.primary) : null,
                       onTap: () async {
                         Navigator.of(tileContext).pop();
                         if (!isCurrent) _showError(await _controller.move(item, toBoardId: d.id));
@@ -175,7 +174,7 @@ class PlanningPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.title('Planejamento', fontSize: AppFontSizes.fz09),
+        title: const AppText.heading('Planejamento', ),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),

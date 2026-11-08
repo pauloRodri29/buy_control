@@ -1,11 +1,9 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/dashboard/domain/usecases/get_dashboard_charts.dart';
-import 'package:buy_control/features/dashboard/presentation/widgets/dashboard_chart_palette.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +17,6 @@ class SpendingByCategoryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final entries = _buildEntries(items);
     final total = entries.fold(Money.zero, (sum, e) => sum + e.total);
 
@@ -33,10 +30,10 @@ class SpendingByCategoryChart extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
               child: Center(
-                child: AppText(
+                child: AppText.small(
                   'Sem dados no período.',
-                  fontSize: AppFontSizes.fz06,
-                  color: AppColors.textSecondary(isDark),
+                  
+                  color: context.colors.onSurfaceVariant,
                 ),
               ),
             )
@@ -51,7 +48,7 @@ class SpendingByCategoryChart extends StatelessWidget {
                     for (var i = 0; i < entries.length; i++)
                       PieChartSectionData(
                         value: entries[i].total.toDouble(),
-                        color: _colorFor(entries[i], i, isDark),
+                        color: _colorFor(context, entries[i], i),
                         showTitle: false,
                         radius: 48,
                       ),
@@ -70,19 +67,19 @@ class SpendingByCategoryChart extends StatelessWidget {
                     Container(
                       width: 10,
                       height: 10,
-                      decoration: BoxDecoration(color: _colorFor(entry, i, isDark), shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: _colorFor(context, entry, i), shape: BoxShape.circle),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: AppText(entry.name, fontSize: AppFontSizes.fz06, overflow: TextOverflow.ellipsis),
+                      child: AppText.small(entry.name,  overflow: TextOverflow.ellipsis),
                     ),
-                    AppText(
+                    AppText.small(
                       '${percent.toStringAsFixed(1)}%',
-                      fontSize: AppFontSizes.fz06,
-                      color: AppColors.textSecondary(isDark),
+                      
+                      color: context.colors.onSurfaceVariant,
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    AppText(entry.total.formatted, fontSize: AppFontSizes.fz06, fontWeight: FontWeight.w600),
+                    AppText.small(entry.total.formatted,  fontWeight: FontWeight.w600),
                   ],
                 ),
               );
@@ -103,7 +100,7 @@ class SpendingByCategoryChart extends StatelessWidget {
     return [...visible, NamedSpend(id: _othersId, name: 'Outros', total: othersTotal)];
   }
 
-  Color _colorFor(NamedSpend entry, int index, bool isDark) {
-    return entry.id == _othersId ? DashboardChartPalette.other : DashboardChartPalette.slot(index, isDark);
+  Color _colorFor(BuildContext context, NamedSpend entry, int index) {
+    return entry.id == _othersId ? context.semantic.chartOther : context.semantic.chart(index);
   }
 }

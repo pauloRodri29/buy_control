@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -112,7 +111,6 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final product = _product;
     final referencePrice = product?.referencePrice;
 
@@ -121,7 +119,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title('Etiqueta de balança', fontSize: AppFontSizes.fz09),
+          AppText.heading('Etiqueta de balança', ),
           const SizedBox(height: AppSpacing.xs),
           AppText.subtitle('Código ${widget.code.digits}'),
           const SizedBox(height: AppSpacing.lg),
@@ -137,7 +135,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
           else ...[
             AppText(
               'Etiqueta ainda não vinculada a um produto. Vincule para o app reconhecer as próximas.',
-              color: AppColors.textSecondary(isDark),
+              color: context.colors.onSurfaceVariant,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton.secondary(
@@ -183,7 +181,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
           ],
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(_error!, color: AppColors.error),
+            AppText(_error!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(label: 'Adicionar', onPressed: _confirm),

@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -74,18 +73,16 @@ class _MultiSelectPickerSheetState extends State<MultiSelectPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           children: [
-            Expanded(child: AppText.title(widget.title, fontSize: AppFontSizes.fz09)),
+            Expanded(child: AppText.heading(widget.title, )),
             GestureDetector(
               onTap: () => setState(_selected.clear),
-              child: AppText('Limpar', fontSize: AppFontSizes.fz06, color: AppColors.accent),
+              child: AppText.small('Limpar',  color: context.colors.primary),
             ),
           ],
         ),
@@ -115,7 +112,7 @@ class _MultiSelectPickerSheetState extends State<MultiSelectPickerSheet> {
         const SizedBox(height: AppSpacing.sm),
         AppText(
           _selected.isEmpty ? 'Todos incluídos (sem filtro)' : '${_selected.length} selecionado(s)',
-          color: AppColors.textSecondary(isDark),
+          color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton(label: 'Aplicar', onPressed: () => Navigator.of(context).pop(_selected)),

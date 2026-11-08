@@ -1,9 +1,7 @@
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
-import 'package:buy_control/app/widgets/app_card.dart';
+import 'package:buy_control/app/widgets/app_list_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -39,7 +37,7 @@ class ProductsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Produtos', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Produtos', )),
       body: GetBuilder<ProductsController>(
         builder: (controller) {
           final showFilters = controller.status != ViewStatus.initial && controller.status != ViewStatus.loading;
@@ -109,9 +107,8 @@ class ProductsPage extends StatelessWidget {
   }
 }
 
-/// Card de produto no padrão das listas do app (mesmo layout de `_BoxCard`):
-/// nome em destaque, preço de referência em verde, metadados em subtítulo e
-/// ações no menu ⋮.
+/// Produto no [AppListCard]: preço de referência (com unidade) em destaque
+/// e categoria/tipo nos detalhes.
 class _ProductCard extends StatelessWidget {
   final ProductEntity product;
   final String categoryName;
@@ -131,60 +128,23 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final price = product.referencePrice;
     final brand = product.brand;
+    final hasUnit = unitAbbreviation.isNotEmpty && unitAbbreviation != '—';
 
-    return AppCard(
+    return AppListCard(
+      title: product.name,
+      subtitle: brand != null && brand.trim().isNotEmpty ? brand : null,
+      highlight: price == null ? null : (hasUnit ? '${price.formatted} / $unitAbbreviation' : price.formatted),
+      details: [
+        if (price == null) 'Sem preço de referência',
+        '$categoryName • $productTypeName',
+      ],
       onTap: onTap,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  product.name,
-                  fontWeight: FontWeight.bold,
-                  fontSize: AppFontSizes.fz08,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (brand != null && brand.trim().isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  AppText.subtitle(brand, color: AppColors.textSecondary(isDark)),
-                ],
-                const SizedBox(height: AppSpacing.xs),
-                price == null
-                    ? AppText('Sem preço de referência', color: AppColors.textSecondary(isDark))
-                    : AppText(
-                        unitAbbreviation.isEmpty || unitAbbreviation == '—'
-                            ? price.formatted
-                            : '${price.formatted} / $unitAbbreviation',
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accent,
-                      ),
-                const SizedBox(height: AppSpacing.xs),
-                AppText.subtitle('$categoryName • $productTypeName', color: AppColors.textSecondary(isDark)),
-              ],
-            ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  onTap();
-                case 'delete':
-                  onDelete();
-              }
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'edit', child: Text('Editar')),
-              PopupMenuItem(value: 'delete', child: Text('Excluir')),
-            ],
-          ),
-        ],
-      ),
+      actions: [
+        AppListCardAction('Editar', onTap),
+        AppListCardAction('Excluir', onDelete, destructive: true),
+      ],
     );
   }
 }

@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_dropdown.dart';
@@ -135,7 +134,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title(widget.product != null ? 'Editar produto' : 'Novo produto', fontSize: AppFontSizes.fz09),
+          AppText.heading(widget.product != null ? 'Editar produto' : 'Novo produto', ),
           const SizedBox(height: AppSpacing.lg),
           AppTextField(controller: nameController, label: 'Nome', hint: 'Arroz Tipo 1'),
           const SizedBox(height: AppSpacing.md),
@@ -193,7 +192,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
           ),
           if (errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(errorMessage!, color: AppColors.error),
+            AppText(errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),

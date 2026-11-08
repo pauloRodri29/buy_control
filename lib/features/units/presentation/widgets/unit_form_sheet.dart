@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -73,7 +72,7 @@ class _UnitFormSheetState extends State<UnitFormSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title(widget.unit != null ? 'Editar unidade' : 'Nova unidade', fontSize: AppFontSizes.fz09),
+        AppText.heading(widget.unit != null ? 'Editar unidade' : 'Nova unidade', ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(controller: nameController, label: 'Nome', hint: 'Quilo'),
         const SizedBox(height: AppSpacing.md),
@@ -87,7 +86,7 @@ class _UnitFormSheetState extends State<UnitFormSheet> {
         ),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          AppText(errorMessage!, color: AppColors.error),
+          AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
         AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),

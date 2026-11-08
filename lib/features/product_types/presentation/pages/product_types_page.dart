@@ -1,7 +1,7 @@
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:buy_control/app/widgets/app_list_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -33,7 +33,7 @@ class ProductTypesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Tipos de Produto', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Tipos de Produto', )),
       body: GetBuilder<ProductTypesController>(
         builder: (controller) {
           switch (controller.status) {
@@ -57,13 +57,13 @@ class ProductTypesPage extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (_, i) {
                   final type = controller.productTypes[i];
-                  return ListTile(
-                    title: AppText(type.name, fontWeight: FontWeight.w600),
+                  return AppListCard(
+                    title: type.name,
                     onTap: () => _openForm(context, type: type),
-                    trailing: IconButton(
-                      icon: const Icon(LucideIcons.trash2, size: 18),
-                      onPressed: () => _delete(context, controller, type),
-                    ),
+                    actions: [
+                      AppListCardAction('Editar', () => _openForm(context, type: type)),
+                      AppListCardAction('Excluir', () => _delete(context, controller, type), destructive: true),
+                    ],
                   );
                 },
               );

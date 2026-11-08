@@ -1,6 +1,6 @@
+import 'package:buy_control/app/widgets/app_feedback.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:buy_control/app/widgets/app_date_picker.dart';
@@ -65,7 +65,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
 
   Future<void> _changeQuantity(TransactionEntity transaction, TransactionItemEntity item, double delta) async {
     final error = await controller.changeItemQuantity(transaction, item.id, delta);
-    if (error != null) Get.snackbar('Erro', error);
+    if (error != null) AppFeedback.error(error);
   }
 
   Future<void> _delete(TransactionEntity transaction) async {
@@ -88,7 +88,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
 
   Future<void> _closeBox() async {
     if (controller.transactions.isEmpty) {
-      Get.snackbar('Nada para fechar', 'Esta Box não tem lançamentos abertos para fechar.');
+      AppFeedback.info('Esta Box não tem lançamentos abertos para fechar.', title: 'Nada para fechar');
       return;
     }
 
@@ -128,9 +128,9 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
 
     final error = await controller.closeBox(referenceDate: referenceDate);
     if (error != null) {
-      Get.snackbar('Erro', error);
+      AppFeedback.error(error);
     } else {
-      Get.snackbar('Box fechada', 'Compras de ${DateTimeFormatter.ddMMyyyy(referenceDate)} salvas no histórico.');
+      AppFeedback.success('Compras de ${DateTimeFormatter.ddMMyyyy(referenceDate)} salvas no histórico.', title: 'Box fechada');
     }
   }
 
@@ -138,7 +138,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: AppText.title(widget.box.name, fontSize: AppFontSizes.fz09),
+        title: AppText.heading(widget.box.name, ),
         actions: [
           IconButton(icon: const Icon(LucideIcons.history), onPressed: _openClosures),
           IconButton(icon: const Icon(LucideIcons.lock), onPressed: _closeBox),
@@ -234,7 +234,7 @@ class _SummaryHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const AppText.subtitle('Total'),
-                AppText(total, fontWeight: FontWeight.bold, fontSize: AppFontSizes.fz11, color: AppColors.accent),
+                AppText.title(total, color: context.colors.primary),
               ],
             ),
           ),
@@ -290,7 +290,7 @@ class _TransactionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              AppText(transaction.total.formatted, fontWeight: FontWeight.w600, color: AppColors.accent),
+              AppText(transaction.total.formatted, fontWeight: FontWeight.w600, color: context.colors.primary),
               IconButton(
                 tooltip: 'Excluir lançamento',
                 icon: const Icon(LucideIcons.trash2, size: 18),

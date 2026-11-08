@@ -1,5 +1,5 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/widgets/app_feedback.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -73,14 +73,13 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
     });
     if (error == null) {
       Navigator.of(context).pop();
-      Get.snackbar('Quadro fechado', 'As compras de "${widget.board.title}" já entram nos relatórios.');
+      AppFeedback.success('As compras de "${widget.board.title}" já entram nos relatórios.', title: 'Quadro fechado');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = AppColors.textSecondary(isDark);
+    final secondary = context.colors.onSurfaceVariant;
 
     final pending = controller.pendingItemsOf(widget.board.id);
     final pendingTotal = pending.fold(Money.zero, (sum, i) => sum + (i.estimatedValue ?? Money.zero));
@@ -94,8 +93,8 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
       if (progress.hasGoal) ('Meta', progress.goal!.formatted, null),
       if (progress.hasGoal)
         progress.isOverGoal
-            ? ('Acima da meta', (progress.planned - progress.goal!).formatted, AppColors.error)
-            : ('Abaixo da meta', progress.remaining!.formatted, AppColors.success),
+            ? ('Acima da meta', (progress.planned - progress.goal!).formatted, context.colors.error)
+            : ('Abaixo da meta', progress.remaining!.formatted, context.semantic.success),
     ];
 
     return SingleChildScrollView(
@@ -103,7 +102,7 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.title('Fechar "${widget.board.title}"?', fontSize: AppFontSizes.fz09, maxLines: 2),
+          AppText.heading('Fechar "${widget.board.title}"?',  maxLines: 2),
           const SizedBox(height: AppSpacing.sm),
           AppText(
             pending.isEmpty
@@ -116,7 +115,7 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant(isDark),
+              color: context.colors.surfaceContainerHighest,
               borderRadius: AppRadius.borderMd,
             ),
             child: Column(
@@ -126,8 +125,8 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Row(
                       children: [
-                        Expanded(child: AppText(label, fontSize: AppFontSizes.fz06, color: secondary)),
-                        AppText(value, fontSize: AppFontSizes.fz06, fontWeight: FontWeight.bold, color: color),
+                        Expanded(child: AppText.small(label,  color: secondary)),
+                        AppText.small(value,  fontWeight: FontWeight.bold, color: color),
                       ],
                     ),
                   ),
@@ -139,7 +138,7 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(LucideIcons.triangleAlert, size: 16, color: AppColors.warning),
+                Icon(LucideIcons.triangleAlert, size: 16, color: context.semantic.warning),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: AppText.subtitle(
@@ -163,7 +162,7 @@ class _ClosePlanBoardSheetState extends State<ClosePlanBoardSheet> {
           ],
           if (errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText(errorMessage!, color: AppColors.error),
+            AppText(errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
           Row(

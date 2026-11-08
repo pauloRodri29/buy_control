@@ -1,7 +1,7 @@
 import 'package:buy_control/app/state/view_status.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:buy_control/app/widgets/app_list_card.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/app/widgets/empty_state_view.dart';
@@ -35,7 +35,7 @@ class UnitsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.title('Unidades', fontSize: AppFontSizes.fz09)),
+      appBar: AppBar(title: const AppText.heading('Unidades', )),
       body: GetBuilder<UnitsController>(
         builder: (controller) {
           switch (controller.status) {
@@ -59,14 +59,15 @@ class UnitsPage extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (_, i) {
                   final unit = controller.units[i];
-                  return ListTile(
-                    title: AppText(unit.name, fontWeight: FontWeight.w600),
-                    subtitle: AppText.subtitle(unit.abbreviation),
+                  return AppListCard(
+                    title: unit.name,
+                    subtitle: unit.abbreviation,
+                    details: [if (unit.allowsDecimal) 'Aceita quantidade fracionada'],
                     onTap: () => _openForm(context, unit: unit),
-                    trailing: IconButton(
-                      icon: const Icon(LucideIcons.trash2, size: 18),
-                      onPressed: () => _delete(context, controller, unit),
-                    ),
+                    actions: [
+                      AppListCardAction('Editar', () => _openForm(context, unit: unit)),
+                      AppListCardAction('Excluir', () => _delete(context, controller, unit), destructive: true),
+                    ],
                   );
                 },
               );

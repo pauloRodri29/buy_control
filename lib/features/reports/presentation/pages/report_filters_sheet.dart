@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -45,8 +44,6 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return GetBuilder<ReportsController>(
       builder: (controller) {
         final f = controller.filterFor(_side);
@@ -58,10 +55,10 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
             children: [
               Row(
                 children: [
-                  Expanded(child: AppText.title('Filtros', fontSize: AppFontSizes.fz09)),
+                  Expanded(child: AppText.heading('Filtros', )),
                   GestureDetector(
                     onTap: () => controller.clearFilters(_side),
-                    child: AppText('Limpar', fontSize: AppFontSizes.fz06, color: AppColors.accent),
+                    child: AppText.small('Limpar',  color: context.colors.primary),
                   ),
                 ],
               ),
@@ -88,7 +85,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Período', color: AppColors.textSecondary(isDark)),
+              AppText.subtitle('Período'),
               const SizedBox(height: AppSpacing.sm),
               FilterChipsBar(
                 options: ReportPeriodPreset.values
@@ -105,12 +102,12 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: AppText(
+                    child: AppText.small(
                       f.periodPreset == ReportPeriodPreset.custom
                           ? 'Personalizado: ${f.periodLabel}'
                           : 'Ou escolha um período personalizado',
-                      fontSize: AppFontSizes.fz06,
-                      color: AppColors.textSecondary(isDark),
+                      
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
                   GestureDetector(
@@ -125,23 +122,23 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                       );
                       if (range != null) controller.setCustomRange(_side, range);
                     },
-                    child: AppText('Personalizado', fontSize: AppFontSizes.fz06, color: AppColors.accent),
+                    child: AppText.small('Personalizado',  color: context.colors.primary),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
-                  Expanded(child: AppText.subtitle('Boxes', color: AppColors.textSecondary(isDark))),
+                  Expanded(child: AppText.subtitle('Boxes')),
                   GestureDetector(
                     onTap: () => controller.selectAllBoxes(_side),
-                    child: AppText('Selecionar todas', fontSize: AppFontSizes.fz06, color: AppColors.accent),
+                    child: AppText.small('Selecionar todas',  color: context.colors.primary),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
               if (controller.boxes.isEmpty)
-                AppText('Nenhuma Box cadastrada.', color: AppColors.textSecondary(isDark))
+                AppText('Nenhuma Box cadastrada.', color: context.colors.onSurfaceVariant)
               else
                 Builder(
                   builder: (_) {
@@ -209,7 +206,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                 },
               ),
               const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Faixa de valor', color: AppColors.textSecondary(isDark)),
+              AppText.subtitle('Faixa de valor'),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
@@ -233,7 +230,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Salvar combinação frequente', color: AppColors.textSecondary(isDark)),
+              AppText.subtitle('Salvar combinação frequente'),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
@@ -282,20 +279,18 @@ class _FilterLinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AppCard(
       onTap: onTap,
       child: Row(
         children: [
           Expanded(child: AppText(label, fontWeight: FontWeight.w600)),
-          AppText(
+          AppText.small(
             count == 0 ? 'Todas' : '$count selecionada(s)',
-            fontSize: AppFontSizes.fz06,
-            color: AppColors.textSecondary(isDark),
+            
+            color: context.colors.onSurfaceVariant,
           ),
           const SizedBox(width: AppSpacing.sm),
-          Icon(LucideIcons.chevronRight, size: 18, color: AppColors.textSecondary(isDark)),
+          Icon(LucideIcons.chevronRight, size: 18, color: context.colors.onSurfaceVariant),
         ],
       ),
     );
@@ -311,10 +306,8 @@ class _PresetChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Material(
-      color: AppColors.surfaceVariant(isDark),
+      color: context.colors.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(AppRadius.full),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.full),
@@ -324,11 +317,11 @@ class _PresetChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppText(preset.name, fontSize: AppFontSizes.fz06),
+              AppText.small(preset.name, ),
               const SizedBox(width: AppSpacing.xs),
               GestureDetector(
                 onTap: onRemove,
-                child: Icon(LucideIcons.x, size: 14, color: AppColors.textSecondary(isDark)),
+                child: Icon(LucideIcons.x, size: 14, color: context.colors.onSurfaceVariant),
               ),
             ],
           ),

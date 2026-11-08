@@ -1,4 +1,3 @@
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -17,7 +16,7 @@ class AddItemsChoiceSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title('Adicionar itens', fontSize: AppFontSizes.fz09),
+        AppText.heading('Adicionar itens', ),
         const SizedBox(height: AppSpacing.lg),
         AppButton(
           label: 'Escanear produtos (câmera)',

@@ -1,5 +1,4 @@
-import 'package:buy_control/app/theme/app_colors.dart';
-import 'package:buy_control/app/theme/app_font_sizes.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -67,12 +66,10 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title('Selecionar produtos', fontSize: AppFontSizes.fz09),
+        AppText.heading('Selecionar produtos', ),
         const SizedBox(height: AppSpacing.md),
         SearchFieldDebounced(
           hint: 'Buscar produto',
@@ -113,7 +110,7 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
                     ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppText('${_selectedIds.length} produtos selecionados', color: AppColors.textSecondary(isDark)),
+        AppText('${_selectedIds.length} produtos selecionados', color: context.colors.onSurfaceVariant),
         const SizedBox(height: AppSpacing.sm),
         AppButton(label: 'Continuar', onPressed: _selectedIds.isEmpty ? null : _continue),
       ],

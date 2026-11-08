@@ -1,4 +1,3 @@
-import 'package:buy_control/app/theme/app_font_sizes.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -21,7 +20,7 @@ class UnknownBarcodeSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.title('Produto não encontrado', fontSize: AppFontSizes.fz09),
+        AppText.heading('Produto não encontrado', ),
         const SizedBox(height: AppSpacing.xs),
         AppText.subtitle('Código ${code.digits}'),
         const SizedBox(height: AppSpacing.lg),
