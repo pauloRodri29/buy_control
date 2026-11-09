@@ -18,8 +18,11 @@ lib/
     navigation/            # AuthGate, MainShell (bottom navigation)
     routes/                # GetPages
     state/                 # ViewStatus, FormStatus (enums de estado de tela)
-    theme/                 # design tokens (AppColors, AppSpacing, AppTypography...)
-    widgets/                # design system reutilizável (AppButton, AppTextField, AppMoneyField...)
+    errors/                # AppErrorHandler (handlers globais) e FailurePresenter
+    theme/                 # AppTheme (ColorScheme/TextTheme/temas de componentes), AppSemanticColors,
+                           # ThemeController, extensão context.colors/text/semantic, AppSpacing/AppRadius
+    widgets/               # componentes compartilhados sobre widgets nativos (AppButton, AppListCard,
+                           # AppFeedback, AppDatePicker, AppMoneyField...)
   core/                    # utilitários sem nenhuma dependência de feature
     database/              # HiveBoxRegistry, AppMetaStore, LegacyDataReader
     errors/                # AppFailure (sealed hierarchy)
@@ -58,6 +61,25 @@ Cada feature é uma vertical fechada. Features não importam a camada `data`/`pr
 
 Todo repositório e usecase que pode falhar retorna `Result<T>` (sealed: `Success<T>` ou `Failure<T>`), nunca lança exceção para quem chama. `AppFailure` é uma hierarquia sealed (`CacheFailure`, `ValidationFailure`, `NotFoundFailure`, `UnknownFailure`, `NotImplementedFailure`), permitindo que a UI trate cada caso (ex.: mostrar a mensagem de `ValidationFailure` num campo de formulário) sem `try/catch` espalhado.
 
+Na apresentação, as falhas chegam ao usuário por dois caminhos:
+- **Estado de tela ou de formulário:** `FailurePresenter.present(failure)` devolve a mensagem para um `ErrorStateView` ou um campo de formulário.
+- **Ações** (excluir, arquivar, exportar...): `FailurePresenter.show(failure)` ou `showIfFailure(result)` mostra um `SnackBar` pelo `AppFeedback`, com o título escolhido pelo tipo da falha.
+
+Os erros que escapam disso são tratados por `AppErrorHandler.install()`, chamado no `main()` com os ganchos nativos do Flutter:
+- `FlutterError.onError`: erros de build e de layout.
+- `PlatformDispatcher.instance.onError`: erros assíncronos não tratados. São registrados no log e geram um aviso genérico.
+- `ErrorWidget.builder`: só em release, mostra um aviso amigável nas cores do tema no lugar da área cinza.
+
+## Tema
+
+O app usa só o tema nativo do Material 3:
+- `AppTheme.build(Brightness)` monta o `ThemeData` claro e o escuro, com `ColorScheme` explícito, escala de `TextTheme` e o tema de cada componente (botões, cards, campos, chips, sheets, diálogos, snackbars...).
+- As cores que o `ColorScheme` não cobre (success, warning e a paleta dos gráficos) ficam numa `ThemeExtension`, a `AppSemanticColors`.
+- Telas e widgets leem tudo do tema, por `context.colors`, `context.text` e `context.semantic`. Não há cores fixas nem checagem de `isDark` nas telas.
+- O `ThemeController` guarda a escolha do usuário (automático, claro ou escuro) no `AppMetaStore` e alimenta o `themeMode` do `GetMaterialApp`.
+
+O GetX fica com injeção de dependência, estado (`GetBuilder`) e navegação. `SnackBar`, diálogos, bottom sheets e tema são nativos do Flutter. Os avisos usam o `ScaffoldMessenger` raiz (`appScaffoldMessengerKey`), por isso também podem ser chamados dos controllers.
+
 ## Money
 
 Todo valor monetário passa por `Money` (`lib/core/money/money.dart`), que guarda centavos como `int` — nunca `double` bruto em cálculo financeiro, evitando erros de arredondamento. `MoneyInputFormatter` + o widget `AppMoneyField` aplicam máscara de moeda em tempo real em todo formulário do app, eliminando a duplicação de parsing manual que existia antes.
@@ -79,7 +101,7 @@ Esse mesmo `closureId` é o que garante a regra "relatórios nunca refletem o es
 ## Backup/Import (JSON) vs. Exportação de Relatório (PDF)
 
 São dois recursos intencionalmente separados:
-- `lib/features/backup/`: dump/restauração de **todos** os dados do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos) em um único JSON, usado para backup manual e migração de aparelho.
+- `lib/features/backup/`: dump/restauração de **todos** os dados do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, Planejamento) em um único JSON, usado para backup manual e migração de aparelho.
 - `lib/features/reports/data/exporters/`: gera um **PDF de um relatório filtrado** (não é um backup de dados). Implementa a interface `ReportExporter`, hoje via `AppReportExporter` (pacote `pdf`+`printing`); CSV e JSON-a-partir-do-relatório ficam com stub (`NotImplementedFailure`), prontos para implementação futura sem mudar o contrato.
 
 ## Migração e bootstrap
@@ -88,8 +110,20 @@ São dois recursos intencionalmente separados:
 
 ## Navegação
 
-`AuthGate` (widget raiz, registrado como `initialRoute`) decide entre `LoginPage` e `MainShell` de acordo com `AuthController.status`. `MainShell` é uma Bottom Navigation com `IndexedStack` (preserva estado/scroll de cada aba); os bindings de cada aba são inicializados uma única vez ao montar o shell.
+`AuthGate` (widget raiz, registrado como `initialRoute`) decide entre `LoginPage` e `MainShell` de acordo com `AuthController.status`. `MainShell` é uma barra de navegação inferior com cinco abas: Início, Boxes, Produtos, Planejar e Mais. Ela usa um `IndexedStack`, que preserva o estado e a rolagem de cada aba, e os bindings das abas são registrados uma única vez, ao montar o shell. As telas secundárias (Relatórios, catálogos, Configurações) são abertas pelo menu Mais com `Get.to(..., binding: ...)`.
+
+## Planejamento
+
+`lib/features/planning/` tem duas entidades, guardadas em Hive boxes próprias (`plan_boards` e `plan_items`):
+- `PlanBoardEntity`: título, descrição, meta, data de previsão, arquivado e data de fechamento.
+- `PlanItemEntity`: quadro (opcional), título, valor estimado, posição, comprado e data da compra.
+
+A ordem dos itens numa coluna usa uma posição `double`. Mover um item calcula o ponto médio entre os vizinhos, e a coluna só é renumerada quando a diferença fica menor que `1e-6`. Fechar um quadro (`ClosePlanBoard`) marca todos os itens pendentes como comprados na data escolhida.
+
+`GetConsolidatedReport` recebe os repositórios do Planejamento como opcionais e monta um `PlanningReportSummary`: comprado no período por quadro, previsão pendente e comparação com as metas.
 
 ## Testes
 
-Testes de unidade cobrem usecases de domínio (`test/features/<feature>/...`), usando repositórios fake em memória (nunca Hive real), validando regras de negócio e os guards de imutabilidade dos Fechamentos.
+- **Unidade:** os casos de uso de domínio (`test/features/<feature>/...`), com repositórios fake em memória. Validam as regras de negócio, os guards de imutabilidade dos Fechamentos e as regras do Planejamento e do relatório.
+- **Widget:** o tema (`test/app/theme`), os componentes compartilhados nos dois temas, o calendário e o tratamento de erros.
+- **Fumaça das telas** (`test/app/screens_smoke_test.dart`): usa Hive real numa pasta temporária com dados de exemplo. Abre as cinco abas e as telas do menu Mais nos temas claro e escuro, num tamanho de celular, e falha com qualquer exceção de build ou de layout, como overflow.

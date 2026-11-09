@@ -1,28 +1,21 @@
 # Próximas melhorias
 
-Ideias fora do escopo atual, organizadas por área. Nenhuma delas exige mudança estrutural na arquitetura já existente — o app foi construído para crescer nessas direções sem retrabalho.
+Ideias estruturais e de longo prazo, organizadas por área. Nenhuma delas exige mudar a arquitetura atual, que foi pensada para crescer nessas direções sem retrabalho.
+
+> As funcionalidades avaliadas e priorizadas para as próximas versões (histórico de preços, previsão automática, metas por Box e categoria, lembretes, backup automático, NFC-e etc.) estão em [CANDIDATE_FEATURES.md](CANDIDATE_FEATURES.md).
 
 ## Sincronização e multiusuário
-- **Sincronização em nuvem**: `SyncableFields`/`SyncStatus` já existem em toda entidade persistida (`id`, `createdAt`, `updatedAt`, `deletedAt`, `syncStatus`, `version`) especificamente para isso — falta apenas o transporte (API/websocket) e a resolução de conflitos.
-- **Múltiplos usuários / compartilhamento de Box**: hoje uma Box pertence implicitamente ao único usuário do dispositivo; compartilhar uma Box exigiria um conceito de "membros da Box" e permissões.
-- **Autenticação real**: substituir `FakeAuthRepository` por uma `ApiAuthRepository` (JWT ou similar) implementando a mesma interface `AuthRepository` — nenhuma tela muda.
-- **Backup automático** (em vez de exportação manual): agendar `ExportBackup` periodicamente e enviar para um armazenamento remoto.
+- **Sincronização em nuvem:** toda entidade persistida já tem `SyncableFields`/`SyncStatus` (`id`, `createdAt`, `updatedAt`, `deletedAt`, `syncStatus`, `version`) justamente para isso. Faltam o transporte (API ou websocket) e a resolução de conflitos.
+- **Vários usuários e Box compartilhada:** hoje uma Box pertence implicitamente ao único usuário do aparelho. Compartilhar uma Box exigiria um conceito de "membros da Box" e permissões.
+- **Autenticação real:** trocar o `FakeAuthRepository` por um `ApiAuthRepository` (JWT ou similar) que implemente a mesma interface `AuthRepository`. Nenhuma tela muda.
 
-## Relatórios e dashboards
-- **Gráficos adicionais no módulo de Relatórios** (hoje só a tabela de evolução mensal existe ali; o Dashboard já tem gráficos via `fl_chart` — extrapolar para Relatórios é direto, dado que `ConsolidatedReport` já centraliza os dados).
-- **Exportação em CSV** e **backup-em-JSON a partir de um relatório filtrado**: contrato (`ReportExporter`) já preparado, faltam as implementações concretas (hoje retornam `NotImplementedFailure`).
-- **Metas de gastos** (por Box, categoria ou geral, com alerta ao se aproximar/ultrapassar).
-
-## Notificações
-- Lembrete para fechar uma Box com lançamentos antigos ainda abertos.
-- Alerta de meta de gastos.
-
-## Preferências
-- **Tema manual** (claro/escuro/automático): a linha já existe em Configurações → Preferências, hoje "Em breve" — falta persistir a escolha e plugar no `ThemeMode` do `GetMaterialApp`.
+## Relatórios
+- **Mais gráficos nos Relatórios:** o Dashboard já tem gráficos com `fl_chart`, e o `ConsolidatedReport` já reúne os dados. Levar os gráficos para os Relatórios é direto.
+- **Backup em JSON a partir de um relatório filtrado:** o contrato (`ReportExporter`) está pronto, mas a implementação ainda devolve `NotImplementedFailure`. O mesmo vale para o CSV, ver [CANDIDATE_FEATURES.md](CANDIDATE_FEATURES.md).
 
 ## Dados
-- **Importação de outros formatos** além do JSON próprio (ex.: CSV de outro app de controle financeiro) — decisão consciente de não implementar agora, por não ser um formato estruturado confiável para reconstruir relações entre entidades.
-- **Mesclar em vez de substituir** na importação de backup (hoje é sempre substituição total, por simplicidade e previsibilidade).
+- **Importar outros formatos** além do JSON próprio (por exemplo, o CSV de outro app de controle financeiro). Foi uma decisão consciente não implementar agora: esses formatos não são estruturados o bastante para reconstruir as relações entre as entidades.
+- **Mesclar em vez de substituir** na importação de backup. Hoje é sempre substituição total, por simplicidade e previsibilidade.
 
-## API / offline-first
-- Introduzir uma camada de repositório remoto (`ApiXRepository`) ao lado da local, com uma estratégia offline-first (grava local imediatamente, sincroniza quando há rede) — a separação `domain`/`data` já existente é o que torna essa transição possível sem tocar em `presentation`.
+## API e offline-first
+- Criar uma camada de repositório remoto (`ApiXRepository`) ao lado da local, com uma estratégia offline-first: grava no aparelho na hora e sincroniza quando houver rede. A separação entre `domain` e `data` é o que permite essa mudança sem tocar em `presentation`.

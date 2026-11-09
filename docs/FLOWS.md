@@ -68,10 +68,21 @@ Dashboard, Relatórios e totais por Box consideram **só lançamentos fechados**
 
 Independente da tela, `UpdateTransaction`/`DeleteTransaction` rejeitam qualquer tentativa de alterar um lançamento com `closureId != null` — a imutabilidade é garantida no domínio, não apenas escondida na UI.
 
+## Planejamento
+
+1. Na aba **Planejar**, o botão **+** no topo cria um quadro: título, descrição, data de previsão e meta opcional. Os quadros ficam ordenados pela data de previsão.
+2. O menu ⋮ do topo mostra ou esconde os quadros arquivados e os itens já comprados.
+3. Em cada coluna, "Adicionar item" pede título, descrição e valor estimado opcional. Itens sem quadro ficam em "Sem quadro".
+4. Para mover um item, segure e arraste até outra coluna ou posição. Perto da borda da tela, os quadros rolam sozinhos.
+5. Tocar no círculo de um item marca ele como comprado (data de hoje) ou desfaz a marcação.
+6. Menu ⋮ do quadro → **Fechar quadro**: um bottom sheet mostra o planejado, a meta e quantos itens estão sem valor, e pede a data da compra. Ao confirmar, todos os itens pendentes ficam comprados nessa data.
+7. Pelo mesmo menu, o quadro pode ser editado, reaberto, arquivado ou excluído. Ao excluir, o usuário escolhe se apaga os itens ou se eles vão para "Sem quadro".
+8. Os itens comprados aparecem nos Relatórios no mês da data da compra.
+
 ## Relatórios
 
-1. Relatórios (aba) → filtros no topo (período, Box(es), categoria, tipo, produto, faixa de valor).
-2. `GetConsolidatedReport` agrega **somente** lançamentos com `closureId != null` (pertencentes a algum Fechamento).
+1. Mais → Relatórios. Os filtros ficam no topo: período, Boxes, categoria, tipo, produto e faixa de valor.
+2. `GetConsolidatedReport` agrega **somente** lançamentos com `closureId != null` (que pertencem a algum Fechamento). Soma também os itens do Planejamento comprados no período, mas só quando não há filtro de Box, categoria, tipo ou produto.
 3. Indicadores calculados: total, médias, destaques (Box/categoria/produto), tabela de produtos, evolução mensal.
 4. Botão de comparação → ativa Lado A/Lado B, cada lado com seu próprio conjunto de filtros, indicadores exibidos lado a lado.
 5. Salvar uma combinação de filtros → nomeia e persiste (Hive) → reaparece em sessões futuras; pode ser removida em Configurações → Dados → Limpar dados → Relatórios salvos.
@@ -83,13 +94,13 @@ Independente da tela, `UpdateTransaction`/`DeleteTransaction` rejeitam qualquer 
 ## Exportação (Backup completo)
 
 1. Configurações → Dados → "Exportar dados".
-2. `ExportBackup` lê todos os repositórios/data sources (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos — incluindo excluídos logicamente) e serializa tudo em um único JSON com `version` + `exportedAt`.
+2. `ExportBackup` lê todos os repositórios/data sources (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, quadros e itens do Planejamento — incluindo excluídos logicamente) e serializa tudo em um único JSON com `version` + `exportedAt`.
 3. O arquivo é salvo no armazenamento do app com nome `buy_control_backup_<timestamp>.json` e a folha de compartilhamento nativa abre para o usuário salvar/enviar onde quiser.
 
 ## Importação
 
 1. Configurações → Dados → "Importar dados".
-2. Confirmação explícita: a importação **substitui** todos os dados atuais atuais e não pode ser desfeita.
+2. Confirmação explícita: a importação **substitui** todos os dados atuais e não pode ser desfeita.
 3. Usuário escolhe um arquivo `.json` (via seletor de arquivos nativo).
 4. `ImportBackup` valida o formato (rejeita arquivos sem a chave `version`), limpa cada coleção local e repopula a partir do conteúdo do arquivo.
 5. Recomenda-se reiniciar o app após importar, para garantir que todas as telas reflitam os novos dados.
@@ -97,10 +108,17 @@ Independente da tela, `UpdateTransaction`/`DeleteTransaction` rejeitam qualquer 
 ## Limpar dados
 
 1. Configurações → Dados → "Limpar dados".
-2. Seis opções, cada uma com sua própria confirmação (mensagem explica exatamente o que será apagado e o que permanece):
+2. Sete opções, cada uma com sua própria confirmação (mensagem explica exatamente o que será apagado e o que permanece):
    - **Boxes**: remove Boxes + seus lançamentos + Fechamentos.
    - **Produtos**: remove só o catálogo de produtos.
    - **Histórico de compras**: remove lançamentos + Fechamentos, mantém Boxes e catálogo.
+   - **Planejamento**: remove todos os quadros e itens.
    - **Relatórios salvos**: remove combinações de filtro salvas.
-   - **Preferências**: hoje sem efeito (nada persistido ainda nessa categoria).
+   - **Preferências**: volta o tema para o automático.
    - **Restaurar tudo**: executa todas as limpezas acima, recria os catálogos padrão (`SeedDefaults`) e encerra a sessão (volta para o login).
+
+## Tema
+
+1. Configurações → Preferências → Tema.
+2. Um bottom sheet mostra Automático (segue o sistema), Claro e Escuro, com a opção atual marcada.
+3. A escolha é aplicada na hora (`ThemeController.setMode`) e salva no `AppMetaStore`. Na próxima abertura, o app já começa no tema escolhido.
