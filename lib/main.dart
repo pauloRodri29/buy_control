@@ -7,6 +7,7 @@ import 'package:buy_control/app/theme/theme_controller.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/core/database/app_meta_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -31,6 +32,12 @@ class BuyControlApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         scaffoldMessengerKey: appScaffoldMessengerKey,
         title: 'BuyControl',
+        // Textos nativos do Material (diálogos, seletores de data/hora,
+        // tooltips como "Voltar", menus etc.) em português.
+        locale: const Locale('pt', 'BR'),
+        fallbackLocale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         initialBinding: InitialBinding(),
         initialRoute: Routes.INITIAL,
         getPages: Pages.pages,

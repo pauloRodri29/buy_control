@@ -1,5 +1,6 @@
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
+import 'package:buy_control/features/settings/presentation/pages/licenses_page.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -38,7 +39,7 @@ class _AboutPageState extends State<AboutPage> {
     (
       LucideIcons.chartBar,
       'Relatórios',
-      'Compare períodos, acompanhe gasto realizado e previsto e exporte em PDF ou CSV.',
+      'Compare períodos, acompanhe gasto realizado e previsto e exporte em PDF.',
     ),
     (LucideIcons.shoppingBasket, 'Catálogo', 'Produtos, categorias, tipos e unidades reutilizáveis.'),
   ];
@@ -124,10 +125,13 @@ class _AboutPageState extends State<AboutPage> {
                     leading: const Icon(LucideIcons.scrollText),
                     title: const Text('Licenças de código aberto'),
                     trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                    onTap: () => showLicensePage(
-                      context: context,
-                      applicationName: AboutPage.appName,
-                      applicationVersion: version,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => LicensesPage(
+                          applicationName: AboutPage.appName,
+                          applicationVersion: version,
+                        ),
+                      ),
                     ),
                   ),
                 ],
