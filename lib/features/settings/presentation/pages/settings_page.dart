@@ -7,6 +7,7 @@ import 'package:buy_control/features/auth/presentation/controllers/auth_controll
 import 'package:buy_control/features/auth/presentation/pages/profile_page.dart';
 import 'package:buy_control/features/backup/presentation/backup_actions.dart';
 import 'package:buy_control/features/settings/presentation/bindings/settings_binding.dart';
+import 'package:buy_control/features/settings/presentation/pages/about_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
 import 'package:buy_control/features/settings/presentation/widgets/theme_mode_sheet.dart';
 import 'package:flutter/material.dart';
@@ -105,22 +106,15 @@ class _SettingsPageState extends State<SettingsPage> {
           _Section(
             title: 'Sobre',
             children: [
-              _Tile(
-                icon: LucideIcons.info,
-                title: 'Versão',
-                trailing: FutureBuilder<PackageInfo>(
-                  future: _packageInfoFuture,
-                  builder: (context, snapshot) {
-                    final info = snapshot.data;
-                    return Text(info == null ? '...' : '${info.version}+${info.buildNumber}');
-                  },
+              FutureBuilder<PackageInfo>(
+                future: _packageInfoFuture,
+                builder: (context, snapshot) => _Tile(
+                  icon: LucideIcons.info,
+                  title: 'Sobre o sistema',
+                  subtitle: snapshot.data == null ? null : 'Versão ${snapshot.data!.version}',
+                  trailing: chevron,
+                  onTap: () => Get.to(() => const AboutPage()),
                 ),
-              ),
-              _Tile(
-                icon: LucideIcons.scrollText,
-                title: 'Licenças',
-                trailing: chevron,
-                onTap: () => showLicensePage(context: context, applicationName: 'Buy Control'),
               ),
             ],
           ),

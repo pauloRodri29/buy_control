@@ -26,6 +26,7 @@ import 'package:buy_control/features/products/domain/repositories/product_reposi
 import 'package:buy_control/features/reports/presentation/bindings/reports_binding.dart';
 import 'package:buy_control/features/reports/presentation/pages/reports_page.dart';
 import 'package:buy_control/features/settings/presentation/bindings/settings_binding.dart';
+import 'package:buy_control/features/settings/presentation/pages/about_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/settings_page.dart';
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
@@ -119,6 +120,7 @@ void main() {
         'Unidades': (() => const UnitsPage(), UnitsBinding()),
         'Configurações': (() => const SettingsPage(), SettingsBinding()),
         'Limpar dados': (() => const ClearDataPage(), SettingsBinding()),
+        'Sobre o sistema': (() => const AboutPage(), null),
       };
       for (final MapEntry(key: name, value: (page, binding)) in pages.entries) {
         Get.to(page, binding: binding);
