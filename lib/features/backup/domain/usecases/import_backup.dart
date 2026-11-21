@@ -54,7 +54,7 @@ class ImportBackup {
     try {
       final decoded = jsonDecode(jsonString);
       if (decoded is! Map<String, dynamic>) {
-        return const Failure(ValidationFailure('Arquivo inválido: não é um backup do Buy Control.'));
+        return const Failure(ValidationFailure('Arquivo inválido: não é um backup do GastoLog.'));
       }
       data = decoded;
     } catch (_) {
@@ -62,7 +62,7 @@ class ImportBackup {
     }
 
     if (!data.containsKey('version')) {
-      return const Failure(ValidationFailure('Arquivo inválido: não é um backup do Buy Control.'));
+      return const Failure(ValidationFailure('Arquivo inválido: não é um backup do GastoLog.'));
     }
 
     try {

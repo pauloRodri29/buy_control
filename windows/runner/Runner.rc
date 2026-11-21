@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "buy_control" "\0"
+            VALUE "CompanyName", "GastoLog" "\0"
+            VALUE "FileDescription", "GastoLog" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "buy_control" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "buy_control.exe" "\0"
-            VALUE "ProductName", "buy_control" "\0"
+            VALUE "InternalName", "gastolog" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 GastoLog. All rights reserved." "\0"
+            VALUE "OriginalFilename", "gastolog.exe" "\0"
+            VALUE "ProductName", "GastoLog" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

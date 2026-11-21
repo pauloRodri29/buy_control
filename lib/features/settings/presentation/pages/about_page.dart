@@ -1,3 +1,5 @@
+import 'package:buy_control/app/brand/app_brand.dart';
+import 'package:buy_control/app/brand/app_logo.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/features/settings/presentation/pages/licenses_page.dart';
@@ -10,7 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
 
-  static const appName = 'Buy Control';
+  static const appName = AppBrand.name;
 
   @override
   State<AboutPage> createState() => _AboutPageState();
@@ -62,20 +64,12 @@ class _AboutPageState extends State<AboutPage> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               const SizedBox(height: AppSpacing.md),
-              Center(
-                child: CircleAvatar(
-                  radius: 36,
-                  backgroundColor: colors.primaryContainer,
-                  child: Icon(Symbols.shopping_cart, size: 36, color: colors.onPrimaryContainer),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(AboutPage.appName, textAlign: TextAlign.center, style: text.headlineSmall),
+              const Center(child: AppLogo()),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Planejamento e previsão de gastos',
+                AppBrand.description,
                 textAlign: TextAlign.center,
-                style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+                style: text.bodySmall,
               ),
               const SizedBox(height: AppSpacing.sm),
               Center(child: Chip(label: Text('Versão $version'))),

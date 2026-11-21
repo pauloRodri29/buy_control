@@ -1,3 +1,4 @@
+import 'package:buy_control/app/brand/app_brand.dart';
 import 'package:buy_control/app/theme/app_icon_style.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_semantic_colors.dart';
@@ -18,21 +19,23 @@ class AppTheme {
   static final ThemeData lightTheme = build(Brightness.light);
   static final ThemeData darkTheme = build(Brightness.dark);
 
-  // Paleta da marca. Só este arquivo conhece valores de cor.
-  static const _green = Color(0xFF4CAF50);
-
+  // Paleta do tema, derivada das cores da marca (`AppBrand`): verde-
+  // petróleo como principal e âmbar como destaque (tertiary). Fora daqui
+  // e de `AppBrand`, nenhum arquivo conhece valores de cor.
   static const lightScheme = ColorScheme(
     brightness: Brightness.light,
-    primary: _green,
+    primary: AppBrand.teal,
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFDCEFDD),
-    onPrimaryContainer: Color(0xFF1B5E20),
+    primaryContainer: Color(0xFFCCFBF1),
+    onPrimaryContainer: Color(0xFF134E4A),
     secondary: Color(0xFF1C1C1C),
     onSecondary: Color(0xFFFFFFFF),
     secondaryContainer: Color(0xFFE0E0E0),
     onSecondaryContainer: Color(0xFF1C1C1E),
-    tertiary: Color(0xFF2E7D32),
+    tertiary: Color(0xFFB45309),
     onTertiary: Color(0xFFFFFFFF),
+    tertiaryContainer: Color(0xFFFEF3C7),
+    onTertiaryContainer: Color(0xFF78350F),
     error: Color(0xFFE5484D),
     onError: Color(0xFFFFFFFF),
     errorContainer: Color(0xFFFCE9E9),
@@ -53,22 +56,24 @@ class AppTheme {
     scrim: Color(0xFF000000),
     inverseSurface: Color(0xFF1C1C1E),
     onInverseSurface: Color(0xFFEDEDED),
-    inversePrimary: Color(0xFF81C784),
+    inversePrimary: Color(0xFF5EEAD4),
     surfaceTint: Colors.transparent,
   );
 
   static const darkScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: _green,
-    onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFF1E3A20),
-    onPrimaryContainer: Color(0xFFB9E4BB),
+    primary: AppBrand.tealLight,
+    onPrimary: Color(0xFF042F2E),
+    primaryContainer: Color(0xFF134E4A),
+    onPrimaryContainer: Color(0xFF99F6E4),
     secondary: Color(0xFF2C2C2C),
     onSecondary: Color(0xFFFFFFFF),
     secondaryContainer: Color(0xFF333333),
     onSecondaryContainer: Color(0xFFEDEDED),
-    tertiary: Color(0xFF81C784),
-    onTertiary: Color(0xFF0D2E10),
+    tertiary: Color(0xFFFBBF24),
+    onTertiary: Color(0xFF2D1B00),
+    tertiaryContainer: Color(0xFF451A03),
+    onTertiaryContainer: Color(0xFFFDE68A),
     error: Color(0xFFE5484D),
     onError: Color(0xFFFFFFFF),
     errorContainer: Color(0xFF3A1F20),
@@ -89,7 +94,7 @@ class AppTheme {
     scrim: Color(0xFF000000),
     inverseSurface: Color(0xFFEDEDED),
     onInverseSurface: Color(0xFF1C1C1E),
-    inversePrimary: Color(0xFF2E7D32),
+    inversePrimary: AppBrand.teal,
     surfaceTint: Colors.transparent,
   );
 
@@ -138,6 +143,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: AppBrand.fontFamily,
       brightness: brightness,
       colorScheme: scheme,
       textTheme: text,

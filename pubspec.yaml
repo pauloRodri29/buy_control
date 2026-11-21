@@ -1,5 +1,5 @@
 name: buy_control
-description: "A new Flutter project."
+description: "GastoLog: planejamento e previsão de gastos."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -62,6 +62,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -104,3 +106,62 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - assets/fonts/plus_jakarta_sans/OFL.txt
+    - assets/fonts/jetbrains_mono/OFL.txt
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Regular.ttf
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/plus_jakarta_sans/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/jetbrains_mono/JetBrainsMono-Regular.ttf
+        - asset: assets/fonts/jetbrains_mono/JetBrainsMono-Bold.ttf
+          weight: 700
+
+# Ícone do app. Os PNGs em assets/brand são gerados por
+# `flutter test tool/brand/render_brand_assets_test.dart`; depois rode
+# `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  image_path: assets/brand/icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#0B1F1E"
+  adaptive_icon_foreground: assets/brand/icon_foreground.png
+  adaptive_icon_monochrome: assets/brand/icon_monochrome.png
+  web:
+    generate: true
+    image_path: assets/brand/icon.png
+    background_color: "#0B1F1E"
+    theme_color: "#0F766E"
+  windows:
+    generate: true
+    image_path: assets/brand/icon.png
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/brand/icon.png
+
+# Splash nativa (antes do Flutter carregar): fundo de terminal com o
+# símbolo. Em seguida entra a SplashPage com a animação de digitação.
+# Depois de mudar, rode `dart run flutter_native_splash:create`.
+flutter_native_splash:
+  color: "#0B1F1E"
+  image: assets/brand/splash_mark.png
+  android_12:
+    color: "#0B1F1E"
+    image: assets/brand/splash_mark_android12.png
+    icon_background_color: "#0B1F1E"
+  web: false

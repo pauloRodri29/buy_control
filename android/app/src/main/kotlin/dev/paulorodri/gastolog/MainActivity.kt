@@ -1,4 +1,4 @@
-package com.example.buy_control
+package dev.paulorodri.gastolog
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,3 +1,4 @@
+import 'package:buy_control/app/brand/app_logo.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
@@ -23,7 +24,17 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Buy Control', )),
+      appBar: AppBar(
+        titleSpacing: AppSpacing.lg,
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppLogoMark(size: 30),
+            SizedBox(width: AppSpacing.sm),
+            AppWordmark(fontSize: 20),
+          ],
+        ),
+      ),
       body: GetBuilder<DashboardController>(
         builder: (controller) {
           switch (controller.status) {

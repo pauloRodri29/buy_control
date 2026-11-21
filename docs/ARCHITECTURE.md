@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-Buy Control é um app Flutter offline-first, construído em Clean Architecture com três camadas por feature (`domain` → `data` → `presentation`), GetX como camada de apresentação/DI e Hive como persistência local. A arquitetura foi desenhada para que a troca de Hive por uma API remota no futuro não exija tocar em nenhuma tela — apenas em implementações de repositório.
+GastoLog é um app Flutter offline-first, construído em Clean Architecture com três camadas por feature (`domain` → `data` → `presentation`), GetX como camada de apresentação/DI e Hive como persistência local. A arquitetura foi desenhada para que a troca de Hive por uma API remota no futuro não exija tocar em nenhuma tela — apenas em implementações de repositório.
 
 ```
 UI (GetX Controller/Page) → UseCase → Repository (interface) → DataSource (Hive hoje / API amanhã)

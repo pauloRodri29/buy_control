@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:buy_control/app/brand/app_brand.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
@@ -64,10 +65,10 @@ Future<void> runExportBackup(BuildContext context) async {
     (json) async {
       try {
         final dir = await getApplicationDocumentsDirectory();
-        final fileName = 'buy_control_backup_${_timestampForFileName(DateTime.now())}.json';
+        final fileName = 'gastolog_backup_${_timestampForFileName(DateTime.now())}.json';
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(json);
-        await Share.shareXFiles([XFile(file.path)], text: 'Backup Buy Control');
+        await Share.shareXFiles([XFile(file.path)], text: 'Backup ${AppBrand.name}');
         AppFeedback.success('Arquivo gerado: ${file.path}', title: 'Backup exportado');
       } catch (_) {
         AppFeedback.error('Não foi possível salvar ou compartilhar o arquivo de backup.');

@@ -1,6 +1,6 @@
 # Melhorias candidatas
 
-Avaliação das próximas funcionalidades do Buy Control, feita a partir do código atual. O app é uma ferramenta de **planejamento e previsão de gastos**. Por isso, as propostas foram priorizadas pelo quanto ajudam o usuário a prever e controlar o que vai gastar, e pelo quanto do código já existente elas reaproveitam.
+Avaliação das próximas funcionalidades do GastoLog, feita a partir do código atual. O app é uma ferramenta de **planejamento e previsão de gastos**. Por isso, as propostas foram priorizadas pelo quanto ajudam o usuário a prever e controlar o que vai gastar, e pelo quanto do código já existente elas reaproveitam.
 
 Nenhuma delas exige mudar a arquitetura. Cada uma cabe na estrutura atual: uma feature com `domain` → `data` → `presentation`, `Result`/`AppFailure`, `Money` e GetX.
 

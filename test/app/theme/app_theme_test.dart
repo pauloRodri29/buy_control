@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:buy_control/app/brand/app_brand.dart';
 import 'package:buy_control/app/theme/app_semantic_colors.dart';
 import 'package:buy_control/app/theme/app_theme.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
@@ -17,7 +18,9 @@ void main() {
       test('tema ${brightness.name} usa o ColorScheme e as cores semânticas do app', () {
         final theme = AppTheme.build(brightness);
         expect(theme.brightness, brightness);
-        expect(theme.colorScheme.primary, const Color(0xFF4CAF50));
+        // Verde-petróleo da marca (versão clara no tema escuro).
+        expect(theme.colorScheme.primary, brightness == Brightness.dark ? AppBrand.tealLight : AppBrand.teal);
+        expect(theme.textTheme.bodyMedium?.fontFamily, AppBrand.fontFamily);
         expect(theme.extension<AppSemanticColors>(), isNotNull);
         // Nenhum componente cai na paleta padrão (lilás) do Material 3.
         expect(theme.colorScheme, brightness == Brightness.dark ? AppTheme.darkScheme : AppTheme.lightScheme);

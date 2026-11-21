@@ -110,3 +110,9 @@ O menu **Mais** é o ponto de entrada das telas secundárias. No topo há o card
 Todo o visual vem do tema nativo do Material 3 (`ColorScheme`, `TextTheme` e os temas de cada componente), em versões clara e escura. Os avisos usam o `SnackBar` nativo, e as confirmações usam `AlertDialog` e bottom sheets nativos.
 
 As melhorias candidatas para as próximas versões estão em [CANDIDATE_FEATURES.md](CANDIDATE_FEATURES.md).
+
+## Abertura e identidade
+
+Ao abrir o app, a splash nativa mostra o símbolo sobre o fundo de terminal enquanto o Flutter carrega. Em seguida, a `SplashPage` digita `> GastoLog` com o cursor âmbar piscando e, abaixo, a frase "Cada gasto, registrado.", e então segue para o login ou para o app. Um toque pula a animação. Com "remover animações" ligado no aparelho, o texto aparece inteiro de uma vez.
+
+Nome, frase de apoio, fontes e cores da marca ficam em `AppBrand`. O logo (`AppLogo`, `AppLogoMark`, `AppWordmark`) aparece no login, no Dashboard e em "Sobre o sistema".
