@@ -11,7 +11,7 @@ import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
 import 'package:buy_control/features/transactions/presentation/pages/product_picker_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// O número embutido na etiqueta de balança é o preço total ou o peso.
 enum ScaleValueMode { price, weight }
@@ -126,7 +126,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
           if (product != null)
             Row(
               children: [
-                const Icon(LucideIcons.packageCheck, size: 18),
+                const Icon(Symbols.fact_check, size: 18),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(child: AppText(product.name, fontWeight: FontWeight.w600)),
                 AppButton.text(label: 'Trocar', onPressed: _pickProduct),
@@ -140,7 +140,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
             const SizedBox(height: AppSpacing.sm),
             AppButton.secondary(
               label: 'Vincular a produto cadastrado',
-              icon: LucideIcons.link,
+              icon: Symbols.link,
               onPressed: _pickProduct,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -151,8 +151,8 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
           const SizedBox(height: AppSpacing.xs),
           SegmentedButton<ScaleValueMode>(
             segments: const [
-              ButtonSegment(value: ScaleValueMode.price, label: Text('Preço'), icon: Icon(LucideIcons.dollarSign)),
-              ButtonSegment(value: ScaleValueMode.weight, label: Text('Peso'), icon: Icon(LucideIcons.weight)),
+              ButtonSegment(value: ScaleValueMode.price, label: Text('Preço'), icon: Icon(Symbols.attach_money)),
+              ButtonSegment(value: ScaleValueMode.weight, label: Text('Peso'), icon: Icon(Symbols.scale)),
             ],
             selected: {_mode},
             onSelectionChanged: (selection) => setState(() => _mode = selection.first),

@@ -1,3 +1,4 @@
+import 'package:buy_control/app/theme/app_icon_style.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_semantic_colors.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
@@ -144,6 +145,8 @@ class AppTheme {
       canvasColor: scheme.surface,
       dividerColor: scheme.outlineVariant,
       splashFactory: InkRipple.splashFactory,
+      iconTheme: AppIconStyle.theme(color: scheme.onSurface),
+      primaryIconTheme: AppIconStyle.theme(color: scheme.onPrimary),
       extensions: [semantic],
 
       appBarTheme: AppBarTheme(
@@ -154,7 +157,8 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: text.titleLarge,
-        iconTheme: IconThemeData(color: scheme.onSurface),
+        iconTheme: AppIconStyle.theme(color: scheme.onSurface),
+        actionsIconTheme: AppIconStyle.theme(color: scheme.onSurface),
       ),
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -163,6 +167,8 @@ class AppTheme {
         elevation: 0,
         selectedItemColor: scheme.primary,
         unselectedItemColor: scheme.onSurfaceVariant,
+        selectedIconTheme: AppIconStyle.theme(color: scheme.primary),
+        unselectedIconTheme: AppIconStyle.theme(color: scheme.onSurfaceVariant),
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
       ),

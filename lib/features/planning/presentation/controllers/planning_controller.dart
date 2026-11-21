@@ -10,47 +10,69 @@ import 'package:buy_control/features/planning/domain/usecases/plan_item_position
 import 'package:buy_control/features/planning/domain/usecases/plan_item_usecases.dart';
 import 'package:get/get.dart';
 
+/// Estado do Planejamento: quadros abertos (kanban), Pendências e
+/// Histórico (quadros finalizados ou cancelados).
 class PlanningController extends GetxController {
   final GetPlanBoards getBoards;
   final CreatePlanBoard createBoard;
+  final CreatePlanBoardFromTemplate createBoardFromTemplate;
   final UpdatePlanBoard updateBoard;
   final DeletePlanBoard deleteBoard;
-  final ClosePlanBoard closeBoard;
-  final ReopenPlanBoard reopenBoard;
+  final FinishPlanBoard finishBoard;
   final GetPlanItems getItems;
   final CreatePlanItem createItem;
   final UpdatePlanItem updateItem;
   final DeletePlanItem deleteItem;
   final TogglePlanItemPurchased togglePurchased;
   final MovePlanItem moveItem;
+  final SendPendingItemToBoard sendPendingToBoard;
 
   PlanningController({
     required this.getBoards,
     required this.createBoard,
+    required this.createBoardFromTemplate,
     required this.updateBoard,
     required this.deleteBoard,
-    required this.closeBoard,
-    required this.reopenBoard,
+    required this.finishBoard,
     required this.getItems,
     required this.createItem,
     required this.updateItem,
     required this.deleteItem,
     required this.togglePurchased,
     required this.moveItem,
+    required this.sendPendingToBoard,
   });
 
   ViewStatus status = ViewStatus.initial;
   String? errorMessage;
 
-  /// Quadros visíveis, já ordenados pela data de previsão.
-  List<PlanBoardEntity> boards = [];
+  List<PlanBoardEntity> _allBoards = [];
   List<PlanItemEntity> _items = [];
 
   bool showArchived = false;
   bool hidePurchased = false;
 
-  /// Quadros disponíveis como destino ao mover/criar itens (sem arquivados).
-  List<PlanBoardEntity> get activeBoards => boards.where((b) => !b.isArchived).toList();
+  /// Quadros abertos exibidos no kanban, ordenados pela data de previsão.
+  List<PlanBoardEntity> get boards =>
+      _allBoards.where((b) => b.isOpen && (showArchived || !b.isArchived)).toList();
+
+  /// Quadros disponíveis como destino ao mover/criar itens: abertos e não
+  /// arquivados.
+  List<PlanBoardEntity> get activeBoards => _allBoards.where((b) => b.isOpen && !b.isArchived).toList();
+
+  /// Destinos para os itens não comprados de [board] ao finalizá-lo.
+  List<PlanBoardEntity> destinationsFor(PlanBoardEntity board) =>
+      activeBoards.where((b) => b.id != board.id).toList();
+
+  /// Quadros finalizados/cancelados, do mais recente para o mais antigo.
+  List<PlanBoardEntity> get history =>
+      _allBoards.where((b) => b.isFinished).toList()..sort((a, b) => b.finishedAt!.compareTo(a.finishedAt!));
+
+  /// Itens não comprados de quadros finalizados, mais recentes primeiro.
+  List<PlanItemEntity> get pendingItems =>
+      _items.where((i) => i.isPending).toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+  PlanBoardEntity? boardById(String? id) => id == null ? null : _allBoards.firstWhereOrNull((b) => b.id == id);
 
   @override
   void onInit() {
@@ -64,7 +86,7 @@ class PlanningController extends GetxController {
       update();
     }
 
-    final boardsResult = await getBoards(includeArchived: showArchived);
+    final boardsResult = await getBoards(includeArchived: true);
     final itemsResult = await getItems();
 
     final failure = boardsResult.failureOrNull ?? itemsResult.failureOrNull;
@@ -72,12 +94,15 @@ class PlanningController extends GetxController {
       status = ViewStatus.error;
       errorMessage = FailurePresenter.present(failure);
     } else {
-      boards = boardsResult.dataOrNull!;
+      _allBoards = boardsResult.dataOrNull!;
       _items = itemsResult.dataOrNull!;
-      status = boards.isEmpty && _items.isEmpty ? ViewStatus.empty : ViewStatus.success;
+      status = ViewStatus.success;
     }
     update();
   }
+
+  /// Nada para mostrar no kanban (sem quadros abertos nem itens soltos).
+  bool get isKanbanEmpty => boards.isEmpty && !hasInboxItems;
 
   /// Itens exibidos na coluna [boardId] (`null` = "Sem quadro").
   List<PlanItemEntity> itemsOf(String? boardId) {
@@ -90,13 +115,28 @@ class PlanningController extends GetxController {
     return PlanBoardProgress.of(board, PlanItemPositions.column(_items, board?.id));
   }
 
-  bool get hasInboxItems => _items.any((i) => i.boardId == null);
+  /// Itens de um quadro do Histórico, incluindo os que viraram Pendência.
+  List<PlanItemEntity> historyItemsOf(String boardId) =>
+      _items.where((i) => i.boardId == boardId).toList()..sort((a, b) => a.position.compareTo(b.position));
 
-  int itemCountOf(String boardId) => _items.where((i) => i.boardId == boardId).length;
+  PlanBoardProgress historyProgressOf(PlanBoardEntity board) =>
+      PlanBoardProgress.of(board, historyItemsOf(board.id));
+
+  bool get hasInboxItems => PlanItemPositions.column(_items, null).isNotEmpty;
+
+  int itemCountOf(String boardId) => PlanItemPositions.column(_items, boardId).length;
+
+  /// Itens ainda não comprados do quadro (ignora o filtro "ocultar comprados").
+  List<PlanItemEntity> unpurchasedItemsOf(String boardId) =>
+      PlanItemPositions.column(_items, boardId).where((i) => !i.isPurchased).toList();
+
+  /// Itens comprados do quadro que estão sem valor algum.
+  List<PlanItemEntity> purchasedWithoutValueOf(String boardId) =>
+      PlanItemPositions.column(_items, boardId).where((i) => i.isPurchased && i.value == null).toList();
 
   void toggleShowArchived() {
     showArchived = !showArchived;
-    load(silent: true);
+    update();
   }
 
   void toggleHidePurchased() {
@@ -123,6 +163,22 @@ class PlanningController extends GetxController {
     return _run(createBoard(title: title, description: description, goal: goal, targetDate: targetDate));
   }
 
+  Future<String?> addBoardFromTemplate(
+    PlanBoardEntity template, {
+    required String title,
+    String? description,
+    Money? goal,
+    required DateTime targetDate,
+  }) {
+    return _run(createBoardFromTemplate(
+      template,
+      title: title,
+      description: description,
+      goal: goal,
+      targetDate: targetDate,
+    ));
+  }
+
   Future<String?> editBoard(PlanBoardEntity board) => _run(updateBoard(board));
 
   Future<String?> setArchived(PlanBoardEntity board, bool archived) {
@@ -133,15 +189,13 @@ class PlanningController extends GetxController {
     return _run(deleteBoard(id, deleteItems: deleteItems));
   }
 
-  Future<String?> close(PlanBoardEntity board, {required DateTime purchasedAt}) {
-    return _run(closeBoard(board, purchasedAt: purchasedAt));
-  }
-
-  Future<String?> reopen(PlanBoardEntity board) => _run(reopenBoard(board));
-
-  /// Itens ainda não comprados do quadro (ignora o filtro "ocultar comprados").
-  List<PlanItemEntity> pendingItemsOf(String boardId) {
-    return PlanItemPositions.column(_items, boardId).where((i) => !i.isPurchased).toList();
+  Future<String?> finish(
+    PlanBoardEntity board, {
+    required PlanBoardEnding ending,
+    required Map<String, PendingItemDestination> destinations,
+    required Map<String, Money> paidValues,
+  }) {
+    return _run(finishBoard(board, ending: ending, destinations: destinations, paidValues: paidValues));
   }
 
   // Itens
@@ -166,4 +220,7 @@ class PlanningController extends GetxController {
     if (sameSpot) return Future.value(null);
     return _run(moveItem(item, toBoardId: toBoardId, beforeItemId: beforeItemId));
   }
+
+  Future<String?> sendPendingTo(PlanItemEntity item, String boardId) =>
+      _run(sendPendingToBoard(item, boardId: boardId));
 }

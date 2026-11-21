@@ -75,9 +75,11 @@ Independente da tela, `UpdateTransaction`/`DeleteTransaction` rejeitam qualquer 
 3. Em cada coluna, "Adicionar item" pede título, descrição e valor estimado opcional. Itens sem quadro ficam em "Sem quadro".
 4. Para mover um item, segure e arraste até outra coluna ou posição. Perto da borda da tela, os quadros rolam sozinhos.
 5. Tocar no círculo de um item marca ele como comprado (data de hoje) ou desfaz a marcação.
-6. Menu ⋮ do quadro → **Fechar quadro**: um bottom sheet mostra o planejado, a meta e quantos itens estão sem valor, e pede a data da compra. Ao confirmar, todos os itens pendentes ficam comprados nessa data.
-7. Pelo mesmo menu, o quadro pode ser editado, reaberto, arquivado ou excluído. Ao excluir, o usuário escolhe se apaga os itens ou se eles vão para "Sem quadro".
-8. Os itens comprados aparecem nos Relatórios no mês da data da compra.
+6. Quando tudo foi comprado, o topo do quadro mostra **Finalizar**. O menu ⋮ do quadro também tem **Finalizar quadro** e **Cancelar quadro**. O bottom sheet pede o destino de cada item não comprado: outro quadro aberto, ou Pendências com um motivo. Também pergunta se o usuário quer informar o valor pago dos itens comprados sem valor. Ao confirmar, o quadro vai para o Histórico, sem volta.
+7. Pelo mesmo menu, o quadro aberto pode ser editado, arquivado ou excluído. Ao excluir, o usuário escolhe se apaga os itens ou se eles vão para "Sem quadro".
+8. Aba **Pendências**: deslizar um item para a esquerda pergunta para qual quadro ele vai. Deslizar para a direita exclui o item, depois de confirmar.
+9. Aba **Histórico**: tocar num quadro abre o detalhe. Ali dá para ajustar a data e o valor pago de cada compra, usar o quadro como modelo de um novo ou excluí-lo do histórico.
+10. Os itens comprados aparecem nos Relatórios no mês da data da compra.
 
 ## Relatórios
 

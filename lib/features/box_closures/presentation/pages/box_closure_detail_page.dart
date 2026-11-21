@@ -12,8 +12,8 @@ import 'package:buy_control/features/box_closures/domain/usecases/get_box_closur
 import 'package:buy_control/features/box_closures/presentation/controllers/box_closure_detail_controller.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_item_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Visualização somente leitura de um Fechamento: cabeçalho com data de
 /// referência, quantidade de itens e total, seguido de todos os produtos
@@ -84,7 +84,7 @@ class _ClosureDetailBody extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(LucideIcons.lock, size: 16),
+                  const Icon(Symbols.lock, size: 16),
                   const SizedBox(width: AppSpacing.xs),
                   AppText.subtitle(closure.boxNameSnapshot),
                 ],

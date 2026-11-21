@@ -4,8 +4,8 @@ import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 /// Atalho exibido acima do calendário ("Hoje", "Fim do mês"...).
@@ -336,7 +336,7 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              Icon(LucideIcons.calendarCheck, size: 16, color: secondaryText),
+              Icon(Symbols.event_available, size: 16, color: secondaryText),
               const SizedBox(width: AppSpacing.sm),
               Expanded(child: Text(_summary, style: context.text.labelMedium?.copyWith(color: colors.onSurface))),
             ],
@@ -403,9 +403,9 @@ class _MonthHeader extends StatelessWidget {
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
               child: const Text('Hoje'),
             ),
-          arrow(LucideIcons.chevronLeft, canGoBack, onPrevious),
+          arrow(Symbols.chevron_left, canGoBack, onPrevious),
           const SizedBox(width: AppSpacing.xs),
-          arrow(LucideIcons.chevronRight, canGoForward, onNext),
+          arrow(Symbols.chevron_right, canGoForward, onNext),
         ],
       ),
     );

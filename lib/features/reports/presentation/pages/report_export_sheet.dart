@@ -4,8 +4,8 @@ import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/features/reports/domain/usecases/export_report.dart';
 import 'package:buy_control/features/reports/presentation/controllers/reports_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _ExportOption {
   final ExportFormat format;
@@ -15,11 +15,11 @@ class _ExportOption {
 }
 
 const _options = [
-  _ExportOption(format: ExportFormat.pdf, label: 'PDF', icon: LucideIcons.fileText),
-  _ExportOption(format: ExportFormat.csv, label: 'CSV', icon: LucideIcons.sheet),
-  _ExportOption(format: ExportFormat.share, label: 'Compartilhar', icon: LucideIcons.share2),
-  _ExportOption(format: ExportFormat.print, label: 'Imprimir', icon: LucideIcons.printer),
-  _ExportOption(format: ExportFormat.jsonBackup, label: 'Backup em JSON', icon: LucideIcons.databaseBackup),
+  _ExportOption(format: ExportFormat.pdf, label: 'PDF', icon: Symbols.description),
+  _ExportOption(format: ExportFormat.csv, label: 'CSV', icon: Symbols.table_chart),
+  _ExportOption(format: ExportFormat.share, label: 'Compartilhar', icon: Symbols.share),
+  _ExportOption(format: ExportFormat.print, label: 'Imprimir', icon: Symbols.print),
+  _ExportOption(format: ExportFormat.jsonBackup, label: 'Backup em JSON', icon: Symbols.backup),
 ];
 
 /// Lista as opções de exportação previstas no contrato `ReportExporter`.

@@ -8,6 +8,7 @@ class PlanBoardModel {
   final DateTime targetDate;
   final bool isArchived;
   final DateTime? closedAt;
+  final DateTime? cancelledAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -22,6 +23,7 @@ class PlanBoardModel {
     required this.targetDate,
     required this.isArchived,
     this.closedAt,
+    this.cancelledAt,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -39,6 +41,7 @@ class PlanBoardModel {
       targetDate: DateTime.parse(map['targetDate'] as String),
       isArchived: map['isArchived'] as bool? ?? false,
       closedAt: map['closedAt'] != null ? DateTime.parse(map['closedAt'] as String) : null,
+      cancelledAt: map['cancelledAt'] != null ? DateTime.parse(map['cancelledAt'] as String) : null,
       createdAt: sync.createdAt,
       updatedAt: sync.updatedAt,
       deletedAt: sync.deletedAt,
@@ -56,6 +59,7 @@ class PlanBoardModel {
       'targetDate': targetDate.toIso8601String(),
       'isArchived': isArchived,
       'closedAt': closedAt?.toIso8601String(),
+      'cancelledAt': cancelledAt?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'deletedAt': deletedAt?.toIso8601String(),

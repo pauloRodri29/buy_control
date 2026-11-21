@@ -18,8 +18,8 @@ import 'package:buy_control/features/boxes/presentation/controllers/boxes_contro
 import 'package:buy_control/features/boxes/presentation/pages/box_detail_page.dart';
 import 'package:buy_control/features/boxes/presentation/widgets/box_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class BoxesPage extends StatelessWidget {
   const BoxesPage({super.key});
@@ -113,7 +113,7 @@ class BoxesPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _openForm(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }
@@ -127,7 +127,7 @@ class BoxesPage extends StatelessWidget {
         return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
-          icon: LucideIcons.package,
+          icon: Symbols.inventory_2,
           title: 'Nenhuma caixa cadastrada',
           message: 'Crie caixas para organizar suas compras, como "Mercado" ou "Farmácia".',
           actionLabel: 'Nova caixa',

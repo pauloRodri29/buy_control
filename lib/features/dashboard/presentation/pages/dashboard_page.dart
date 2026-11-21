@@ -14,8 +14,8 @@ import 'package:buy_control/features/dashboard/presentation/widgets/monthly_evol
 import 'package:buy_control/features/dashboard/presentation/widgets/spending_by_box_chart.dart';
 import 'package:buy_control/features/dashboard/presentation/widgets/spending_by_category_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -34,7 +34,7 @@ class DashboardPage extends StatelessWidget {
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
               return const EmptyStateView(
-                icon: LucideIcons.layoutDashboard,
+                icon: Symbols.dashboard,
                 title: 'Nenhum dado ainda',
                 message: 'Crie sua primeira Box e registre um lançamento para ver o resumo aqui.',
               );
@@ -182,7 +182,7 @@ class DashboardPage extends StatelessWidget {
         );
       case ViewStatus.empty:
         return const EmptyStateView(
-          icon: LucideIcons.chartColumn,
+          icon: Symbols.insert_chart,
           title: 'Nenhum gasto no período selecionado.',
           message: 'Ajuste os filtros ou registre lançamentos para ver os gráficos aqui.',
         );

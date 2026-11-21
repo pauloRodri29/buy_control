@@ -14,8 +14,8 @@ import 'package:buy_control/features/products/presentation/bindings/products_bin
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/widgets/product_form_sheet.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
 
 /// Seleção de produtos do catálogo para um lançamento. Nada é persistido
@@ -132,7 +132,7 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
                             tileColor: context.colors.primaryContainer,
                             textColor: context.colors.onPrimaryContainer,
                             iconColor: context.colors.onPrimaryContainer,
-                            leading: const Icon(LucideIcons.plus),
+                            leading: const Icon(Symbols.add),
                             title: Text('Cadastrar "${_query.trim()}"'),
                             subtitle: const Text('Vira produto do catálogo e já entra nesta compra'),
                           ),

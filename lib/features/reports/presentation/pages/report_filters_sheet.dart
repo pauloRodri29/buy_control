@@ -14,8 +14,8 @@ import 'package:buy_control/features/reports/presentation/controllers/reports_co
 import 'package:buy_control/features/reports/presentation/controllers/saved_filter_preset.dart';
 import 'package:buy_control/features/reports/presentation/pages/multi_select_picker_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Bottom sheet único que concentra todos os filtros do relatório: período,
 /// Boxes, categoria, tipo de produto, produto e faixa de valor. Quando o
@@ -290,7 +290,7 @@ class _FilterLinkCard extends StatelessWidget {
             color: context.colors.onSurfaceVariant,
           ),
           const SizedBox(width: AppSpacing.sm),
-          Icon(LucideIcons.chevronRight, size: 18, color: context.colors.onSurfaceVariant),
+          Icon(Symbols.chevron_right, size: 18, color: context.colors.onSurfaceVariant),
         ],
       ),
     );
@@ -321,7 +321,7 @@ class _PresetChip extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
               GestureDetector(
                 onTap: onRemove,
-                child: Icon(LucideIcons.x, size: 14, color: context.colors.onSurfaceVariant),
+                child: Icon(Symbols.close, size: 14, color: context.colors.onSurfaceVariant),
               ),
             ],
           ),

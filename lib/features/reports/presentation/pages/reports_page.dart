@@ -15,8 +15,8 @@ import 'package:buy_control/features/reports/presentation/pages/report_export_sh
 import 'package:buy_control/features/reports/presentation/pages/report_filters_sheet.dart';
 import 'package:buy_control/features/reports/presentation/widgets/report_evolution_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Relatório consolidado: filtros de período/Boxes/categoria/tipo/produto/
 /// valor, métricas detalhadas, modo de comparação (dois conjuntos de
@@ -42,7 +42,7 @@ class ReportsPage extends StatelessWidget {
           GetBuilder<ReportsController>(
             builder: (controller) => IconButton(
               icon: Icon(
-                LucideIcons.gitCompare,
+                Symbols.compare_arrows,
                 color: controller.compareMode ? context.colors.primary : null,
               ),
               tooltip: 'Comparar',
@@ -50,12 +50,12 @@ class ReportsPage extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(LucideIcons.listFilter),
+            icon: const Icon(Symbols.filter_list),
             tooltip: 'Filtros',
             onPressed: () => _openFilters(context),
           ),
           IconButton(
-            icon: const Icon(LucideIcons.share2),
+            icon: const Icon(Symbols.share),
             tooltip: 'Exportar',
             onPressed: () => _openExport(context),
           ),
@@ -71,7 +71,7 @@ class ReportsPage extends StatelessWidget {
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
-                icon: LucideIcons.chartBar,
+                icon: Symbols.bar_chart,
                 title: 'Nenhuma Box com dados ainda',
                 message: 'Crie Boxes e registre lançamentos para consolidar relatórios aqui.',
                 actionLabel: 'Filtros',
@@ -138,7 +138,7 @@ class _ReportSection extends StatelessWidget {
           onTap: onOpenFilters,
           child: Row(
             children: [
-              Icon(LucideIcons.calendar, size: 14, color: context.colors.onSurfaceVariant),
+              Icon(Symbols.calendar_today, size: 14, color: context.colors.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
               AppText.small(periodLabel,  color: context.colors.onSurfaceVariant),
             ],
@@ -147,7 +147,7 @@ class _ReportSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         if (r == null || r.isEmpty)
           const EmptyStateView(
-            icon: LucideIcons.chartBar,
+            icon: Symbols.bar_chart,
             title: 'Nenhum lançamento nos filtros atuais',
             message: 'Ajuste o período, as Boxes ou os demais filtros para ver o relatório.',
           )
@@ -275,7 +275,7 @@ class _PlanningCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.squareKanban, size: 16, color: secondary),
+              Icon(Symbols.view_kanban, size: 16, color: secondary),
               const SizedBox(width: AppSpacing.xs),
               const AppText('Planejamento', fontWeight: FontWeight.bold),
             ],

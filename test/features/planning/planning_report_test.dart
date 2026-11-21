@@ -1,6 +1,5 @@
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
-import 'package:buy_control/features/planning/domain/usecases/plan_board_usecases.dart';
 import 'package:buy_control/features/reports/domain/usecases/get_consolidated_report.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_item_entity.dart';
@@ -11,49 +10,6 @@ import '../reports/get_consolidated_report_test.dart'
 import 'planning_usecases_test.dart' show FakePlanBoardRepository, FakePlanItemRepository, board, item;
 
 void main() {
-  group('ClosePlanBoard', () {
-    test('marca pendentes como comprados na data escolhida e fecha o quadro', () async {
-      final boards = FakePlanBoardRepository();
-      final items = FakePlanItemRepository();
-      await boards.create(board('b1'));
-      final alreadyBought = item('a', boardId: 'b1', cents: 1000, purchased: true)
-          .copyWith(purchasedAt: DateTime(2026, 10, 5));
-      await items.create(alreadyBought);
-      await items.create(item('b', boardId: 'b1', cents: 2000));
-      await items.create(item('other', boardId: 'b2', cents: 500));
-
-      final date = DateTime(2026, 12, 20);
-      final result = await ClosePlanBoard(boardRepository: boards, itemRepository: items)(
-        boards.store['b1']!,
-        purchasedAt: date,
-      );
-
-      expect(result.isSuccess, isTrue);
-      expect(boards.store['b1']!.closedAt, date);
-      expect(items.store['b']!.isPurchased, isTrue);
-      expect(items.store['b']!.purchasedAt, date);
-      // Item já comprado mantém a data original.
-      expect(items.store['a']!.purchasedAt, DateTime(2026, 10, 5));
-      // Outros quadros não são afetados.
-      expect(items.store['other']!.isPurchased, isFalse);
-    });
-
-    test('não fecha um quadro já fechado; reabrir limpa o fechamento', () async {
-      final boards = FakePlanBoardRepository();
-      final items = FakePlanItemRepository();
-      await boards.create(board('b1').copyWith(closedAt: DateTime(2026, 12, 1)));
-
-      final result = await ClosePlanBoard(boardRepository: boards, itemRepository: items)(
-        boards.store['b1']!,
-        purchasedAt: DateTime(2026, 12, 2),
-      );
-      expect(result.isFailure, isTrue);
-
-      await ReopenPlanBoard(boards)(boards.store['b1']!);
-      expect(boards.store['b1']!.isClosed, isFalse);
-    });
-  });
-
   group('Relatório com Planejamento', () {
     late FakePlanBoardRepository boards;
     late FakePlanItemRepository items;
@@ -147,6 +103,16 @@ void main() {
       final byMonth = {for (final p in report.evolution) DateTime(p.month.year, p.month.month): p.total};
       expect(byMonth[DateTime(2026, 11)], const Money(10000));
       expect(byMonth[DateTime(2026, 12)], const Money(25000));
+    });
+
+    test('valor pago substitui o estimado no relatório', () async {
+      await items.update(items.store['dez1']!.copyWith(paidValue: const Money(25000)));
+      final report = (await usecase(
+        start: DateTime(2026, 12, 1),
+        end: DateTime(2026, 12, 31, 23, 59, 59),
+      ))
+          .dataOrNull!;
+      expect(report.planning!.purchasedTotal, const Money(25000));
     });
 
     test('filtro de Box deixa o Planejamento de fora', () async {

@@ -11,8 +11,8 @@ import 'package:buy_control/features/products/domain/entities/product_entity.dar
 import 'package:buy_control/features/products/domain/product_barcodes.dart';
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Formulário de criação/edição de produto. Todo o estado fica local ao
 /// widget (rascunho) — nada é persistido até o usuário tocar em Salvar.
@@ -159,7 +159,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
             keyboardType: TextInputType.number,
             suffix: IconButton(
               tooltip: 'Ler com a câmera',
-              icon: const Icon(LucideIcons.scanBarcode, size: 20),
+              icon: const Icon(Symbols.qr_code_scanner, size: 20),
               onPressed: _scanBarcode,
             ),
           ),

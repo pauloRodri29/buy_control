@@ -5,8 +5,8 @@ import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(LucideIcons.box, size: 48, color: context.colors.primary),
+                Icon(Symbols.inventory_2, size: 48, color: context.colors.primary),
                 const SizedBox(height: AppSpacing.md),
                 const AppText.title('Buy Control', textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.xs),

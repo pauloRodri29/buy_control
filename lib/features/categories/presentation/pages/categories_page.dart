@@ -11,8 +11,8 @@ import 'package:buy_control/features/categories/domain/entities/category_entity.
 import 'package:buy_control/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:buy_control/features/categories/presentation/widgets/category_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
@@ -44,7 +44,7 @@ class CategoriesPage extends StatelessWidget {
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
-                icon: LucideIcons.tag,
+                icon: Symbols.sell,
                 title: 'Nenhuma categoria cadastrada',
                 message: 'Crie categorias como Bebidas ou Limpeza para organizar seus produtos.',
                 actionLabel: 'Nova categoria',
@@ -73,7 +73,7 @@ class CategoriesPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _openForm(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }

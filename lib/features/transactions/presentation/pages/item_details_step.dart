@@ -17,8 +17,8 @@ import 'package:buy_control/features/transactions/presentation/widgets/discount_
 import 'package:buy_control/features/units/domain/entities/unit_entity.dart';
 import 'package:buy_control/features/units/domain/usecases/get_units.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Editor dos itens de uma compra (nova ou já lançada e ainda aberta).
 /// Trabalha direto sobre o [PurchaseDraft]: altera quantidade, preço,
@@ -155,7 +155,7 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
                     Expanded(
                       child: AppButton.secondary(
                         label: 'Produto',
-                        icon: LucideIcons.plus,
+                        icon: Symbols.add,
                         onPressed: _addProducts,
                       ),
                     ),
@@ -163,7 +163,7 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
                     Expanded(
                       child: AppButton.secondary(
                         label: 'Escanear',
-                        icon: LucideIcons.scanBarcode,
+                        icon: Symbols.qr_code_scanner,
                         onPressed: _scanProducts,
                       ),
                     ),
@@ -304,7 +304,7 @@ class _ItemFormState extends State<_ItemForm> {
             children: [
               IconButton.filledTonal(
                 tooltip: 'Diminuir',
-                icon: const Icon(LucideIcons.minus, size: 16),
+                icon: const Icon(Symbols.remove, size: 16),
                 onPressed: item.quantity > 1 ? () => _step(-1) : null,
               ),
               Expanded(
@@ -317,7 +317,7 @@ class _ItemFormState extends State<_ItemForm> {
               ),
               IconButton.filledTonal(
                 tooltip: 'Aumentar',
-                icon: const Icon(LucideIcons.plus, size: 16),
+                icon: const Icon(Symbols.add, size: 16),
                 onPressed: () => _step(1),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -364,7 +364,7 @@ class _ItemFormState extends State<_ItemForm> {
             TextButton.icon(
               onPressed: widget.onRemove,
               style: TextButton.styleFrom(foregroundColor: context.colors.error),
-              icon: const Icon(LucideIcons.trash2, size: 18),
+              icon: const Icon(Symbols.delete, size: 18),
               label: const Text('Remover produto'),
             ),
           ],

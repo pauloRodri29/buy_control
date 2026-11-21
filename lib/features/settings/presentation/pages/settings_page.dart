@@ -11,8 +11,8 @@ import 'package:buy_control/features/settings/presentation/pages/about_page.dart
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
 import 'package:buy_control/features/settings/presentation/widgets/theme_mode_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    const chevron = Icon(LucideIcons.chevronRight, size: 18);
+    const chevron = Icon(Symbols.chevron_right, size: 18);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -54,12 +54,12 @@ class _SettingsPageState extends State<SettingsPage> {
             title: 'Conta',
             children: [
               _Tile(
-                icon: LucideIcons.userCircle,
+                icon: Symbols.account_circle,
                 title: 'Perfil',
                 trailing: chevron,
                 onTap: () => Get.to(() => const ProfilePage()),
               ),
-              _Tile(icon: LucideIcons.logOut, title: 'Sair', onTap: () => _logout(context)),
+              _Tile(icon: Symbols.logout, title: 'Sair', onTap: () => _logout(context)),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -67,19 +67,19 @@ class _SettingsPageState extends State<SettingsPage> {
             title: 'Dados',
             children: [
               _Tile(
-                icon: LucideIcons.uploadCloud,
+                icon: Symbols.cloud_upload,
                 title: 'Exportar dados',
                 trailing: chevron,
                 onTap: () => runExportBackup(context),
               ),
               _Tile(
-                icon: LucideIcons.downloadCloud,
+                icon: Symbols.cloud_download,
                 title: 'Importar dados',
                 trailing: chevron,
                 onTap: () => runImportBackup(context),
               ),
               _Tile(
-                icon: LucideIcons.trash2,
+                icon: Symbols.delete,
                 title: 'Limpar dados',
                 destructive: true,
                 trailing: chevron,
@@ -93,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: 'Preferências',
               children: [
                 _Tile(
-                  icon: LucideIcons.palette,
+                  icon: Symbols.palette,
                   title: 'Tema',
                   subtitle: themeController.mode.label,
                   trailing: chevron,
@@ -109,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
               FutureBuilder<PackageInfo>(
                 future: _packageInfoFuture,
                 builder: (context, snapshot) => _Tile(
-                  icon: LucideIcons.info,
+                  icon: Symbols.info,
                   title: 'Sobre o sistema',
                   subtitle: snapshot.data == null ? null : 'Versão ${snapshot.data!.version}',
                   trailing: chevron,

@@ -24,8 +24,8 @@ import 'package:buy_control/features/transactions/domain/entities/transaction_it
 import 'package:buy_control/features/transactions/domain/usecases/transaction_sort.dart';
 import 'package:buy_control/features/transactions/presentation/add_items_flow.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class BoxDetailPage extends StatefulWidget {
   final BoxEntity box;
@@ -140,8 +140,8 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
       appBar: AppBar(
         title: AppText.heading(widget.box.name, ),
         actions: [
-          IconButton(icon: const Icon(LucideIcons.history), onPressed: _openClosures),
-          IconButton(icon: const Icon(LucideIcons.lock), onPressed: _closeBox),
+          IconButton(icon: const Icon(Symbols.history), onPressed: _openClosures),
+          IconButton(icon: const Icon(Symbols.lock), onPressed: _closeBox),
         ],
       ),
       body: GetBuilder<BoxDetailController>(
@@ -179,7 +179,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: _addItems,
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }
@@ -193,7 +193,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
         return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
-          icon: LucideIcons.receipt,
+          icon: Symbols.receipt,
           title: 'Nenhum lançamento nesta caixa',
           message: 'Adicione produtos ou um lançamento avulso para começar.',
           actionLabel: 'Adicionar itens',
@@ -286,7 +286,7 @@ class _TransactionCard extends StatelessWidget {
 
   Widget _deleteButton() => IconButton(
         tooltip: 'Excluir lançamento',
-        icon: const Icon(LucideIcons.trash2, size: 18),
+        icon: const Icon(Symbols.delete, size: 18),
         onPressed: onDelete,
       );
 
@@ -430,7 +430,7 @@ class _QuantityStepper extends StatelessWidget {
         IconButton(
           tooltip: 'Diminuir',
           visualDensity: VisualDensity.compact,
-          icon: const Icon(LucideIcons.minus, size: 16),
+          icon: const Icon(Symbols.remove, size: 16),
           onPressed: item.quantity > 1 ? () => onChange(-1) : null,
         ),
         SizedBox(
@@ -444,7 +444,7 @@ class _QuantityStepper extends StatelessWidget {
         IconButton(
           tooltip: 'Aumentar',
           visualDensity: VisualDensity.compact,
-          icon: const Icon(LucideIcons.plus, size: 16),
+          icon: const Icon(Symbols.add, size: 16),
           onPressed: () => onChange(1),
         ),
       ],

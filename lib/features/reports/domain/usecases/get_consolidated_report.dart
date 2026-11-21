@@ -254,7 +254,7 @@ class GetConsolidatedReport {
       final byBoard = <String, int>{};
       for (final item in allItems.where((i) => i.isPurchased)) {
         final date = item.purchasedAt ?? item.updatedAt;
-        final value = item.estimatedValue ?? Money.zero;
+        final value = item.value ?? Money.zero;
         if (!inPeriod(date) || !valueMatches(value)) continue;
         purchasedTotal += value;
         purchasedCount++;

@@ -1,6 +1,6 @@
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Item de lista selecionável ([ListTile] nativo com `selected`), usado em
 /// seleções múltiplas como os filtros dos relatórios.
@@ -31,7 +31,8 @@ class SelectableListTile extends StatelessWidget {
       tileColor: colors.surfaceContainerHighest,
       selectedTileColor: colors.primary.withValues(alpha: 0.12),
       leading: Icon(
-        selected ? LucideIcons.circleCheck : LucideIcons.circle,
+        selected ? Symbols.check_circle : Symbols.radio_button_unchecked,
+        fill: selected ? 1 : 0,
         size: 20,
         color: selected ? colors.primary : colors.onSurfaceVariant,
       ),

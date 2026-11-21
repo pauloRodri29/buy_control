@@ -118,7 +118,7 @@ São dois recursos intencionalmente separados:
 - `PlanBoardEntity`: título, descrição, meta, data de previsão, arquivado e data de fechamento.
 - `PlanItemEntity`: quadro (opcional), título, valor estimado, posição, comprado e data da compra.
 
-A ordem dos itens numa coluna usa uma posição `double`. Mover um item calcula o ponto médio entre os vizinhos, e a coluna só é renumerada quando a diferença fica menor que `1e-6`. Fechar um quadro (`ClosePlanBoard`) marca todos os itens pendentes como comprados na data escolhida.
+A ordem dos itens numa coluna usa uma posição `double`. Mover um item calcula o ponto médio entre os vizinhos, e a coluna só é renumerada quando a diferença fica menor que `1e-6`. Finalizar ou cancelar um quadro (`FinishPlanBoard`) grava `closedAt` ou `cancelledAt`. Isso é definitivo. Cada item não comprado recebe um destino: outro quadro aberto, ou Pendência (`notPurchasedReason`). A Pendência guarda o `boardId` de origem e fica fora de qualquer coluna (`PlanItemPositions.column`). O valor que conta nos relatórios é `PlanItemEntity.value`: o `paidValue`, quando informado, senão o `estimatedValue`.
 
 `GetConsolidatedReport` recebe os repositórios do Planejamento como opcionais e monta um `PlanningReportSummary`: comprado no período por quadro, previsão pendente e comparação com as metas.
 

@@ -15,6 +15,15 @@ class PlanItemEntity extends SyncableFields {
   final bool isPurchased;
   final DateTime? purchasedAt;
 
+  /// Valor efetivamente pago, informado ao finalizar o quadro ou no
+  /// Histórico. `null` = vale o [estimatedValue].
+  final Money? paidValue;
+
+  /// Motivo de não ter sido comprado, informado ao finalizar um quadro sem
+  /// mandar o item para outro. Com motivo, o item é uma Pendência: sai do
+  /// kanban e fica na aba Pendências até ir para um quadro ou ser excluído.
+  final String? notPurchasedReason;
+
   const PlanItemEntity({
     required super.id,
     this.boardId,
@@ -24,12 +33,24 @@ class PlanItemEntity extends SyncableFields {
     required this.position,
     this.isPurchased = false,
     this.purchasedAt,
+    this.paidValue,
+    this.notPurchasedReason,
     required super.createdAt,
     required super.updatedAt,
     super.deletedAt,
     super.syncStatus,
     super.version,
   });
+
+  bool get isPending => notPurchasedReason != null;
+
+  /// Valor que conta: o pago, quando informado; senão o estimado.
+  Money? get value {
+    final paid = paidValue;
+    if (paid != null && !paid.isZero) return paid;
+    final estimated = estimatedValue;
+    return estimated == null || estimated.isZero ? null : estimated;
+  }
 
   PlanItemEntity copyWith({
     String? boardId,
@@ -43,6 +64,10 @@ class PlanItemEntity extends SyncableFields {
     bool? isPurchased,
     DateTime? purchasedAt,
     bool clearPurchasedAt = false,
+    Money? paidValue,
+    bool clearPaidValue = false,
+    String? notPurchasedReason,
+    bool clearNotPurchasedReason = false,
     DateTime? updatedAt,
   }) {
     return PlanItemEntity(
@@ -54,6 +79,8 @@ class PlanItemEntity extends SyncableFields {
       position: position ?? this.position,
       isPurchased: isPurchased ?? this.isPurchased,
       purchasedAt: clearPurchasedAt ? null : (purchasedAt ?? this.purchasedAt),
+      paidValue: clearPaidValue ? null : (paidValue ?? this.paidValue),
+      notPurchasedReason: clearNotPurchasedReason ? null : (notPurchasedReason ?? this.notPurchasedReason),
       createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       deletedAt: deletedAt,

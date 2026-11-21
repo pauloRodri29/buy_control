@@ -2,6 +2,7 @@ import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Configurações → Sobre o sistema → Licenças de código aberto.
 ///
@@ -123,7 +124,7 @@ class _PackageLicensesPage extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline, size: 20, color: colors.onSurfaceVariant),
+              Icon(Symbols.info, size: 20, color: colors.onSurfaceVariant),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

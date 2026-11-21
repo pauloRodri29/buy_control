@@ -4,7 +4,7 @@ import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/features/planning/domain/entities/plan_item_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 enum PlanItemAction { edit, move, delete }
 
@@ -42,7 +42,8 @@ class PlanItemCard extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 tooltip: item.isPurchased ? 'Marcar como não comprado' : 'Marcar como comprado',
                 icon: Icon(
-                  item.isPurchased ? LucideIcons.circleCheck : LucideIcons.circle,
+                  item.isPurchased ? Symbols.check_circle : Symbols.radio_button_unchecked,
+                  fill: item.isPurchased ? 1 : 0,
                   size: 20,
                   color: item.isPurchased ? context.semantic.success : secondary,
                 ),
@@ -84,7 +85,7 @@ class PlanItemCard extends StatelessWidget {
                 ),
               ),
               PopupMenuButton<PlanItemAction>(
-                icon: Icon(LucideIcons.ellipsisVertical, size: 18, color: secondary),
+                icon: Icon(Symbols.more_vert, size: 18, color: secondary),
                 onSelected: onAction,
                 itemBuilder: (_) => const [
                   PopupMenuItem(value: PlanItemAction.move, child: Text('Mover para…')),

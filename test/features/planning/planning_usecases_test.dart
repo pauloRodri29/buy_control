@@ -302,4 +302,155 @@ void main() {
       expect(back.position, 2.5);
     });
   });
+
+  group('FinishPlanBoard', () {
+    late FakePlanBoardRepository boards;
+    late FakePlanItemRepository items;
+    late FinishPlanBoard finish;
+
+    setUp(() async {
+      boards = FakePlanBoardRepository();
+      items = FakePlanItemRepository();
+      finish = FinishPlanBoard(boardRepository: boards, itemRepository: items);
+      await boards.create(board('b1'));
+      await boards.create(board('b2'));
+      await items.create(item('bought', boardId: 'b1', purchased: true).copyWith(purchasedAt: DateTime(2026, 10, 5)));
+      await items.create(item('a', boardId: 'b1', position: 1, cents: 2000));
+      await items.create(item('b', boardId: 'b1', position: 2));
+      await items.create(item('z', boardId: 'b2', position: 0));
+    });
+
+    test('exige destino para cada item não comprado', () async {
+      final result = await finish(boards.store['b1']!, destinations: {
+        'a': const PendingItemDestination.board('b2'),
+      });
+      expect(result.isFailure, isTrue);
+      expect(boards.store['b1']!.isFinished, isFalse);
+      expect(items.store['a']!.boardId, 'b1');
+    });
+
+    test('move para outro quadro ou manda para Pendências, e finaliza', () async {
+      final now = DateTime(2026, 12, 20);
+      final result = await finish(
+        boards.store['b1']!,
+        destinations: {
+          'a': const PendingItemDestination.board('b2'),
+          'b': const PendingItemDestination.pending('Sem estoque'),
+        },
+        paidValues: {'bought': const Money(1500)},
+        now: now,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(boards.store['b1']!.closedAt, now);
+      // Vai para o final do outro quadro, ainda a comprar.
+      expect(columnIds(items, 'b2'), ['z', 'a']);
+      expect(items.store['a']!.isPurchased, isFalse);
+      // Pendência: fora do kanban, com motivo e quadro de origem.
+      expect(items.store['b']!.isPending, isTrue);
+      expect(items.store['b']!.notPurchasedReason, 'Sem estoque');
+      expect(items.store['b']!.boardId, 'b1');
+      expect(columnIds(items, 'b1'), ['bought']);
+      // Valor pago registrado; data da compra preservada.
+      expect(items.store['bought']!.paidValue, const Money(1500));
+      expect(items.store['bought']!.purchasedAt, DateTime(2026, 10, 5));
+    });
+
+    test('Pendência exige motivo e o destino precisa ser um quadro aberto', () async {
+      final blank = await finish(boards.store['b1']!, destinations: {
+        'a': const PendingItemDestination.pending('  '),
+        'b': const PendingItemDestination.pending('x'),
+      });
+      expect(blank.isFailure, isTrue);
+
+      await boards.update(boards.store['b2']!.copyWith(closedAt: DateTime(2026, 12, 1)));
+      final closedTarget = await finish(boards.store['b1']!, destinations: {
+        'a': const PendingItemDestination.board('b2'),
+        'b': const PendingItemDestination.pending('x'),
+      });
+      expect(closedTarget.isFailure, isTrue);
+    });
+
+    test('cancelar marca cancelledAt; quadro no histórico não finaliza de novo', () async {
+      final now = DateTime(2026, 12, 20);
+      final result = await finish(
+        boards.store['b2']!,
+        ending: PlanBoardEnding.cancel,
+        destinations: {'z': const PendingItemDestination.pending('Desisti')},
+        now: now,
+      );
+      expect(result.isSuccess, isTrue);
+      expect(boards.store['b2']!.cancelledAt, now);
+      expect(boards.store['b2']!.isClosed, isFalse);
+      expect(boards.store['b2']!.isFinished, isTrue);
+
+      final again = await finish(boards.store['b2']!);
+      expect(again.isFailure, isTrue);
+    });
+  });
+
+  group('Pendências e Histórico', () {
+    test('enviar para um quadro tira o motivo e coloca no final, a comprar', () async {
+      final items = FakePlanItemRepository();
+      await items.create(item('x', boardId: 'b2', position: 0));
+      final pending = item('p', boardId: 'b1').copyWith(notPurchasedReason: 'Preço alto');
+      await items.create(pending);
+
+      await SendPendingItemToBoard(items)(pending, boardId: 'b2');
+
+      expect(items.store['p']!.isPending, isFalse);
+      expect(columnIds(items, 'b2'), ['x', 'p']);
+    });
+
+    test('excluir um quadro do Histórico apaga as compras e mantém as Pendências', () async {
+      final boards = FakePlanBoardRepository();
+      final items = FakePlanItemRepository();
+      await boards.create(board('b1').copyWith(closedAt: DateTime(2026, 12, 1)));
+      await items.create(item('bought', boardId: 'b1', purchased: true));
+      await items.create(item('p', boardId: 'b1').copyWith(notPurchasedReason: 'Sem estoque'));
+
+      await DeletePlanBoard(boardRepository: boards, itemRepository: items)('b1');
+
+      expect(boards.store, isEmpty);
+      expect(items.store.keys, ['p']);
+      expect(items.store['p']!.isPending, isTrue);
+      // Continua fora do "Sem quadro".
+      expect(columnIds(items, null), isEmpty);
+    });
+
+    test('criar a partir de modelo copia os itens desmarcados', () async {
+      final boards = FakePlanBoardRepository();
+      final items = FakePlanItemRepository();
+      await boards.create(board('b1').copyWith(closedAt: DateTime(2026, 12, 1)));
+      await items.create(item('a', boardId: 'b1', purchased: true, cents: 1000).copyWith(paidValue: const Money(1200)));
+      await items.create(item('p', boardId: 'b1', position: 1).copyWith(notPurchasedReason: 'Sem estoque'));
+
+      final result = await CreatePlanBoardFromTemplate(createBoard: CreatePlanBoard(boards), itemRepository: items)(
+        boards.store['b1']!,
+        title: 'Natal 2027',
+        targetDate: DateTime(2027, 12, 24),
+      );
+
+      final created = result.dataOrNull!;
+      final copies = PlanItemPositions.column(items.store.values, created.id);
+      expect(copies.map((i) => i.title), ['a', 'p']);
+      expect(copies.every((i) => !i.isPurchased && !i.isPending && i.paidValue == null), isTrue);
+      // O valor de referência é o último pago.
+      expect(copies.first.estimatedValue, const Money(1200));
+      // O original fica intacto.
+      expect(items.store['a']!.isPurchased, isTrue);
+    });
+
+    test('item com motivo e valor pago sobrevive à ida e volta no mapper', () {
+      final original = item('a', boardId: 'b1', cents: 100)
+          .copyWith(paidValue: const Money(150), notPurchasedReason: 'Sem estoque');
+      final back = PlanItemMapper.toEntity(PlanItemModel.fromMap(PlanItemMapper.toModel(original).toMap()));
+      expect(back.paidValue, const Money(150));
+      expect(back.notPurchasedReason, 'Sem estoque');
+
+      final cancelled = board('b1').copyWith(cancelledAt: DateTime(2026, 12, 2));
+      final boardBack = PlanBoardMapper.toEntity(PlanBoardModel.fromMap(PlanBoardMapper.toModel(cancelled).toMap()));
+      expect(boardBack.cancelledAt, DateTime(2026, 12, 2));
+    });
+  });
 }

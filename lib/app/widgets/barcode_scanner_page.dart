@@ -8,8 +8,8 @@ import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/app/widgets/text_input_dialog.dart';
 import 'package:buy_control/core/barcode/barcode_parser.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// O que fazer com cada código lido no modo contínuo. Pode abrir diálogos
@@ -193,10 +193,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
         actions: [
           IconButton(
             tooltip: 'Lanterna',
-            icon: const Icon(LucideIcons.flashlight),
+            icon: const Icon(Symbols.flashlight_on),
             onPressed: () => _controller.toggleTorch(),
           ),
-          IconButton(tooltip: 'Digitar código', icon: const Icon(LucideIcons.keyboard), onPressed: _typeCode),
+          IconButton(tooltip: 'Digitar código', icon: const Icon(Symbols.keyboard), onPressed: _typeCode),
         ],
       ),
       body: LayoutBuilder(

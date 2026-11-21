@@ -13,8 +13,8 @@ import 'package:buy_control/features/transactions/domain/usecases/update_transac
 import 'package:buy_control/features/transactions/presentation/purchase_draft.dart';
 import 'package:buy_control/features/transactions/presentation/widgets/carry_over_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Como o resumo foi fechado: compra gravada, ou o usuário quer voltar ao
 /// editor de itens (o rascunho continua intacto).
@@ -100,7 +100,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
               Expanded(child: AppText.heading('Resumo da compra', )),
               AppButton.text(
                 label: 'Editar itens',
-                icon: LucideIcons.pencil,
+                icon: Symbols.edit,
                 onPressed: _submitting ? null : _editItems,
               ),
             ],

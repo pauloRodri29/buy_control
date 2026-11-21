@@ -6,8 +6,8 @@ import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/features/settings/domain/usecases/clear_app_data.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ClearDataPage extends StatelessWidget {
   const ClearDataPage({super.key});
@@ -45,7 +45,7 @@ class ClearDataPage extends StatelessWidget {
             child: Column(
               children: [
                 _ClearTile(
-                  icon: LucideIcons.package,
+                  icon: Symbols.inventory_2,
                   label: 'Boxes',
                   onTap: () => _run(
                     context,
@@ -57,7 +57,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.shoppingBasket,
+                  icon: Symbols.shopping_basket,
                   label: 'Produtos',
                   onTap: () => _run(
                     context,
@@ -69,7 +69,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.history,
+                  icon: Symbols.history,
                   label: 'Histórico de compras',
                   onTap: () => _run(
                     context,
@@ -82,7 +82,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.squareKanban,
+                  icon: Symbols.view_kanban,
                   label: 'Planejamento',
                   onTap: () => _run(
                     context,
@@ -94,7 +94,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.fileText,
+                  icon: Symbols.description,
                   label: 'Relatórios salvos',
                   onTap: () => _run(
                     context,
@@ -106,7 +106,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.palette,
+                  icon: Symbols.palette,
                   label: 'Preferências',
                   onTap: () => _run(
                     context,
@@ -118,7 +118,7 @@ class ClearDataPage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 _ClearTile(
-                  icon: LucideIcons.rotateCcw,
+                  icon: Symbols.replay,
                   label: 'Restaurar tudo',
                   destructive: true,
                   onTap: () => _run(
@@ -159,7 +159,7 @@ class _ClearTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color),
       title: AppText(label, fontWeight: FontWeight.w600, color: color),
-      trailing: const Icon(LucideIcons.chevronRight, size: 18),
+      trailing: const Icon(Symbols.chevron_right, size: 18),
       onTap: onTap,
     );
   }

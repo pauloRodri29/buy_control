@@ -2,7 +2,7 @@ import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class EmptyStateView extends StatelessWidget {
   final IconData icon;
@@ -13,7 +13,7 @@ class EmptyStateView extends StatelessWidget {
 
   const EmptyStateView({
     super.key,
-    this.icon = LucideIcons.inbox,
+    this.icon = Symbols.inbox,
     required this.title,
     this.message,
     this.actionLabel,

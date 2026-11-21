@@ -48,11 +48,19 @@ Cada item tem título, descrição opcional e valor estimado opcional. Itens sem
 
 - **Organizar:** segurar e arrastar um item move ele entre quadros e posições. Arrastar até a borda da tela rola os quadros sozinho.
 - **Acompanhar a meta:** o cabeçalho de cada quadro mostra o planejado, o já comprado e o progresso da meta, e avisa quando a meta é ultrapassada.
-- **Comprar:** cada item pode ser marcado como comprado individualmente.
-- **Fechar o quadro:** um bottom sheet de confirmação mostra o resumo, avisa sobre itens sem valor e pede a data da compra. Ao confirmar, todos os itens pendentes são marcados como comprados.
-- **Depois de fechado:** o quadro pode ser reaberto, arquivado ou excluído. Ao excluir, o usuário escolhe se apaga os itens junto ou se eles vão para "Sem quadro".
+- **Comprar:** cada item pode ser marcado como comprado individualmente. A data da compra é a do momento em que foi marcado.
+- **Finalizar o quadro:** quando todos os itens estão comprados, aparece no topo do quadro a faixa "Tudo comprado!" com o botão **Finalizar**. O menu ⋮ do quadro também tem "Finalizar quadro" a qualquer momento. Finalizar é definitivo: não há reabrir. Antes de confirmar:
+  - cada item não comprado vai para outro quadro aberto ou para **Pendências**, com um motivo ("Sem estoque", "Preço alto", "Não precisei", "Deixei para depois" ou outro). Se não houver outro quadro aberto, todos vão para Pendências;
+  - se houver itens comprados sem valor, o app pergunta se o usuário quer informar quanto pagou.
+- **Cancelar o quadro:** mesmo fluxo, mas o quadro vai para o Histórico como cancelado. O que já tinha sido comprado continua nos relatórios.
+- **Arquivar:** esconde um quadro aberto do kanban, sem finalizar.
 
-Um item só entra nos Relatórios depois de marcado como comprado, no mês da data da compra.
+O Planejamento tem três abas:
+- **Quadros:** o kanban dos quadros abertos. Com um único quadro, ele ocupa a largura da tela.
+- **Pendências:** itens que não foram comprados quando o quadro foi finalizado, com o motivo e o quadro de origem. Deslizar para a esquerda envia o item para um quadro aberto, onde ele volta a ficar "a comprar". Deslizar para a direita exclui o item.
+- **Histórico:** quadros finalizados e cancelados, com o total gasto e a comparação com a meta. No detalhe, cada compra pode ter a data e o valor pago ajustados. "Usar como modelo" cria um quadro novo com os mesmos itens desmarcados. "Excluir do histórico" apaga as compras do quadro, que deixam de contar nos relatórios, e mantém as Pendências.
+
+Um item só entra nos Relatórios depois de marcado como comprado, no mês da data da compra, pelo valor pago (ou, sem ele, pelo estimado).
 
 ## Relatórios
 

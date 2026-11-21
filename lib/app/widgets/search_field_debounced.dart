@@ -4,7 +4,7 @@ import 'package:buy_control/app/theme/app_durations.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Campo de busca nativo ([TextField]) que só avisa a mudança depois de
 /// uma pausa na digitação. Sem borda em repouso; ao focar, usa a borda de
@@ -59,10 +59,10 @@ class _SearchFieldDebouncedState extends State<SearchFieldDebounced> {
         hintText: widget.hint,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
-        prefixIcon: const Icon(LucideIcons.search, size: 18),
+        prefixIcon: const Icon(Symbols.search, size: 18),
         suffixIcon: _controller.text.isEmpty
             ? null
-            : IconButton(icon: const Icon(LucideIcons.x, size: 16), tooltip: 'Limpar', onPressed: _clear),
+            : IconButton(icon: const Icon(Symbols.close, size: 16), tooltip: 'Limpar', onPressed: _clear),
         border: noBorder,
         enabledBorder: noBorder,
       ),

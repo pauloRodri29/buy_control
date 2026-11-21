@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Tratamento global de erros com os ganchos nativos do Flutter:
 ///
@@ -66,7 +66,7 @@ class AppErrorWidget extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(LucideIcons.triangleAlert, color: colors.error, size: 32),
+                Icon(Symbols.warning, color: colors.error, size: 32),
                 const SizedBox(height: 8),
                 Text(
                   'Não foi possível mostrar este conteúdo.',

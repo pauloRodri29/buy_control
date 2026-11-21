@@ -7,10 +7,11 @@ import 'package:buy_control/features/planning/domain/entities/plan_item_entity.d
 class PlanBoardProgress {
   final Money? goal;
 
-  /// Soma do valor estimado de todos os itens (comprados ou não).
+  /// Soma do valor de todos os itens (comprados ou não). Vale o pago,
+  /// quando informado; senão o estimado.
   final Money planned;
 
-  /// Soma do valor estimado dos itens já marcados como comprados.
+  /// Soma do valor dos itens já marcados como comprados.
   final Money purchased;
   final int itemCount;
   final int purchasedCount;
@@ -35,8 +36,8 @@ class PlanBoardProgress {
     for (final item in items) {
       count++;
       if (item.isPurchased) purchasedCount++;
-      final value = item.estimatedValue;
-      if (value == null || value.isZero) {
+      final value = item.value;
+      if (value == null) {
         withoutValue++;
         continue;
       }

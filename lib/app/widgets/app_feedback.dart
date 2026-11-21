@@ -1,6 +1,6 @@
 import 'package:buy_control/app/theme/app_semantic_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Chave do [ScaffoldMessenger] raiz (registrada no `GetMaterialApp`), para
 /// mostrar avisos também de fora da árvore de widgets (ex.: controllers).
@@ -28,9 +28,9 @@ class AppFeedback {
     final colors = theme.colorScheme;
     final semantic = theme.extension<AppSemanticColors>();
     final (icon, iconColor) = switch (kind) {
-      _FeedbackKind.info => (LucideIcons.info, colors.inversePrimary),
-      _FeedbackKind.success => (LucideIcons.circleCheck, semantic?.success ?? colors.inversePrimary),
-      _FeedbackKind.error => (LucideIcons.circleAlert, colors.error),
+      _FeedbackKind.info => (Symbols.info, colors.inversePrimary),
+      _FeedbackKind.success => (Symbols.check_circle, semantic?.success ?? colors.inversePrimary),
+      _FeedbackKind.error => (Symbols.error, colors.error),
     };
     final textStyle = theme.snackBarTheme.contentTextStyle;
 

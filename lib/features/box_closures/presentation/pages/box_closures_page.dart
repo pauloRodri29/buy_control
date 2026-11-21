@@ -13,8 +13,8 @@ import 'package:buy_control/features/box_closures/presentation/controllers/box_c
 import 'package:buy_control/features/box_closures/presentation/pages/box_closure_detail_page.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class BoxClosuresPage extends StatefulWidget {
   final BoxEntity box;
@@ -60,7 +60,7 @@ class _BoxClosuresPageState extends State<BoxClosuresPage> {
         return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
       case ViewStatus.empty:
         return const EmptyStateView(
-          icon: LucideIcons.archive,
+          icon: Symbols.archive,
           title: 'Nenhum Fechamento ainda',
           message: 'Feche a Box para começar o histórico.',
         );

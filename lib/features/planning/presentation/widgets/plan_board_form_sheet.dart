@@ -11,14 +11,16 @@ import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/planning/domain/entities/plan_board_entity.dart';
 import 'package:buy_control/features/planning/presentation/controllers/planning_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Formulário de criação/edição de quadro. Estado local (rascunho) até
-/// tocar em Salvar.
+/// tocar em Salvar. Com [template], cria um quadro novo copiando os itens
+/// de outro (ex.: um quadro do Histórico).
 class PlanBoardFormSheet extends StatefulWidget {
   final PlanBoardEntity? board;
-  const PlanBoardFormSheet({super.key, this.board});
+  final PlanBoardEntity? template;
+  const PlanBoardFormSheet({super.key, this.board, this.template});
 
   @override
   State<PlanBoardFormSheet> createState() => _PlanBoardFormSheetState();
@@ -26,10 +28,11 @@ class PlanBoardFormSheet extends StatefulWidget {
 
 class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
   final controller = Get.find<PlanningController>();
-  late final titleController = TextEditingController(text: widget.board?.title);
-  late final descriptionController = TextEditingController(text: widget.board?.description);
+  late final PlanBoardEntity? source = widget.board ?? widget.template;
+  late final titleController = TextEditingController(text: source?.title);
+  late final descriptionController = TextEditingController(text: source?.description);
   late final dateController = TextEditingController(text: DateTimeFormatter.ddMMyyyy(targetDate));
-  late Money goal = widget.board?.goal ?? Money.zero;
+  late Money goal = source?.goal ?? Money.zero;
   late DateTime targetDate = widget.board?.targetDate ?? _endOfCurrentMonth();
   String? errorMessage;
   bool submitting = false;
@@ -78,6 +81,14 @@ class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
         clearGoal: goal.isZero,
         targetDate: targetDate,
       ));
+    } else if (widget.template != null) {
+      error = await controller.addBoardFromTemplate(
+        widget.template!,
+        title: titleController.text,
+        description: description,
+        goal: goal,
+        targetDate: targetDate,
+      );
     } else {
       error = await controller.addBoard(
         title: titleController.text,
@@ -103,7 +114,11 @@ class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.heading(widget.board != null ? 'Editar quadro' : 'Novo quadro', ),
+          AppText.heading(widget.board != null ? 'Editar quadro' : 'Novo quadro'),
+          if (widget.template != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            AppText.subtitle('Os itens de "${widget.template!.title}" serão copiados, todos a comprar.'),
+          ],
           const SizedBox(height: AppSpacing.lg),
           AppTextField(
             controller: titleController,
@@ -126,12 +141,12 @@ class _PlanBoardFormSheetState extends State<PlanBoardFormSheet> {
             label: 'Data de previsão',
             readOnly: true,
             onTap: _pickDate,
-            suffix: const Icon(LucideIcons.calendar, size: 18),
+            suffix: const Icon(Symbols.calendar_today, size: 18),
           ),
           const SizedBox(height: AppSpacing.md),
           AppMoneyField(
             label: 'Meta de gasto (opcional)',
-            initialValue: widget.board?.goal,
+            initialValue: source?.goal,
             onChanged: (value) => goal = value,
           ),
           if (errorMessage != null) ...[

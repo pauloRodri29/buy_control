@@ -13,8 +13,8 @@ import 'package:buy_control/features/products/domain/entities/product_entity.dar
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/widgets/product_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ProductsPage extends StatelessWidget {
   const ProductsPage({super.key});
@@ -66,7 +66,7 @@ class ProductsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _openForm(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }
@@ -80,7 +80,7 @@ class ProductsPage extends StatelessWidget {
         return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
-          icon: LucideIcons.package,
+          icon: Symbols.inventory_2,
           title: 'Nenhum produto encontrado',
           message: 'Cadastre produtos para usar nas compras e nos lançamentos.',
           actionLabel: 'Novo produto',

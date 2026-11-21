@@ -94,7 +94,7 @@ Além disso, oferecer **atualizar o preço de referência** com o último preço
 - Os campos `icon` e `color` em `BoxEntity`, que hoje não são usados pelo formulário.
 - O parâmetro `leading` do `AppListCard`.
 
-**O que falta:** um seletor com uma lista curta de ícones Lucide e uma paleta derivada do tema (`AppSemanticColors.chartSeries`), para funcionar nos temas claro e escuro.
+**O que falta:** um seletor com uma lista curta de ícones Material Symbols e uma paleta derivada do tema (`AppSemanticColors.chartSeries`), para funcionar nos temas claro e escuro.
 
 ## 5. Item do quadro vira lançamento
 
@@ -108,7 +108,7 @@ Além disso, oferecer **atualizar o preço de referência** com o último preço
 O relatório passa a ignorar os itens que já têm lançamento, porque eles entram pela Box.
 
 **O que já existe:**
-- `TogglePlanItemPurchased` e `ClosePlanBoard`.
+- `TogglePlanItemPurchased` e `FinishPlanBoard`.
 - O fluxo de lançamento avulso.
 - `GetConsolidatedReport`, que já separa Boxes e Planejamento.
 

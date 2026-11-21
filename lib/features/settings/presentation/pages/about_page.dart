@@ -2,7 +2,7 @@ import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/features/settings/presentation/pages/licenses_page.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Configurações → Sobre o sistema: o que o app faz, como os dados são
@@ -20,28 +20,28 @@ class _AboutPageState extends State<AboutPage> {
   late final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
 
   static const _features = [
-    (LucideIcons.package, 'Caixas', 'Agrupe as compras por contexto, como "Mercado" ou "Farmácia".'),
+    (Symbols.inventory_2, 'Caixas', 'Agrupe as compras por contexto, como "Mercado" ou "Farmácia".'),
     (
-      LucideIcons.scanBarcode,
+      Symbols.qr_code_scanner,
       'Lançamentos',
       'Registre compras item a item, com leitura de código de barras, etiqueta de balança e promoções.',
     ),
     (
-      LucideIcons.archive,
+      Symbols.archive,
       'Fechamentos',
       'Feche o ciclo de uma caixa e guarde o histórico; lançamentos recorrentes seguem para o próximo.',
     ),
     (
-      LucideIcons.squareKanban,
+      Symbols.view_kanban,
       'Planejamento',
       'Monte quadros de compras futuras com data de previsão e meta de gasto.',
     ),
     (
-      LucideIcons.chartBar,
+      Symbols.bar_chart,
       'Relatórios',
       'Compare períodos, acompanhe gasto realizado e previsto e exporte em PDF.',
     ),
-    (LucideIcons.shoppingBasket, 'Catálogo', 'Produtos, categorias, tipos e unidades reutilizáveis.'),
+    (Symbols.shopping_basket, 'Catálogo', 'Produtos, categorias, tipos e unidades reutilizáveis.'),
   ];
 
   @override
@@ -66,7 +66,7 @@ class _AboutPageState extends State<AboutPage> {
                 child: CircleAvatar(
                   radius: 36,
                   backgroundColor: colors.primaryContainer,
-                  child: Icon(LucideIcons.shoppingCart, size: 36, color: colors.onPrimaryContainer),
+                  child: Icon(Symbols.shopping_cart, size: 36, color: colors.onPrimaryContainer),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -96,12 +96,12 @@ class _AboutPageState extends State<AboutPage> {
                 title: 'Seus dados',
                 children: [
                   ListTile(
-                    leading: Icon(LucideIcons.hardDrive),
+                    leading: Icon(Symbols.storage),
                     title: Text('Guardados no aparelho'),
                     subtitle: Text('Tudo fica salvo localmente e o app funciona sem internet.'),
                   ),
                   ListTile(
-                    leading: Icon(LucideIcons.databaseBackup),
+                    leading: Icon(Symbols.backup),
                     title: Text('Backup manual'),
                     subtitle: Text('Use Configurações → Exportar dados para guardar uma cópia em arquivo.'),
                   ),
@@ -112,19 +112,19 @@ class _AboutPageState extends State<AboutPage> {
                 title: 'Informações',
                 children: [
                   ListTile(
-                    leading: const Icon(LucideIcons.tag),
+                    leading: const Icon(Symbols.sell),
                     title: const Text('Versão'),
                     trailing: Text(version, style: text.bodyMedium),
                   ),
                   ListTile(
-                    leading: const Icon(LucideIcons.hash),
+                    leading: const Icon(Symbols.tag),
                     title: const Text('Compilação'),
                     trailing: Text(build, style: text.bodyMedium),
                   ),
                   ListTile(
-                    leading: const Icon(LucideIcons.scrollText),
+                    leading: const Icon(Symbols.receipt_long),
                     title: const Text('Licenças de código aberto'),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18),
+                    trailing: const Icon(Symbols.chevron_right, size: 18),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => LicensesPage(

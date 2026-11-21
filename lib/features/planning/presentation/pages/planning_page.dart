@@ -14,22 +14,28 @@ import 'package:buy_control/core/formatters/date_time_formatter.dart';
 import 'package:buy_control/features/planning/domain/entities/plan_board_entity.dart';
 import 'package:buy_control/features/planning/domain/entities/plan_item_entity.dart';
 import 'package:buy_control/features/planning/presentation/controllers/planning_controller.dart';
-import 'package:buy_control/features/planning/presentation/widgets/close_plan_board_sheet.dart';
+import 'package:buy_control/features/planning/domain/usecases/plan_board_usecases.dart';
+import 'package:buy_control/features/planning/presentation/widgets/finish_plan_board_sheet.dart';
+import 'package:buy_control/features/planning/presentation/widgets/pending_items_view.dart';
+import 'package:buy_control/features/planning/presentation/widgets/plan_history_view.dart';
 import 'package:buy_control/features/planning/presentation/widgets/plan_board_form_sheet.dart';
 import 'package:buy_control/features/planning/presentation/widgets/plan_column.dart';
 import 'package:buy_control/features/planning/presentation/widgets/plan_item_card.dart';
 import 'package:buy_control/features/planning/presentation/widgets/plan_item_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 enum _MenuOption { toggleArchived, togglePurchased }
 
 enum _DeleteBoardChoice { moveItems, deleteItems }
 
-/// Planejamento de compras em quadros estilo kanban. A primeira coluna é
-/// "Sem quadro" (quando há itens soltos); as demais são os quadros,
-/// ordenados pela data de previsão.
+/// Planejamento de compras, em três abas:
+/// - Quadros: kanban dos quadros abertos. A primeira coluna é "Sem quadro"
+///   (quando há itens soltos); as demais são os quadros, ordenados pela
+///   data de previsão.
+/// - Pendências: itens não comprados de quadros já finalizados.
+/// - Histórico: quadros finalizados ou cancelados (sem reabrir).
 class PlanningPage extends StatelessWidget {
   const PlanningPage({super.key});
 
@@ -51,18 +57,10 @@ class PlanningPage extends StatelessWidget {
     switch (action) {
       case PlanBoardAction.edit:
         _openBoardForm(context, board: board);
-      case PlanBoardAction.close:
-        AppBottomSheet.show(context, child: ClosePlanBoardSheet(board: board));
-      case PlanBoardAction.reopen:
-        final confirmed = await ConfirmDialog.show(
-          context,
-          title: 'Reabrir "${board.title}"?',
-          message: 'O quadro volta a ficar em aberto. Os itens continuam marcados como comprados e '
-              'nos relatórios; desmarque os que não foram comprados de fato.',
-          confirmLabel: 'Reabrir',
-          isDestructive: false,
-        );
-        if (confirmed) _showError(await _controller.reopen(board));
+      case PlanBoardAction.finish:
+        AppBottomSheet.show(context, child: FinishPlanBoardSheet(board: board));
+      case PlanBoardAction.cancel:
+        AppBottomSheet.show(context, child: FinishPlanBoardSheet(board: board, ending: PlanBoardEnding.cancel));
       case PlanBoardAction.archive:
         _showError(await _controller.setArchived(board, true));
       case PlanBoardAction.unarchive:
@@ -150,12 +148,12 @@ class PlanningPage extends StatelessWidget {
                   Builder(builder: (tileContext) {
                     final isCurrent = d.id == item.boardId;
                     return ListTile(
-                      leading: Icon(d.id == null ? LucideIcons.inbox : LucideIcons.squareKanban),
+                      leading: Icon(d.id == null ? Symbols.inbox : Symbols.view_kanban),
                       title: AppText(d.title, fontWeight: FontWeight.w600),
                       subtitle: d.subtitle == null
                           ? null
                           : AppText.subtitle(d.subtitle!),
-                      trailing: isCurrent ? Icon(LucideIcons.circleCheck, color: context.colors.primary) : null,
+                      trailing: isCurrent ? Icon(Symbols.check_circle, fill: 1, color: context.colors.primary) : null,
                       onTap: () async {
                         Navigator.of(tileContext).pop();
                         if (!isCurrent) _showError(await _controller.move(item, toBoardId: d.id));
@@ -172,18 +170,26 @@ class PlanningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.heading('Planejamento', ),
+        title: const AppText.heading('Planejamento'),
+        bottom: const _PlanningTabBar(),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.plus),
+            icon: const Icon(Symbols.add),
             tooltip: 'Novo quadro',
             onPressed: () => _openBoardForm(context),
           ),
           GetBuilder<PlanningController>(
             builder: (controller) => PopupMenuButton<_MenuOption>(
-              icon: const Icon(LucideIcons.ellipsisVertical),
+              icon: const Icon(Symbols.more_vert),
               onSelected: (option) => switch (option) {
                 _MenuOption.toggleArchived => controller.toggleShowArchived(),
                 _MenuOption.togglePurchased => controller.toggleHidePurchased(),
@@ -213,16 +219,26 @@ class PlanningPage extends StatelessWidget {
             case ViewStatus.error:
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
-              return EmptyStateView(
-                icon: LucideIcons.squareKanban,
-                title: 'Planeje suas próximas compras',
-                message: 'Crie quadros como "Dezembro" ou "Fim de ano", defina uma data de previsão e uma '
-                    'meta de gasto, e adicione os itens que pretende comprar.',
-                actionLabel: 'Novo quadro',
-                onAction: () => _openBoardForm(context),
-              );
             case ViewStatus.success:
-              return _buildBoard(context, controller);
+              return TabBarView(
+                // Sem troca de aba por gesto: o kanban rola na horizontal e
+                // as Pendências usam deslizar para os lados.
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  controller.isKanbanEmpty
+                      ? EmptyStateView(
+                          icon: Symbols.view_kanban,
+                          title: 'Planeje suas próximas compras',
+                          message: 'Crie quadros como "Dezembro" ou "Fim de ano", defina uma data de previsão '
+                              'e uma meta de gasto, e adicione os itens que pretende comprar.',
+                          actionLabel: 'Novo quadro',
+                          onAction: () => _openBoardForm(context),
+                        )
+                      : _buildBoard(context, controller),
+                  const PendingItemsView(),
+                  const PlanHistoryView(),
+                ],
+              );
           }
         },
       ),
@@ -258,6 +274,42 @@ class PlanningPage extends StatelessWidget {
   }
 }
 
+/// Abas do Planejamento; "Pendências" mostra a quantidade em aberto.
+class _PlanningTabBar extends StatelessWidget implements PreferredSizeWidget {
+  const _PlanningTabBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kTextTabBarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<PlanningController>(
+      builder: (controller) {
+        final pending = controller.pendingItems.length;
+        return TabBar(
+          labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          tabs: [
+            const Tab(text: 'Quadros'),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Flexible(child: Text('Pendências', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  if (pending > 0) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    Badge.count(count: pending),
+                  ],
+                ],
+              ),
+            ),
+            const Tab(text: 'Histórico'),
+          ],
+        );
+      },
+    );
+  }
+}
+
 typedef _ColumnBuilder = Widget Function(
   BuildContext context,
   int index,
@@ -280,6 +332,7 @@ class _KanbanScroller extends StatefulWidget {
 }
 
 class _KanbanScrollerState extends State<_KanbanScroller> {
+  static const _singleMaxWidth = 560.0;
   static const _edge = 80.0;
   static const _maxSpeed = 20.0;
   static const _tick = Duration(milliseconds: 16);
@@ -333,12 +386,28 @@ class _KanbanScrollerState extends State<_KanbanScroller> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        const padding = EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg);
+
+        // Um único quadro ocupa a largura disponível (limitada em telas
+        // largas) e fica centralizado, em vez de encostar à esquerda.
+        if (widget.itemCount == 1) {
+          final width = (constraints.maxWidth - padding.horizontal).clamp(0.0, _singleMaxWidth);
+          return Padding(
+            padding: padding,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: widget.columnBuilder(context, 0, width, (_) {}, () {}),
+            ),
+          );
+        }
+
         final width = (constraints.maxWidth * 0.85).clamp(260.0, 360.0);
-        return ListView.builder(
+        return ListView.separated(
           controller: _scrollController,
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+          padding: padding,
           itemCount: widget.itemCount,
+          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
           itemBuilder: (context, i) => widget.columnBuilder(context, i, width, _onDragUpdate, _stop),
         );
       },

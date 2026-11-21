@@ -8,9 +8,9 @@ import 'package:buy_control/features/planning/domain/entities/plan_board_progres
 import 'package:buy_control/features/planning/domain/entities/plan_item_entity.dart';
 import 'package:buy_control/features/planning/presentation/widgets/plan_item_card.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
-enum PlanBoardAction { edit, close, reopen, archive, unarchive, delete }
+enum PlanBoardAction { edit, finish, cancel, archive, unarchive, delete }
 
 /// Coluna do kanban: um quadro (ou "Sem quadro" quando [board] é `null`).
 /// Aceita itens arrastados: soltar sobre um card insere antes dele; soltar
@@ -57,7 +57,6 @@ class PlanColumn extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           width: width,
-          margin: const EdgeInsets.only(right: AppSpacing.md),
           decoration: BoxDecoration(
             color: context.colors.surfaceContainerHighest,
             borderRadius: AppRadius.borderLg,
@@ -103,7 +102,7 @@ class PlanColumn extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: TextButton.icon(
                   onPressed: onAddItem,
-                  icon: const Icon(LucideIcons.plus, size: 18),
+                  icon: const Icon(Symbols.add, size: 18),
                   label: const Text('Adicionar item'),
                 ),
               ),
@@ -185,6 +184,8 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final secondary = context.colors.onSurfaceVariant;
     final board = this.board;
+    final overdue = board != null && board.isOverdue(DateTime.now());
+    final allPurchased = board != null && progress.itemCount > 0 && progress.purchasedCount == progress.itemCount;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.xs, AppSpacing.sm),
@@ -194,7 +195,7 @@ class _Header extends StatelessWidget {
           Row(
             children: [
               if (board == null) ...[
-                Icon(LucideIcons.inbox, size: 18, color: secondary),
+                Icon(Symbols.inbox, size: 18, color: secondary),
                 const SizedBox(width: AppSpacing.sm),
               ],
               Expanded(
@@ -208,13 +209,12 @@ class _Header extends StatelessWidget {
               ),
               if (board != null)
                 PopupMenuButton<PlanBoardAction>(
-                  icon: Icon(LucideIcons.ellipsisVertical, size: 18, color: secondary),
+                  icon: Icon(Symbols.more_vert, size: 18, color: secondary),
                   onSelected: onAction,
                   itemBuilder: (_) => [
                     const PopupMenuItem(value: PlanBoardAction.edit, child: Text('Editar quadro')),
-                    board.isClosed
-                        ? const PopupMenuItem(value: PlanBoardAction.reopen, child: Text('Reabrir quadro'))
-                        : const PopupMenuItem(value: PlanBoardAction.close, child: Text('Fechar quadro')),
+                    const PopupMenuItem(value: PlanBoardAction.finish, child: Text('Finalizar quadro')),
+                    const PopupMenuItem(value: PlanBoardAction.cancel, child: Text('Cancelar quadro')),
                     board.isArchived
                         ? const PopupMenuItem(value: PlanBoardAction.unarchive, child: Text('Desarquivar'))
                         : const PopupMenuItem(value: PlanBoardAction.archive, child: Text('Arquivar')),
@@ -228,30 +228,22 @@ class _Header extends StatelessWidget {
           if (board != null) ...[
             Row(
               children: [
-                Icon(LucideIcons.calendarClock, size: 14, color: secondary),
+                Icon(Symbols.event, size: 14, color: overdue ? context.colors.error : secondary),
                 const SizedBox(width: AppSpacing.xs),
-                AppText.subtitle(DateTimeFormatter.ddMMyyyy(board.targetDate), color: secondary),
+                AppText.subtitle(
+                  overdue
+                      ? '${DateTimeFormatter.ddMMyyyy(board.targetDate)} · atrasado'
+                      : DateTimeFormatter.ddMMyyyy(board.targetDate),
+                  color: overdue ? context.colors.error : secondary,
+                ),
                 if (board.isArchived) ...[
                   const SizedBox(width: AppSpacing.sm),
-                  Icon(LucideIcons.archive, size: 14, color: secondary),
+                  Icon(Symbols.archive, size: 14, color: secondary),
                   const SizedBox(width: AppSpacing.xs),
                   AppText.subtitle('Arquivado', color: secondary),
                 ],
               ],
             ),
-            if (board.isClosed) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                children: [
-                  Icon(LucideIcons.badgeCheck, size: 14, color: context.semantic.success),
-                  const SizedBox(width: AppSpacing.xs),
-                  AppText.subtitle(
-                    'Fechado em ${DateTimeFormatter.ddMMyyyy(board.closedAt!)}',
-                    color: context.semantic.success,
-                  ),
-                ],
-              ),
-            ],
             if (board.description != null) ...[
               const SizedBox(height: AppSpacing.xs),
               AppText.subtitle(board.description!, color: secondary, maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -262,6 +254,13 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: _ProgressSummary(progress: progress),
           ),
+          if (allPurchased) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: _FinishBanner(onFinish: () => onAction(PlanBoardAction.finish)),
+            ),
+          ],
         ],
       ),
     );
@@ -302,7 +301,7 @@ class _ProgressSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(LucideIcons.target, size: 14, color: _barColor(context)),
+            Icon(Symbols.track_changes, size: 14, color: _barColor(context)),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: AppText.small(
@@ -332,6 +331,37 @@ class _ProgressSummary extends StatelessWidget {
         ),
         AppText.subtitle(counts, color: secondary),
       ],
+    );
+  }
+}
+
+/// Aparece quando todos os itens do quadro foram comprados.
+class _FinishBanner extends StatelessWidget {
+  final VoidCallback onFinish;
+  const _FinishBanner({required this.onFinish});
+
+  @override
+  Widget build(BuildContext context) {
+    final success = context.semantic.success;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.xs, AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: success.withValues(alpha: 0.12),
+        borderRadius: AppRadius.borderMd,
+        border: Border.all(color: success.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(Symbols.task_alt, size: 18, color: success),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: AppText.small('Tudo comprado!', fontWeight: FontWeight.bold, color: success)),
+          FilledButton.tonalIcon(
+            onPressed: onFinish,
+            icon: const Icon(Symbols.flag, size: 18),
+            label: const Text('Finalizar'),
+          ),
+        ],
+      ),
     );
   }
 }

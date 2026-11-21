@@ -64,7 +64,8 @@ class UpdatePlanItem {
   const UpdatePlanItem(this.repository);
 
   Future<Result<void>> call(PlanItemEntity item) async {
-    final failure = _validateItem(title: item.title, value: item.estimatedValue);
+    final failure = _validateItem(title: item.title, value: item.estimatedValue) ??
+        _validateItem(title: item.title, value: item.paidValue);
     if (failure != null) return Failure(failure);
 
     final itemsResult = await repository.getAll();
@@ -100,6 +101,27 @@ class TogglePlanItemPurchased {
       isPurchased: purchased,
       purchasedAt: purchased ? DateTime.now() : null,
       clearPurchasedAt: !purchased,
+    ));
+  }
+}
+
+/// Tira um item de Pendências e coloca no final de um quadro aberto, de
+/// novo como "a comprar".
+class SendPendingItemToBoard {
+  final PlanItemRepository repository;
+  const SendPendingItemToBoard(this.repository);
+
+  Future<Result<void>> call(PlanItemEntity item, {required String boardId}) async {
+    final itemsResult = await repository.getAll();
+    if (itemsResult case Failure(:final failure)) return Failure(failure);
+
+    return repository.update(item.copyWith(
+      boardId: boardId,
+      position: PlanItemPositions.nextPosition(itemsResult.dataOrNull!, boardId),
+      clearNotPurchasedReason: true,
+      isPurchased: false,
+      clearPurchasedAt: true,
+      clearPaidValue: true,
     ));
   }
 }

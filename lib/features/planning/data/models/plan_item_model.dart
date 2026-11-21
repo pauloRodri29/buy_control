@@ -9,6 +9,8 @@ class PlanItemModel {
   final double position;
   final bool isPurchased;
   final DateTime? purchasedAt;
+  final int? paidValueCents;
+  final String? notPurchasedReason;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -24,6 +26,8 @@ class PlanItemModel {
     required this.position,
     required this.isPurchased,
     this.purchasedAt,
+    this.paidValueCents,
+    this.notPurchasedReason,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -42,6 +46,8 @@ class PlanItemModel {
       position: (map['position'] as num?)?.toDouble() ?? 0,
       isPurchased: map['isPurchased'] as bool? ?? false,
       purchasedAt: map['purchasedAt'] != null ? DateTime.parse(map['purchasedAt'] as String) : null,
+      paidValueCents: (map['paidValueCents'] as num?)?.toInt(),
+      notPurchasedReason: map['notPurchasedReason'] as String?,
       createdAt: sync.createdAt,
       updatedAt: sync.updatedAt,
       deletedAt: sync.deletedAt,
@@ -60,6 +66,8 @@ class PlanItemModel {
       'position': position,
       'isPurchased': isPurchased,
       'purchasedAt': purchasedAt?.toIso8601String(),
+      'paidValueCents': paidValueCents,
+      'notPurchasedReason': notPurchasedReason,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'deletedAt': deletedAt?.toIso8601String(),

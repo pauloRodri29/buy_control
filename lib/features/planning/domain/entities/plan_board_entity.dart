@@ -13,9 +13,13 @@ class PlanBoardEntity extends SyncableFields {
   final DateTime targetDate;
   final bool isArchived;
 
-  /// Data em que o quadro foi fechado (todos os itens marcados como
-  /// comprados). `null` = quadro em aberto.
+  /// Data em que o quadro foi finalizado. Finalizar é definitivo: o quadro
+  /// sai do kanban e vai para o Histórico.
   final DateTime? closedAt;
+
+  /// Data em que o quadro foi cancelado (desistência). Também vai para o
+  /// Histórico; os itens que já tinham sido comprados continuam valendo.
+  final DateTime? cancelledAt;
 
   const PlanBoardEntity({
     required super.id,
@@ -25,6 +29,7 @@ class PlanBoardEntity extends SyncableFields {
     required this.targetDate,
     this.isArchived = false,
     this.closedAt,
+    this.cancelledAt,
     required super.createdAt,
     required super.updatedAt,
     super.deletedAt,
@@ -34,7 +39,20 @@ class PlanBoardEntity extends SyncableFields {
 
   bool get hasGoal => goal != null && !goal!.isZero;
 
+  /// Finalizado (concluído).
   bool get isClosed => closedAt != null;
+
+  bool get isCancelled => cancelledAt != null;
+
+  /// Finalizado ou cancelado: fica só no Histórico, sem volta.
+  bool get isFinished => isClosed || isCancelled;
+
+  bool get isOpen => !isFinished;
+
+  DateTime? get finishedAt => closedAt ?? cancelledAt;
+
+  /// Previsão já passou e o quadro continua aberto.
+  bool isOverdue(DateTime now) => isOpen && targetDate.isBefore(DateTime(now.year, now.month, now.day));
 
   /// `clearDescription`/`clearGoal` permitem remover um valor opcional, já
   /// que passar `null` em [copyWith] significa "manter o atual".
@@ -47,7 +65,7 @@ class PlanBoardEntity extends SyncableFields {
     DateTime? targetDate,
     bool? isArchived,
     DateTime? closedAt,
-    bool clearClosedAt = false,
+    DateTime? cancelledAt,
     DateTime? updatedAt,
   }) {
     return PlanBoardEntity(
@@ -57,7 +75,8 @@ class PlanBoardEntity extends SyncableFields {
       goal: clearGoal ? null : (goal ?? this.goal),
       targetDate: targetDate ?? this.targetDate,
       isArchived: isArchived ?? this.isArchived,
-      closedAt: clearClosedAt ? null : (closedAt ?? this.closedAt),
+      closedAt: closedAt ?? this.closedAt,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
       createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       deletedAt: deletedAt,

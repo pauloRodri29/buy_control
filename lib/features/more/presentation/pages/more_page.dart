@@ -16,8 +16,8 @@ import 'package:buy_control/features/settings/presentation/pages/settings_page.d
 import 'package:buy_control/features/units/presentation/bindings/units_binding.dart';
 import 'package:buy_control/features/units/presentation/pages/units_page.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -42,7 +42,7 @@ class MorePage extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: context.colors.primary,
-                  child: Icon(LucideIcons.userCircle, color: context.colors.onPrimary),
+                  child: Icon(Symbols.account_circle, color: context.colors.onPrimary),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
@@ -55,40 +55,40 @@ class MorePage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(LucideIcons.chevronRight, size: 18),
+                const Icon(Symbols.chevron_right, size: 18),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           ListTile(
-            leading: const Icon(LucideIcons.chartBar),
+            leading: const Icon(Symbols.bar_chart),
             title: const AppText('Relatórios', fontWeight: FontWeight.w600),
             subtitle: AppText.subtitle('Gastos realizados, previsão e metas'),
-            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const ReportsPage(), binding: ReportsBinding()),
           ),
           ListTile(
-            leading: const Icon(LucideIcons.tag),
+            leading: const Icon(Symbols.sell),
             title: const AppText('Categorias', fontWeight: FontWeight.w600),
-            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const CategoriesPage(), binding: CategoriesBinding()),
           ),
           ListTile(
-            leading: const Icon(LucideIcons.shapes),
+            leading: const Icon(Symbols.category),
             title: const AppText('Tipos de Produto', fontWeight: FontWeight.w600),
-            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const ProductTypesPage(), binding: ProductTypesBinding()),
           ),
           ListTile(
-            leading: const Icon(LucideIcons.ruler),
+            leading: const Icon(Symbols.straighten),
             title: const AppText('Unidades', fontWeight: FontWeight.w600),
-            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const UnitsPage(), binding: UnitsBinding()),
           ),
           ListTile(
-            leading: const Icon(LucideIcons.settings),
+            leading: const Icon(Symbols.settings),
             title: const AppText('Configurações', fontWeight: FontWeight.w600),
-            trailing: const Icon(LucideIcons.chevronRight, size: 18),
+            trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const SettingsPage(), binding: SettingsBinding()),
           ),
           const Padding(
@@ -98,7 +98,7 @@ class MorePage extends StatelessWidget {
           AppText.subtitle('Em breve'),
           const SizedBox(height: AppSpacing.sm),
           ListTile(
-            leading: Icon(LucideIcons.refreshCw, color: context.colors.onSurfaceVariant),
+            leading: Icon(Symbols.refresh, color: context.colors.onSurfaceVariant),
             title: AppText('Sincronização', fontWeight: FontWeight.w600, color: context.colors.onSurfaceVariant),
             onTap: _comingSoon,
           ),

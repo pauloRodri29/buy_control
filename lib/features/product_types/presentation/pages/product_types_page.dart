@@ -11,8 +11,8 @@ import 'package:buy_control/features/product_types/domain/entities/product_type_
 import 'package:buy_control/features/product_types/presentation/controllers/product_types_controller.dart';
 import 'package:buy_control/features/product_types/presentation/widgets/product_type_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ProductTypesPage extends StatelessWidget {
   const ProductTypesPage({super.key});
@@ -44,7 +44,7 @@ class ProductTypesPage extends StatelessWidget {
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
-                icon: LucideIcons.shapes,
+                icon: Symbols.category,
                 title: 'Nenhum tipo cadastrado',
                 message: 'Crie tipos de produto para classificar seu catálogo.',
                 actionLabel: 'Novo tipo',
@@ -73,7 +73,7 @@ class ProductTypesPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _openForm(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }

@@ -12,8 +12,8 @@ import 'package:buy_control/features/products/presentation/bindings/products_bin
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/pages/products_page.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Shell com Bottom Navigation. Todas as abas são registradas e montadas de
 /// uma vez (`IndexedStack`) para preservar estado/scroll ao alternar, em
@@ -72,11 +72,11 @@ class _MainShellState extends State<MainShell> {
           }
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(LucideIcons.house), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.box), label: 'Boxes'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.shoppingBasket), label: 'Produtos'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.squareKanban), label: 'Planejar'),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.menu), label: 'Mais'),
+          BottomNavigationBarItem(icon: Icon(Symbols.home), label: 'Início'),
+          BottomNavigationBarItem(icon: Icon(Symbols.inventory_2), label: 'Boxes'),
+          BottomNavigationBarItem(icon: Icon(Symbols.shopping_basket), label: 'Produtos'),
+          BottomNavigationBarItem(icon: Icon(Symbols.view_kanban), label: 'Planejar'),
+          BottomNavigationBarItem(icon: Icon(Symbols.menu), label: 'Mais'),
         ],
       ),
     );

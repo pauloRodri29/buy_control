@@ -11,8 +11,8 @@ import 'package:buy_control/features/units/domain/entities/unit_entity.dart';
 import 'package:buy_control/features/units/presentation/controllers/units_controller.dart';
 import 'package:buy_control/features/units/presentation/widgets/unit_form_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class UnitsPage extends StatelessWidget {
   const UnitsPage({super.key});
@@ -46,7 +46,7 @@ class UnitsPage extends StatelessWidget {
               return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
-                icon: LucideIcons.ruler,
+                icon: Symbols.straighten,
                 title: 'Nenhuma unidade cadastrada',
                 message: 'Crie unidades como Quilo, Litro ou Unidade para usar nos produtos.',
                 actionLabel: 'Nova unidade',
@@ -77,7 +77,7 @@ class UnitsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: null,
         onPressed: () => _openForm(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(Symbols.add),
       ),
     );
   }
