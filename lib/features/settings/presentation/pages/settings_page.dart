@@ -1,15 +1,21 @@
+import 'package:buy_control/app/i18n/locale_controller.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/core/i18n/app_locale.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/theme_controller.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:buy_control/features/auth/presentation/pages/profile_page.dart';
-import 'package:buy_control/features/backup/presentation/backup_actions.dart';
+import 'package:buy_control/features/backup/presentation/bindings/backup_binding.dart';
+import 'package:buy_control/features/backup/presentation/pages/backup_page.dart';
 import 'package:buy_control/features/settings/presentation/bindings/settings_binding.dart';
 import 'package:buy_control/features/settings/presentation/pages/about_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
+import 'package:buy_control/features/settings/presentation/widgets/language_sheet.dart';
 import 'package:buy_control/features/settings/presentation/widgets/theme_mode_sheet.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
+import 'package:buy_control/features/subscription/presentation/pages/my_plan_page.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
@@ -34,9 +40,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _logout(BuildContext context) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Sair da conta?',
-      message: 'Você precisará entrar novamente para acessar seus dados.',
-      confirmLabel: 'Sair',
+      title: 'common.signOutAccount'.tr,
+      message: 'settings.youllNeedSignAgainAccess'.tr,
+      confirmLabel: 'common.signOut'.tr,
     );
     if (confirmed) await Get.find<AuthController>().logout();
   }
@@ -46,41 +52,45 @@ class _SettingsPageState extends State<SettingsPage> {
     const chevron = Icon(Symbols.chevron_right, size: 18);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: AppBar(title: Text('common.settings'.tr)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _Section(
-            title: 'Conta',
+            title: 'settings.account'.tr,
             children: [
               _Tile(
                 icon: Symbols.account_circle,
-                title: 'Perfil',
+                title: 'common.profile'.tr,
                 trailing: chevron,
                 onTap: () => Get.to(() => const ProfilePage()),
               ),
-              _Tile(icon: Symbols.logout, title: 'Sair', onTap: () => _logout(context)),
+              GetBuilder<SubscriptionController>(
+                builder: (subscription) => _Tile(
+                  icon: Symbols.workspace_premium,
+                  title: 'common.myPlan'.tr,
+                  subtitle: 'common.planName'.trParams({'name': subscription.plan.name}),
+                  trailing: chevron,
+                  onTap: () => Get.to(() => const MyPlanPage()),
+                ),
+              ),
+              _Tile(icon: Symbols.logout, title: 'common.signOut'.tr, onTap: () => _logout(context)),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
           _Section(
-            title: 'Dados',
+            title: 'settings.data'.tr,
             children: [
               _Tile(
-                icon: Symbols.cloud_upload,
-                title: 'Exportar dados',
+                icon: Symbols.cloud_sync,
+                title: 'common.backupRestore'.tr,
+                subtitle: 'settings.fileCloudGithub'.tr,
                 trailing: chevron,
-                onTap: () => runExportBackup(context),
-              ),
-              _Tile(
-                icon: Symbols.cloud_download,
-                title: 'Importar dados',
-                trailing: chevron,
-                onTap: () => runImportBackup(context),
+                onTap: () => Get.to(() => const BackupPage(), binding: BackupBinding()),
               ),
               _Tile(
                 icon: Symbols.delete,
-                title: 'Limpar dados',
+                title: 'settings.clearData'.tr,
                 destructive: true,
                 trailing: chevron,
                 onTap: () => Get.to(() => const ClearDataPage(), binding: SettingsBinding()),
@@ -90,28 +100,37 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: AppSpacing.xl),
           GetBuilder<ThemeController>(
             builder: (themeController) => _Section(
-              title: 'Preferências',
+              title: 'settings.preferences'.tr,
               children: [
                 _Tile(
                   icon: Symbols.palette,
-                  title: 'Tema',
+                  title: 'settings.theme'.tr,
                   subtitle: themeController.mode.label,
                   trailing: chevron,
                   onTap: () => AppBottomSheet.show(context, child: const ThemeModeSheet()),
+                ),
+                GetBuilder<LocaleController>(
+                  builder: (localeController) => _Tile(
+                    icon: Symbols.translate,
+                    title: 'settings.language'.tr,
+                    subtitle: AppLocale.nativeName(localeController.locale),
+                    trailing: chevron,
+                    onTap: () => AppBottomSheet.show(context, child: const LanguageSheet()),
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
           _Section(
-            title: 'Sobre',
+            title: 'settings.about'.tr,
             children: [
               FutureBuilder<PackageInfo>(
                 future: _packageInfoFuture,
                 builder: (context, snapshot) => _Tile(
                   icon: Symbols.info,
-                  title: 'Sobre o sistema',
-                  subtitle: snapshot.data == null ? null : 'Versão ${snapshot.data!.version}',
+                  title: 'settings.aboutApp'.tr,
+                  subtitle: snapshot.data == null ? null : 'settings.version2'.trParams({'version': snapshot.data!.version}),
                   trailing: chevron,
                   onTap: () => Get.to(() => const AboutPage()),
                 ),

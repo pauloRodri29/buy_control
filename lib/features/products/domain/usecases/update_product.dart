@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -11,19 +12,19 @@ class UpdateProduct {
 
   Future<Result<void>> call(ProductEntity product) async {
     if (!Validators.isNotBlank(product.name)) {
-      return const Failure(ValidationFailure('Nome do produto é obrigatório.'));
+      return Failure(ValidationFailure('products.productNameRequired'.tr));
     }
     if (!Validators.isNotBlank(product.categoryId)) {
-      return const Failure(ValidationFailure('Categoria do produto é obrigatória.'));
+      return Failure(ValidationFailure('products.productCategoryRequired'.tr));
     }
     if (!Validators.isNotBlank(product.productTypeId)) {
-      return const Failure(ValidationFailure('Tipo do produto é obrigatório.'));
+      return Failure(ValidationFailure('products.productTypeRequired'.tr));
     }
     if (!Validators.isNotBlank(product.defaultUnitId)) {
-      return const Failure(ValidationFailure('Unidade padrão do produto é obrigatória.'));
+      return Failure(ValidationFailure('products.productDefaultUnitRequired'.tr));
     }
     if (product.referencePrice != null && product.referencePrice!.cents < 0) {
-      return const Failure(ValidationFailure('Preço de referência não pode ser negativo.'));
+      return Failure(ValidationFailure('products.referencePriceCantNegative'.tr));
     }
 
     final code = product.code?.trim();
@@ -41,7 +42,7 @@ class UpdateProduct {
             (p) => p.id != product.id && !p.isDeleted && p.code?.trim().toLowerCase() == code.toLowerCase(),
           );
       if (sameCode) {
-        return const Failure(ValidationFailure('Já existe um produto com este código.'));
+        return Failure(ValidationFailure('products.productCodeAlreadyExists'.tr));
       }
       final conflict = ProductBarcodes.findConflict(existing, barcodes: barcodes, exceptProductId: product.id);
       if (conflict != null) {

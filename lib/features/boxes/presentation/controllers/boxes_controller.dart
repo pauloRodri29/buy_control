@@ -9,10 +9,15 @@ import 'package:buy_control/features/boxes/domain/usecases/get_box_summary.dart'
 import 'package:buy_control/features/boxes/domain/usecases/get_boxes.dart';
 import 'package:buy_control/features/boxes/domain/usecases/update_box.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 
 enum BoxSort { name, date, value }
 
-class BoxesController extends GetxController {
+class BoxesController extends GetxController with PlanLocks {
+  @override
+  ResourceKey get lockResource => ResourceKey.boxes;
+
   final GetBoxes getBoxes;
   final GetBoxSummary getBoxSummary;
   final CreateBox createBox;
@@ -44,9 +49,11 @@ class BoxesController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load() async {
     status = ViewStatus.loading;
     update();
+    await refreshLocks();
 
     final result = await getBoxes();
     final failure = result.failureOrNull;
@@ -114,7 +121,7 @@ class BoxesController extends GetxController {
     final result = await createBox(name: name);
     return result.fold((outcome) {
       if (outcome.hasDuplicateName) {
-        AppFeedback.error('Já existe uma caixa chamada "${outcome.box.name}".', title: 'Nome duplicado');
+        AppFeedback.error('boxes.boxNamedAlreadyExistsName'.trParams({'name': outcome.box.name}), title: 'boxes.duplicateName'.tr);
       }
       load();
       return null;

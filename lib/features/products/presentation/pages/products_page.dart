@@ -26,10 +26,9 @@ class ProductsPage extends StatelessWidget {
   Future<void> _delete(BuildContext context, ProductsController controller, ProductEntity product) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir o produto "${product.name}"?',
+      title: 'products.deleteProductName'.trParams({'name': product.name}),
       message:
-          'O produto deixará de aparecer no catálogo, mas lançamentos antigos que já usam ele '
-          'continuam mostrando o nome e preço registrados na época.',
+          'products.productWillNoLongerAppear'.tr,
     );
     if (confirmed) await controller.delete(product.id);
   }
@@ -37,7 +36,7 @@ class ProductsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Produtos', )),
+      appBar: AppBar(title: AppText.heading('common.products'.tr, )),
       body: GetBuilder<ProductsController>(
         builder: (controller) {
           final showFilters = controller.status != ViewStatus.initial && controller.status != ViewStatus.loading;
@@ -46,7 +45,7 @@ class ProductsPage extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
-                child: SearchFieldDebounced(hint: 'Buscar produto', onChanged: controller.search),
+                child: SearchFieldDebounced(hint: 'common.searchProduct'.tr, onChanged: controller.search),
               ),
               if (showFilters && controller.categories.isNotEmpty)
                 Padding(
@@ -77,13 +76,13 @@ class ProductsPage extends StatelessWidget {
       case ViewStatus.loading:
         return const LoadingSkeletonList();
       case ViewStatus.error:
-        return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+        return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
           icon: Symbols.inventory_2,
-          title: 'Nenhum produto encontrado',
-          message: 'Cadastre produtos para usar nas compras e nos lançamentos.',
-          actionLabel: 'Novo produto',
+          title: 'common.noProductsFound'.tr,
+          message: 'products.registerProductsUsePurchasesEntries'.tr,
+          actionLabel: 'products.newProduct'.tr,
           onAction: () => _openForm(context),
         );
       case ViewStatus.success:
@@ -93,12 +92,14 @@ class ProductsPage extends StatelessWidget {
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (_, i) {
             final product = controller.products[i];
+            final locked = controller.isLocked(product.id);
             return _ProductCard(
               product: product,
               categoryName: controller.categoryName(product.categoryId),
               productTypeName: controller.productTypeName(product.productTypeId),
               unitAbbreviation: controller.unitAbbreviation(product.defaultUnitId),
-              onTap: () => _openForm(context, product: product),
+              locked: locked,
+              onTap: locked ? controller.showLockedPrompt : () => _openForm(context, product: product),
               onDelete: () => _delete(context, controller, product),
             );
           },
@@ -114,6 +115,7 @@ class _ProductCard extends StatelessWidget {
   final String categoryName;
   final String productTypeName;
   final String unitAbbreviation;
+  final bool locked;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
@@ -122,6 +124,7 @@ class _ProductCard extends StatelessWidget {
     required this.categoryName,
     required this.productTypeName,
     required this.unitAbbreviation,
+    required this.locked,
     required this.onTap,
     required this.onDelete,
   });
@@ -137,13 +140,14 @@ class _ProductCard extends StatelessWidget {
       subtitle: brand != null && brand.trim().isNotEmpty ? brand : null,
       highlight: price == null ? null : (hasUnit ? '${price.formatted} / $unitAbbreviation' : price.formatted),
       details: [
-        if (price == null) 'Sem preço de referência',
+        if (price == null) 'products.noReferencePrice'.tr,
         '$categoryName • $productTypeName',
       ],
       onTap: onTap,
+      locked: locked,
       actions: [
-        AppListCardAction('Editar', onTap),
-        AppListCardAction('Excluir', onDelete, destructive: true),
+        AppListCardAction('common.edit'.tr, onTap),
+        AppListCardAction('common.delete'.tr, onDelete, destructive: true),
       ],
     );
   }

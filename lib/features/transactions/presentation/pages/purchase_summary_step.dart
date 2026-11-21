@@ -97,9 +97,9 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
         children: [
           Row(
             children: [
-              Expanded(child: AppText.heading('Resumo da compra', )),
+              Expanded(child: AppText.heading('transactions.purchaseSummary'.tr, )),
               AppButton.text(
-                label: 'Editar itens',
+                label: 'transactions.editItems'.tr,
                 icon: Symbols.edit,
                 onPressed: _submitting ? null : _editItems,
               ),
@@ -121,7 +121,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
                             AppText.subtitle('${QuantityFormatter.format(item.quantity)} × ${item.unitPrice.formatted}'),
                             if (!item.discount.isZero)
                               AppText.small(
-                                '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
+                                '${item.discountRule?.description ?? 'common.discount'.tr} · - ${item.discount.formatted}',
                                 color: context.colors.primary,
                                 
                               ),
@@ -141,7 +141,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
               Expanded(
                 child: AppMoneyField(
                   initialValue: _draft.discount,
-                  label: 'Desconto na compra (opcional)',
+                  label: 'transactions.purchaseDiscountOptional'.tr,
                   onChanged: (money) => setState(() => _draft.discount = money),
                 ),
               ),
@@ -149,7 +149,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
               Expanded(
                 child: AppMoneyField(
                   initialValue: _draft.additionalCost,
-                  label: 'Acréscimo (opcional)',
+                  label: 'transactions.surchargeOptional'.tr,
                   onChanged: (money) => setState(() => _draft.additionalCost = money),
                 ),
               ),
@@ -159,7 +159,7 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const AppText('Total', fontWeight: FontWeight.bold),
+              AppText('common.total'.tr, fontWeight: FontWeight.bold),
               AppText.heading(_draft.total.formatted, color: context.colors.primary),
             ],
           ),
@@ -171,11 +171,11 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
           ],
           const SizedBox(height: AppSpacing.lg),
           AppButton(
-            label: _draft.isEditing ? 'Salvar alterações' : 'Confirmar',
+            label: _draft.isEditing ? 'transactions.saveChanges'.tr : 'common.confirm'.tr,
             onPressed: _submitting ? null : _confirm,
           ),
           const SizedBox(height: AppSpacing.xs),
-          const AppText.subtitle('Toque num item para alterar quantidade, preço ou desconto.'),
+          AppText.subtitle('transactions.tapItemChangeQuantityPrice'.tr),
         ],
       ),
     );

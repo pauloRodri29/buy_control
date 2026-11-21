@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -10,10 +11,10 @@ class UpdateUnit {
 
   Future<Result<void>> call(UnitEntity unit) async {
     if (!Validators.isNotBlank(unit.name)) {
-      return const Failure(ValidationFailure('Nome da unidade é obrigatório.'));
+      return Failure(ValidationFailure('units.unitNameRequired'.tr));
     }
     if (!Validators.isNotBlank(unit.abbreviation)) {
-      return const Failure(ValidationFailure('Abreviação da unidade é obrigatória.'));
+      return Failure(ValidationFailure('units.unitAbbreviationRequired'.tr));
     }
     return repository.update(unit);
   }

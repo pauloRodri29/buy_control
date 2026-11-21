@@ -76,16 +76,23 @@ Ficam em Mais → Relatórios.
 
 A partir de um relatório consolidado: PDF (título, período, filtros aplicados, resumo financeiro, tabela de produtos, total geral, data de geração), Compartilhar e Imprimir (via pacote `printing`, reaproveitando o mesmo PDF). CSV e backup-em-JSON-a-partir-do-relatório ainda não implementados (stub com mensagem clara), com o contrato já pronto para receber essas implementações sem mudar a UI.
 
-## Backup e Importação (JSON)
+## Backup e restauração (arquivo ou nuvem)
 
-Em Configurações → Dados: "Exportar dados" gera um único arquivo JSON com todo o conteúdo do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, quadros e itens do Planejamento — incluindo registros excluídos logicamente; backups antigos sem Planejamento continuam importáveis e não apagam os quadros existentes) e abre a tela nativa de compartilhamento. "Importar dados" pede confirmação (a importação **substitui** todos os dados atuais, não mescla), permite escolher um arquivo `.json` e repopula o app a partir dele.
+Em Configurações → Dados → **Backup e restauração**. O backup é um único JSON com todo o conteúdo do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, quadros e itens do Planejamento — incluindo registros excluídos logicamente; backups antigos sem Planejamento continuam importáveis e não apagam os quadros existentes).
+
+- **Arquivo**: "Exportar para arquivo" gera o `.json` e abre o compartilhamento; "Importar de arquivo" escolhe um `.json`.
+- **Nuvem (GitHub, grátis)**: o backup vai para um repositório **privado** do usuário. Configuração: link do repositório + token pessoal *fine-grained* com "Contents: Read and write" só nesse repositório (passo a passo na própria tela). O token fica no armazenamento seguro do sistema; repositório público é recusado. Cada "Enviar agora" é um commit no arquivo `gastolog-backup.json`, então o **Histórico** lista todas as versões enviadas e qualquer uma pode ser restaurada. O card mostra o último envio com sucesso e, se a última tentativa falhou, a mensagem de erro.
+- **Resumo antes de agir**: toda restauração (arquivo, nuvem ou desfazer) e todo envio abrem antes a tela "Conferir", com totais do que entra / muda / sai, a lista por tipo de dado (nome e data de cada registro), e avisos: backup mais antigo que a última alteração local, registros locais mais novos que seriam trocados por versões antigas, registros que serão apagados, coleções não incluídas (mantidas). Nada muda sem confirmar.
+- **Reversível**: antes de substituir, o app guarda uma cópia dos dados atuais; "Desfazer última importação" volta a ela. Se a importação falhar no meio, os dados anteriores são restaurados automaticamente.
+- **Envio seguro**: o envio só acontece se o backup na nuvem ainda for o mesmo que foi conferido no resumo (evita sobrescrever um envio feito de outro aparelho).
+- **Atividade recente**: lista as últimas operações com sucesso ou erro e a mensagem de cada uma.
 
 ## Configurações
 
 Organizadas em grupos:
 - **Conta**: Perfil, Sair.
 - **Dados**: Exportar dados, Importar dados, Limpar dados.
-- **Preferências**: Tema — Automático (segue o sistema), Claro ou Escuro. A escolha é salva no `AppMetaStore` e aplicada na hora pelo `ThemeController`.
+- **Preferências**: Tema — Automático (segue o sistema), Claro ou Escuro. A escolha é salva no `AppMetaStore` e aplicada na hora pelo `ThemeController`. Idioma — Português (Brasil) ou English, aplicado na hora pelo `LocaleController`; sem escolha, segue o idioma do aparelho (português se for português, senão inglês).
 - **Sobre**: "Sobre o sistema" abre uma tela com o que o app faz, como os dados são guardados (no aparelho, sem internet, backup manual), versão, compilação e licenças de código aberto.
 
 ### Limpar dados

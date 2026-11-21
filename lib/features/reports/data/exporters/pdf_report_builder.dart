@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:typed_data';
 
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
@@ -29,7 +30,7 @@ class PdfReportBuilder {
             pw.Text(title, style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
             if (periodLabel != null) ...[
               pw.SizedBox(height: 4),
-              pw.Text('Período: $periodLabel', style: const pw.TextStyle(fontSize: 11)),
+              pw.Text('reports.periodPeriodLabel'.trParams({'periodLabel': periodLabel}), style: const pw.TextStyle(fontSize: 11)),
             ],
             pw.SizedBox(height: 8),
             pw.Divider(),
@@ -39,14 +40,14 @@ class PdfReportBuilder {
           if (appliedFilters != null && appliedFilters.isNotEmpty) _buildFiltersSection(appliedFilters),
           _buildSummarySection(report),
           pw.SizedBox(height: 16),
-          pw.Text('Produtos', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text('common.products'.tr, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
           pw.SizedBox(height: 8),
           _buildProductsTable(report),
           pw.SizedBox(height: 16),
           _buildTotalsSection(report),
           pw.SizedBox(height: 24),
           pw.Text(
-            'Gerado em ${DateTimeFormatter.ddMMyyyyHHmm(DateTime.now())}',
+            'reports.generatedDateTime'.trParams({'ddMMyyyyHHmm': DateTimeFormatter.ddMMyyyyHHmm(DateTime.now())}),
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
         ],
@@ -62,7 +63,7 @@ class PdfReportBuilder {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('Filtros aplicados', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+          pw.Text('reports.appliedFilters'.tr, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
           pw.SizedBox(height: 4),
           ...filters.entries.map(
             (entry) => pw.Text('${entry.key}: ${entry.value}', style: const pw.TextStyle(fontSize: 10)),
@@ -74,36 +75,36 @@ class PdfReportBuilder {
 
   pw.Widget _buildSummarySection(ConsolidatedReport report) {
     final rows = <List<String>>[
-      ['Total', report.total.formatted],
+      ['common.total'.tr, report.total.formatted],
       if (report.planning != null && report.planning!.purchasedCount > 0) ...[
-        ['Total das Boxes', report.boxesTotal.formatted],
-        ['Comprado pelo Planejamento', report.planning!.purchasedTotal.formatted],
+        ['reports.boxesTotal'.tr, report.boxesTotal.formatted],
+        ['reports.purchasedThroughPlanning'.tr, report.planning!.purchasedTotal.formatted],
       ],
       if (report.planning != null && report.planning!.pendingCount > 0)
-        ['Ainda previsto no Planejamento', report.planning!.forecastPending.formatted],
+        ['reports.stillPlannedPlanning'.tr, report.planning!.forecastPending.formatted],
       if (report.planning != null && !report.planning!.goalTotal.isZero)
-        ['Metas dos quadros no período', report.planning!.goalTotal.formatted],
-      ['Média por Box', report.averagePerBox.formatted],
-      ['Média por dia', report.averagePerDay.formatted],
-      ['Lançamentos', report.transactionCount.toString()],
-      ['Itens', report.itemCount.toString()],
+        ['reports.boardGoalsPeriod'.tr, report.planning!.goalTotal.formatted],
+      ['reports.averagePerBox'.tr, report.averagePerBox.formatted],
+      ['reports.averagePerDay'.tr, report.averagePerDay.formatted],
+      ['common.entries'.tr, report.transactionCount.toString()],
+      ['reports.items'.tr, report.itemCount.toString()],
       if (report.topBox != null)
-        ['Box com maior gasto', '${report.topBox!.name} (${report.topBox!.total.formatted})'],
+        ['reports.boxHighestSpending'.tr, '${report.topBox!.name} (${report.topBox!.total.formatted})'],
       if (report.topCategory != null)
-        ['Categoria com maior gasto', '${report.topCategory!.name} (${report.topCategory!.total.formatted})'],
+        ['reports.categoryHighestSpending'.tr, '${report.topCategory!.name} (${report.topCategory!.total.formatted})'],
       if (report.mostPurchasedProduct != null)
-        ['Produto mais comprado', '${report.mostPurchasedProduct!.name} (${_formatQuantity(report.mostPurchasedProduct!.quantity)})'],
+        ['reports.mostPurchasedProduct'.tr, '${report.mostPurchasedProduct!.name} (${_formatQuantity(report.mostPurchasedProduct!.quantity)})'],
       if (report.highestImpactProduct != null)
-        ['Produto de maior impacto', '${report.highestImpactProduct!.name} (${report.highestImpactProduct!.total.formatted})'],
+        ['reports.productBiggestImpact'.tr, '${report.highestImpactProduct!.name} (${report.highestImpactProduct!.total.formatted})'],
     ];
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Resumo financeiro', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+        pw.Text('reports.financialSummary'.tr, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 8),
         pw.TableHelper.fromTextArray(
-          headers: const ['Indicador', 'Valor'],
+          headers: ['reports.metric'.tr, 'common.value'.tr],
           data: rows,
           cellAlignment: pw.Alignment.centerLeft,
           headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
@@ -115,10 +116,10 @@ class PdfReportBuilder {
 
   pw.Widget _buildProductsTable(ConsolidatedReport report) {
     if (report.productLines.isEmpty) {
-      return pw.Text('Nenhum produto no período selecionado.', style: const pw.TextStyle(fontSize: 10));
+      return pw.Text('reports.noProductsSelectedPeriod'.tr, style: const pw.TextStyle(fontSize: 10));
     }
     return pw.TableHelper.fromTextArray(
-      headers: const ['Produto', 'Quantidade', 'Total'],
+      headers: ['common.product'.tr, 'common.quantity'.tr, 'common.total'.tr],
       data: report.productLines
           .map((line) => [line.name, _formatQuantity(line.quantity), line.total.formatted])
           .toList(),
@@ -134,7 +135,7 @@ class PdfReportBuilder {
       alignment: pw.Alignment.centerRight,
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Text(
-        'Total geral: ${report.total.formatted}',
+        'reports.grandTotalAmount'.trParams({'formatted': report.total.formatted}),
         style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
       ),
     );

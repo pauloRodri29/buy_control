@@ -12,6 +12,8 @@ import 'package:buy_control/features/products/domain/usecases/link_barcode_to_pr
 import 'package:buy_control/features/products/presentation/bindings/products_binding.dart';
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/widgets/product_form_sheet.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_item_entity.dart';
 import 'package:buy_control/features/transactions/presentation/pages/product_picker_sheet.dart';
 import 'package:buy_control/features/transactions/presentation/pages/scale_label_sheet.dart';
@@ -21,6 +23,7 @@ import 'package:buy_control/features/units/domain/entities/unit_entity.dart';
 import 'package:buy_control/features/units/domain/usecases/get_units.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/presentation/plan_features.dart';
 
 /// Abre a câmera em "modo carrinho" e vai colocando no [draft] cada
 /// produto lido. Nada é gravado como lançamento aqui — o rascunho segue
@@ -34,8 +37,15 @@ import 'package:get/get.dart';
 ///   lançar avulso ou ignorar.
 Future<void> scanIntoDraft(BuildContext context, PurchaseDraft draft) async {
   final units = (await Get.find<GetUnits>()()).dataOrNull ?? const <UnitEntity>[];
+  final subscription = Get.find<SubscriptionController>();
+  final lockedProducts = await subscription.lockedIds(ResourceKey.products);
   if (!context.mounted) return;
-  final handler = _ScanHandler(draft: draft, units: units);
+  final handler = _ScanHandler(
+    draft: draft,
+    units: units,
+    lockedProductIds: lockedProducts,
+    planName: subscription.plan.name,
+  );
   await BarcodeScannerPage.scanContinuous(context, onScanned: handler.handle);
 }
 
@@ -43,7 +53,16 @@ class _ScanHandler {
   final PurchaseDraft draft;
   final List<UnitEntity> units;
 
-  _ScanHandler({required this.draft, required this.units});
+  /// Produtos que passaram do limite do plano: o leitor avisa em vez de usar.
+  final Set<String> lockedProductIds;
+  final String planName;
+
+  _ScanHandler({
+    required this.draft,
+    required this.units,
+    required this.lockedProductIds,
+    required this.planName,
+  });
 
   final _findProduct = Get.find<FindProductByBarcode>();
   final _linkBarcode = Get.find<LinkBarcodeToProduct>();
@@ -59,7 +78,13 @@ class _ScanHandler {
     if (!context.mounted) return null;
     final product = found.dataOrNull;
 
-    if (code.isScaleLabel) return _handleScaleLabel(context, code, product);
+    if (product != null && lockedProductIds.contains(product.id)) {
+      return 'transactions.lockedPlanNamePlanName'.trParams({'name': product.name, 'planName': planName});
+    }
+    if (code.isScaleLabel) {
+      if (!PlanFeatures.has(FeatureKey.scaleLabel)) return PlanFeatures.message(FeatureKey.scaleLabel);
+      return _handleScaleLabel(context, code, product);
+    }
     if (product != null) return _addProduct(product);
     return _handleUnknown(context, code);
   }
@@ -68,7 +93,7 @@ class _ScanHandler {
     draft.addProducts([product]);
     final quantity = draft.quantityOf(product.id);
     final label = QuantityFormatter.format(quantity);
-    return '+1 ${product.name} (total: $label)';
+    return 'transactions.n1TotalNameLabel'.trParams({'name': product.name, 'label': label});
   }
 
   Future<String?> _handleScaleLabel(BuildContext context, ScannedCode code, ProductEntity? product) async {
@@ -88,7 +113,7 @@ class _ScanHandler {
     final unitId = byWeight
         ? (_unitIdByAbbreviation('KG') ?? chosen?.defaultUnitId ?? _defaultUnitId)
         : (chosen?.defaultUnitId ?? _defaultUnitId);
-    if (unitId == null) return 'Cadastre ao menos uma unidade antes de lançar.';
+    if (unitId == null) return 'transactions.registerLeastOneUnitBefore'.tr;
 
     draft.addItem(TransactionItemEntity(
       id: IdGenerator.generate(),
@@ -101,7 +126,7 @@ class _ScanHandler {
       unitPrice: byWeight ? (chosen?.referencePrice ?? Money.zero) : result.price,
     ));
     return byWeight
-        ? '+ ${result.name} (${result.weightKg.toStringAsFixed(3).replaceAll('.', ',')} kg)'
+        ? 'transactions.kgNameWeight'.trParams({'name': result.name, 'replaceAll': result.weightKg.toStringAsFixed(3).replaceAll('.', ',')})
         : '+ ${result.name} (${result.price.formatted})';
   }
 
@@ -148,13 +173,13 @@ class _ScanHandler {
 
   Future<String?> _addStandalone(BuildContext context) async {
     final unitId = _defaultUnitId;
-    if (unitId == null) return 'Cadastre ao menos uma unidade antes de lançar.';
+    if (unitId == null) return 'transactions.registerLeastOneUnitBefore'.tr;
 
     final name = await TextInputDialog.show(
       context,
-      title: 'Nome do item',
-      hint: 'Ex.: Biscoito da padaria',
-      confirmLabel: 'Adicionar',
+      title: 'transactions.itemName'.tr,
+      hint: 'transactions.eGBakeryCookies'.tr,
+      confirmLabel: 'transactions.add'.tr,
       textCapitalization: TextCapitalization.sentences,
     );
     if (name == null || name.isEmpty) return null;
@@ -167,6 +192,6 @@ class _ScanHandler {
       quantity: 1,
       unitPrice: Money.zero,
     ));
-    return '+ $name (informe o preço na lista de itens)';
+    return 'transactions.enterPriceItemListName'.trParams({'name': name});
   }
 }

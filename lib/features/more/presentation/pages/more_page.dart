@@ -15,6 +15,9 @@ import 'package:buy_control/features/settings/presentation/bindings/settings_bin
 import 'package:buy_control/features/settings/presentation/pages/settings_page.dart';
 import 'package:buy_control/features/units/presentation/bindings/units_binding.dart';
 import 'package:buy_control/features/units/presentation/pages/units_page.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
+import 'package:buy_control/features/subscription/presentation/pages/my_plan_page.dart';
+import 'package:buy_control/features/subscription/presentation/widgets/plan_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
@@ -23,7 +26,7 @@ class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
   void _comingSoon() {
-    AppFeedback.info('Este recurso ainda não está disponível.', title: 'Em breve');
+    AppFeedback.info('common.featureNotAvailableYet'.tr, title: 'common.comingSoon'.tr);
   }
 
   @override
@@ -31,7 +34,7 @@ class MorePage extends StatelessWidget {
     final currentUser = Get.find<AuthController>().currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Mais', )),
+      appBar: AppBar(title: AppText.heading('common.more'.tr, )),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -49,9 +52,16 @@ class MorePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppText(currentUser?.name ?? 'Usuário', fontWeight: FontWeight.bold, ),
+                      AppText(currentUser?.name ?? 'more.user'.tr, fontWeight: FontWeight.bold, ),
                       const SizedBox(height: AppSpacing.xs),
                       AppText.subtitle(currentUser?.email ?? ''),
+                      const SizedBox(height: AppSpacing.sm),
+                      GetBuilder<SubscriptionController>(
+                        builder: (subscription) => GestureDetector(
+                          onTap: () => Get.to(() => const MyPlanPage()),
+                          child: PlanBadge(plan: subscription.plan),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -62,32 +72,32 @@ class MorePage extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           ListTile(
             leading: const Icon(Symbols.bar_chart),
-            title: const AppText('Relatórios', fontWeight: FontWeight.w600),
-            subtitle: AppText.subtitle('Gastos realizados, previsão e metas'),
+            title: AppText('common.reports'.tr, fontWeight: FontWeight.w600),
+            subtitle: AppText.subtitle('more.actualSpendingForecastGoals'.tr),
             trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const ReportsPage(), binding: ReportsBinding()),
           ),
           ListTile(
             leading: const Icon(Symbols.sell),
-            title: const AppText('Categorias', fontWeight: FontWeight.w600),
+            title: AppText('common.categories'.tr, fontWeight: FontWeight.w600),
             trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const CategoriesPage(), binding: CategoriesBinding()),
           ),
           ListTile(
             leading: const Icon(Symbols.category),
-            title: const AppText('Tipos de Produto', fontWeight: FontWeight.w600),
+            title: AppText('common.productTypes'.tr, fontWeight: FontWeight.w600),
             trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const ProductTypesPage(), binding: ProductTypesBinding()),
           ),
           ListTile(
             leading: const Icon(Symbols.straighten),
-            title: const AppText('Unidades', fontWeight: FontWeight.w600),
+            title: AppText('common.units'.tr, fontWeight: FontWeight.w600),
             trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const UnitsPage(), binding: UnitsBinding()),
           ),
           ListTile(
             leading: const Icon(Symbols.settings),
-            title: const AppText('Configurações', fontWeight: FontWeight.w600),
+            title: AppText('common.settings'.tr, fontWeight: FontWeight.w600),
             trailing: const Icon(Symbols.chevron_right, size: 18),
             onTap: () => Get.to(() => const SettingsPage(), binding: SettingsBinding()),
           ),
@@ -95,11 +105,11 @@ class MorePage extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Divider(),
           ),
-          AppText.subtitle('Em breve'),
+          AppText.subtitle('common.comingSoon'.tr),
           const SizedBox(height: AppSpacing.sm),
           ListTile(
             leading: Icon(Symbols.refresh, color: context.colors.onSurfaceVariant),
-            title: AppText('Sincronização', fontWeight: FontWeight.w600, color: context.colors.onSurfaceVariant),
+            title: AppText('more.sync'.tr, fontWeight: FontWeight.w600, color: context.colors.onSurfaceVariant),
             onTap: _comingSoon,
           ),
         ],

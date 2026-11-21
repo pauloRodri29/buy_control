@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /// Identidade do app: nome, textos de apoio, fontes e as cores fixas da
 /// marca.
@@ -8,8 +9,9 @@ import 'package:flutter/material.dart';
 /// não mudam com o tema; o [ColorScheme] em `app_theme.dart` parte delas.
 abstract final class AppBrand {
   static const name = 'GastoLog';
-  static const tagline = 'Cada gasto, registrado.';
-  static const description = 'Planejamento e previsão de gastos';
+  // Textos traduzíveis (getters, para acompanhar a troca de idioma).
+  static String get tagline => 'common.everyExpenseRecorded'.tr;
+  static String get description => 'common.spendingPlanningForecasting'.tr;
 
   /// Fonte do app (embutida em `assets/fonts`, funciona offline).
   static const fontFamily = 'PlusJakartaSans';

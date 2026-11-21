@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
@@ -6,10 +7,13 @@ import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
 import 'package:buy_control/features/products/domain/product_barcodes.dart';
 import 'package:buy_control/features/products/domain/repositories/product_repository.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 
 class CreateProduct {
   final ProductRepository repository;
-  const CreateProduct(this.repository);
+  final QuotaGuard? quota;
+  const CreateProduct(this.repository, {this.quota});
 
   Future<Result<ProductEntity>> call({
     String? code,
@@ -23,20 +27,22 @@ class CreateProduct {
     Money? referencePrice,
   }) async {
     if (!Validators.isNotBlank(name)) {
-      return const Failure(ValidationFailure('Nome do produto é obrigatório.'));
+      return Failure(ValidationFailure('products.productNameRequired'.tr));
     }
     if (!Validators.isNotBlank(categoryId)) {
-      return const Failure(ValidationFailure('Categoria do produto é obrigatória.'));
+      return Failure(ValidationFailure('products.productCategoryRequired'.tr));
     }
     if (!Validators.isNotBlank(productTypeId)) {
-      return const Failure(ValidationFailure('Tipo do produto é obrigatório.'));
+      return Failure(ValidationFailure('products.productTypeRequired'.tr));
     }
     if (!Validators.isNotBlank(defaultUnitId)) {
-      return const Failure(ValidationFailure('Unidade padrão do produto é obrigatória.'));
+      return Failure(ValidationFailure('products.productDefaultUnitRequired'.tr));
     }
     if (referencePrice != null && referencePrice.cents < 0) {
-      return const Failure(ValidationFailure('Preço de referência não pode ser negativo.'));
+      return Failure(ValidationFailure('products.referencePriceCantNegative'.tr));
     }
+
+    if (await quota?.ensureCanAdd(ResourceKey.products) case final limit?) return Failure(limit);
 
     final trimmedCode = code?.trim();
     final normalizedBarcodes = ProductBarcodes.normalize(barcodes);
@@ -51,7 +57,7 @@ class CreateProduct {
           trimmedCode.isNotEmpty &&
           existing.any((p) => !p.isDeleted && p.code?.trim().toLowerCase() == trimmedCode.toLowerCase());
       if (sameCode) {
-        return const Failure(ValidationFailure('Já existe um produto com este código.'));
+        return Failure(ValidationFailure('products.productCodeAlreadyExists'.tr));
       }
       final conflict = ProductBarcodes.findConflict(existing, barcodes: normalizedBarcodes);
       if (conflict != null) {

@@ -14,6 +14,8 @@ import 'package:buy_control/features/products/presentation/bindings/products_bin
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/widgets/product_form_sheet.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
@@ -47,16 +49,20 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
     _init();
   }
 
+  /// Produtos que passaram do limite do plano: não aparecem para seleção.
+  Set<String> _locked = const {};
+
   Future<void> _init() async {
     final categoriesResult = await _getCategories();
     categoriesResult.fold((data) => _categories = data, (_) {});
+    _locked = await Get.find<SubscriptionController>().lockedIds(ResourceKey.products);
     await _loadProducts();
   }
 
   Future<void> _loadProducts() async {
     setState(() => _loading = true);
     final result = await _searchProducts(query: _query, categoryId: _categoryId);
-    result.fold((data) => _products = data, (_) => _products = []);
+    result.fold((data) => _products = data.where((p) => !_locked.contains(p.id)).toList(), (_) => _products = []);
     if (mounted) setState(() => _loading = false);
   }
 
@@ -98,10 +104,10 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading('Selecionar produtos', ),
+        AppText.heading('transactions.selectProducts'.tr, ),
         const SizedBox(height: AppSpacing.md),
         SearchFieldDebounced(
-          hint: 'Buscar produto',
+          hint: 'common.searchProduct'.tr,
           onChanged: (value) {
             _query = value;
             _loadProducts();
@@ -123,7 +129,7 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
           child: _loading
               ? const Center(child: CircularProgressIndicator())
               : _products.isEmpty && !_canCreateFromQuery
-                  ? const EmptyStateView(title: 'Nenhum produto encontrado')
+                  ? EmptyStateView(title: 'common.noProductsFound'.tr)
                   : ListView(
                       children: [
                         if (_canCreateFromQuery) ...[
@@ -133,8 +139,8 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
                             textColor: context.colors.onPrimaryContainer,
                             iconColor: context.colors.onPrimaryContainer,
                             leading: const Icon(Symbols.add),
-                            title: Text('Cadastrar "${_query.trim()}"'),
-                            subtitle: const Text('Vira produto do catálogo e já entra nesta compra'),
+                            title: Text('transactions.addName'.trParams({'trim': _query.trim()})),
+                            subtitle: Text('transactions.becomesCatalogProductAddedPurchase'.tr),
                           ),
                           const SizedBox(height: AppSpacing.sm),
                         ],
@@ -152,11 +158,11 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
         ),
         const SizedBox(height: AppSpacing.sm),
         AppText(
-          _selected.length == 1 ? '1 produto selecionado' : '${_selected.length} produtos selecionados',
+          _selected.length == 1 ? 'transactions.n1ProductSelected'.tr : 'transactions.productsSelectedCount'.trParams({'length': '${_selected.length}'}),
           color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppButton(label: 'Continuar', onPressed: _selected.isEmpty ? null : _continue),
+        AppButton(label: 'common.continue'.tr, onPressed: _selected.isEmpty ? null : _continue),
       ],
     );
   }

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_dropdown.dart';
 import 'package:buy_control/app/widgets/app_money_field.dart';
@@ -114,20 +115,20 @@ class _DiscountRuleEditorState extends State<DiscountRuleEditor> {
       case null:
         return null;
       case DiscountType.fixed:
-        return _moneyField('Valor do desconto');
+        return _moneyField('transactions.discountAmount'.tr);
       case DiscountType.percent:
         return AppTextField(
           controller: _percentController,
-          label: 'Percentual (%)',
+          label: 'transactions.percentage'.tr,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => _emit(),
         );
       case DiscountType.bundlePrice:
-        return _row(_intField(_quantityController, 'Leve (un.)'), _moneyField('Por (total)'));
+        return _row(_intField(_quantityController, 'transactions.buyUnits'.tr), _moneyField('transactions.total'.tr));
       case DiscountType.buyXPayY:
-        return _row(_intField(_quantityController, 'Leve (un.)'), _intField(_payController, 'Pague (un.)'));
+        return _row(_intField(_quantityController, 'transactions.buyUnits'.tr), _intField(_payController, 'transactions.payUnits'.tr));
       case DiscountType.wholesale:
-        return _row(_intField(_quantityController, 'A partir de (un.)'), _moneyField('Preço de cada'));
+        return _row(_intField(_quantityController, 'transactions.fromUnits'.tr), _moneyField('transactions.priceEach'.tr));
     }
   }
 
@@ -138,10 +139,10 @@ class _DiscountRuleEditorState extends State<DiscountRuleEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppDropdown<String>(
-          label: 'Desconto / promoção',
+          label: 'transactions.discountPromotion'.tr,
           value: _type?.name ?? _none,
           options: [
-            const AppDropdownOption(value: _none, label: 'Sem desconto'),
+            AppDropdownOption(value: _none, label: 'transactions.noDiscount'.tr),
             ...DiscountType.values.map((t) => AppDropdownOption(value: t.name, label: t.label)),
           ],
           onChanged: _changeType,

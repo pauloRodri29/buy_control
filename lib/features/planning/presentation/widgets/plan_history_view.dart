@@ -23,11 +23,10 @@ class PlanHistoryView extends StatelessWidget {
       builder: (controller) {
         final boards = controller.history;
         if (boards.isEmpty) {
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Symbols.history,
-            title: 'Nada no histórico ainda',
-            message: 'Quando você finalizar ou cancelar um quadro, ele aparece aqui com o resumo do que '
-                'foi gasto.',
+            title: 'planning.nothingHistoryYet'.tr,
+            message: 'planning.whenYouFinishCancelBoard'.tr,
           );
         }
 
@@ -71,7 +70,7 @@ class PlanBoardStatusChip extends StatelessWidget {
         children: [
           Icon(cancelled ? Symbols.block : Symbols.task_alt, size: 14, color: color),
           const SizedBox(width: AppSpacing.xs),
-          AppText.small(cancelled ? 'Cancelado' : 'Finalizado', color: color, fontWeight: FontWeight.w600),
+          AppText.small(cancelled ? 'planning.cancelled'.tr : 'planning.finished'.tr, color: color, fontWeight: FontWeight.w600),
         ],
       ),
     );
@@ -113,25 +112,24 @@ class PlanHistoryCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               AppText.subtitle(
-                '${board.isCancelled ? 'Cancelado' : 'Finalizado'} em ${DateTimeFormatter.ddMMyyyy(board.finishedAt!)}'
-                ' · previsão ${DateTimeFormatter.ddMMyyyy(board.targetDate)}',
+                'planning.plannedValueDate'.trParams({'value': board.isCancelled ? 'planning.cancelled'.tr : 'planning.finished'.tr, 'ddMMyyyy': DateTimeFormatter.ddMMyyyy(board.finishedAt!), 'vBDdMMyyyy': DateTimeFormatter.ddMMyyyy(board.targetDate)}),
                 color: secondary,
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   Expanded(
-                    child: AppText.small('Gasto: ${spent.formatted}', fontWeight: FontWeight.w600),
+                    child: AppText.small('planning.spentAmount'.trParams({'formatted': spent.formatted}), fontWeight: FontWeight.w600),
                   ),
-                  AppText.subtitle('${progress.purchasedCount} de ${progress.itemCount} comprados', color: secondary),
+                  AppText.subtitle('planning.purchasedPurchasedCountItemCount'.trParams({'purchasedCount': '${progress.purchasedCount}', 'itemCount': '${progress.itemCount}'}), color: secondary),
                 ],
               ),
               if (goal != null) ...[
                 const SizedBox(height: AppSpacing.xs),
                 AppText.subtitle(
                   spent > goal
-                      ? '${(spent - goal).formatted} acima da meta de ${goal.formatted}'
-                      : '${(goal - spent).formatted} abaixo da meta de ${goal.formatted}',
+                      ? 'planning.overGoalAmount2'.trParams({'formatted': (spent - goal).formatted, 'vBFormatted': goal.formatted})
+                      : 'planning.belowGoalAmount'.trParams({'formatted': (goal - spent).formatted, 'vBFormatted': goal.formatted}),
                   color: spent > goal ? context.colors.error : context.semantic.success,
                 ),
               ],

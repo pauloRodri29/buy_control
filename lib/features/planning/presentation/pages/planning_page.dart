@@ -42,7 +42,7 @@ class PlanningPage extends StatelessWidget {
   PlanningController get _controller => Get.find<PlanningController>();
 
   void _showError(String? error) {
-    if (error != null) AppFeedback.error(error, title: 'Não foi possível concluir');
+    if (error != null) AppFeedback.error(error, title: 'common.couldntComplete'.tr);
   }
 
   void _openBoardForm(BuildContext context, {PlanBoardEntity? board}) {
@@ -76,8 +76,8 @@ class PlanningPage extends StatelessWidget {
     if (count == 0) {
       final confirmed = await ConfirmDialog.show(
         context,
-        title: 'Excluir o quadro "${board.title}"?',
-        message: 'O quadro está vazio. Esta ação não pode ser desfeita.',
+        title: 'planning.deleteBoardTitle'.trParams({'title': board.title}),
+        message: 'planning.boardEmptyActionCantUndone'.tr,
       );
       if (confirmed) _showError(await _controller.removeBoard(board.id, deleteItems: false));
       return;
@@ -86,21 +86,20 @@ class PlanningPage extends StatelessWidget {
     final choice = await showDialog<_DeleteBoardChoice>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Excluir o quadro "${board.title}"?'),
+        title: Text('planning.deleteBoardTitle'.trParams({'title': board.title})),
         content: Text(
-          'Este quadro tem $count ${count == 1 ? 'item' : 'itens'}. Você pode mantê-los em '
-          '"Sem quadro" ou excluí-los junto. Esta ação não pode ser desfeita.',
+          'planning.boardHasYouCanKeepCountValue'.trParams({'count': '$count', 'value': count == 1 ? 'common.item'.tr : 'common.items'.tr}),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text('common.cancel'.tr)),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(_DeleteBoardChoice.moveItems),
-            child: const Text('Manter itens'),
+            child: Text('planning.keepItems'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(_DeleteBoardChoice.deleteItems),
             style: TextButton.styleFrom(foregroundColor: context.colors.error),
-            child: const Text('Excluir tudo'),
+            child: Text('planning.deleteEverything'.tr),
           ),
         ],
       ),
@@ -118,8 +117,8 @@ class PlanningPage extends StatelessWidget {
       case PlanItemAction.delete:
         final confirmed = await ConfirmDialog.show(
           context,
-          title: 'Excluir "${item.title}"?',
-          message: 'O item será removido do planejamento. Esta ação não pode ser desfeita.',
+          title: 'planning.deleteTitle'.trParams({'title': item.title}),
+          message: 'planning.itemWillRemovedFromPlanning'.tr,
         );
         if (confirmed) _showError(await _controller.removeItem(item.id));
     }
@@ -127,7 +126,7 @@ class PlanningPage extends StatelessWidget {
 
   Future<void> _showMoveSheet(BuildContext context, PlanItemEntity item) async {
     final destinations = <({String? id, String title, String? subtitle})>[
-      (id: null, title: 'Sem quadro', subtitle: null),
+      (id: null, title: 'common.noBoard'.tr, subtitle: null),
       for (final b in _controller.activeBoards)
         (id: b.id, title: b.title, subtitle: DateTimeFormatter.ddMMyyyy(b.targetDate)),
     ];
@@ -138,7 +137,7 @@ class PlanningPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.heading('Mover "${item.title}" para',  maxLines: 2),
+          AppText.heading('planning.moveTitle'.trParams({'title': item.title}),  maxLines: 2),
           const SizedBox(height: AppSpacing.md),
           Flexible(
             child: ListView(
@@ -179,12 +178,12 @@ class PlanningPage extends StatelessWidget {
   Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.heading('Planejamento'),
+        title: AppText.heading('common.planning'.tr),
         bottom: const _PlanningTabBar(),
         actions: [
           IconButton(
             icon: const Icon(Symbols.add),
-            tooltip: 'Novo quadro',
+            tooltip: 'planning.newBoard'.tr,
             onPressed: () => _openBoardForm(context),
           ),
           GetBuilder<PlanningController>(
@@ -198,12 +197,12 @@ class PlanningPage extends StatelessWidget {
                 CheckedPopupMenuItem(
                   value: _MenuOption.toggleArchived,
                   checked: controller.showArchived,
-                  child: const Text('Mostrar arquivados'),
+                  child: Text('planning.showArchived'.tr),
                 ),
                 CheckedPopupMenuItem(
                   value: _MenuOption.togglePurchased,
                   checked: controller.hidePurchased,
-                  child: const Text('Ocultar comprados'),
+                  child: Text('planning.hidePurchased'.tr),
                 ),
               ],
             ),
@@ -217,7 +216,7 @@ class PlanningPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
             case ViewStatus.success:
               return TabBarView(
@@ -228,10 +227,9 @@ class PlanningPage extends StatelessWidget {
                   controller.isKanbanEmpty
                       ? EmptyStateView(
                           icon: Symbols.view_kanban,
-                          title: 'Planeje suas próximas compras',
-                          message: 'Crie quadros como "Dezembro" ou "Fim de ano", defina uma data de previsão '
-                              'e uma meta de gasto, e adicione os itens que pretende comprar.',
-                          actionLabel: 'Novo quadro',
+                          title: 'planning.planNextPurchases'.tr,
+                          message: 'planning.createBoardsLikeDecemberYear'.tr,
+                          actionLabel: 'planning.newBoard'.tr,
                           onAction: () => _openBoardForm(context),
                         )
                       : _buildBoard(context, controller),
@@ -268,6 +266,9 @@ class PlanningPage extends StatelessWidget {
               _showError(await controller.move(item, toBoardId: board?.id, beforeItemId: beforeId)),
           onDragUpdate: onDragUpdate,
           onDragEnd: onDragEnd,
+          locked: board != null && controller.isLocked(board.id),
+          lockedItemIds: controller.lockedItemIds,
+          onLockedTap: controller.showLockedPrompt,
         );
       },
     );
@@ -289,12 +290,12 @@ class _PlanningTabBar extends StatelessWidget implements PreferredSizeWidget {
         return TabBar(
           labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           tabs: [
-            const Tab(text: 'Quadros'),
+            Tab(text: 'planning.boards'.tr),
             Tab(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Flexible(child: Text('Pendências', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  Flexible(child: Text('planning.pending'.tr, maxLines: 1, overflow: TextOverflow.ellipsis)),
                   if (pending > 0) ...[
                     const SizedBox(width: AppSpacing.xs),
                     Badge.count(count: pending),
@@ -302,7 +303,7 @@ class _PlanningTabBar extends StatelessWidget implements PreferredSizeWidget {
                 ],
               ),
             ),
-            const Tab(text: 'Histórico'),
+            Tab(text: 'common.history'.tr),
           ],
         );
       },

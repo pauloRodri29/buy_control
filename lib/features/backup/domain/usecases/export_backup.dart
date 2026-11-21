@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 
 import 'package:buy_control/core/errors/app_failure.dart';
@@ -73,7 +74,7 @@ class ExportBackup {
 
       return Success(jsonEncode(payload));
     } catch (_) {
-      return const Failure(CacheFailure('Falha ao gerar o backup dos dados locais.'));
+      return Failure(CacheFailure('backup.failedGenerateBackupLocalData'.tr));
     }
   }
 }

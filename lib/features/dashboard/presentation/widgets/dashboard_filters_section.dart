@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_date_picker.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -6,10 +7,10 @@ import 'package:buy_control/features/dashboard/presentation/controllers/dashboar
 import 'package:flutter/material.dart';
 
 const _periodOptions = [
-  FilterChipOption(key: 'thisMonth', label: 'Este mês'),
-  FilterChipOption(key: 'lastMonth', label: 'Mês anterior'),
-  FilterChipOption(key: 'thisYear', label: 'Este ano'),
-  FilterChipOption(key: 'custom', label: 'Personalizado'),
+  FilterChipOption(key: 'thisMonth', label: 'common.month'),
+  FilterChipOption(key: 'lastMonth', label: 'common.previousMonth'),
+  FilterChipOption(key: 'thisYear', label: 'dashboard.year'),
+  FilterChipOption(key: 'custom', label: 'common.custom'),
 ];
 
 class DashboardFiltersSection extends StatelessWidget {
@@ -22,7 +23,7 @@ class DashboardFiltersSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.subtitle('Período'),
+        AppText.subtitle('common.period'.tr),
         const SizedBox(height: AppSpacing.sm),
         FilterChipsBar(
           options: _periodOptions,
@@ -31,7 +32,7 @@ class DashboardFiltersSection extends StatelessWidget {
         ),
         if (controller.boxes.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          AppText.subtitle('Box'),
+          AppText.subtitle('common.box'.tr),
           const SizedBox(height: AppSpacing.sm),
           FilterChipsBar(
             options: controller.boxes.map((b) => FilterChipOption(key: b.id, label: b.name)).toList(),
@@ -41,7 +42,7 @@ class DashboardFiltersSection extends StatelessWidget {
         ],
         if (controller.categories.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          AppText.subtitle('Categoria'),
+          AppText.subtitle('common.category'.tr),
           const SizedBox(height: AppSpacing.sm),
           FilterChipsBar(
             options: controller.categories.map((c) => FilterChipOption(key: c.id, label: c.name)).toList(),
@@ -59,7 +60,7 @@ class DashboardFiltersSection extends StatelessWidget {
       final now = DateTime.now();
       final range = await AppDatePicker.showRange(
         context,
-        title: 'Período personalizado',
+        title: 'common.customPeriod'.tr,
         firstDate: DateTime(now.year - 5),
         lastDate: DateTime(now.year + 1),
         initialRange: controller.customRange,

@@ -56,15 +56,15 @@ class _ProductTypeFormSheetState extends State<ProductTypeFormSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading(widget.productType != null ? 'Editar tipo' : 'Novo tipo', ),
+        AppText.heading(widget.productType != null ? 'productTypes.editType'.tr : 'productTypes.newType'.tr, ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(controller: nameController, label: 'Nome', hint: 'Alimentício'),
+        AppTextField(controller: nameController, label: 'common.name'.tr, hint: 'productTypes.food'.tr),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
           AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+        AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
       ],
     );
   }

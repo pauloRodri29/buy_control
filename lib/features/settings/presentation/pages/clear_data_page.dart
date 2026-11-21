@@ -17,7 +17,7 @@ class ClearDataPage extends StatelessWidget {
       context,
       title: title,
       message: message,
-      confirmLabel: 'Apagar',
+      confirmLabel: 'settings.delete'.tr,
     );
     if (!confirmed) return;
 
@@ -25,19 +25,19 @@ class ClearDataPage extends StatelessWidget {
     await clearAppData(scope);
 
     if (context.mounted) {
-      AppFeedback.success('A operação foi concluída.', title: 'Dados apagados');
+      AppFeedback.success('settings.operationWasCompleted'.tr, title: 'settings.dataDeleted'.tr);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Limpar dados', )),
+      appBar: AppBar(title: AppText.heading('settings.clearData'.tr, )),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           AppText.subtitle(
-            'Cada opção abaixo apaga permanentemente uma parte dos seus dados. Não é possível desfazer.',
+            'settings.eachOptionBelowPermanentlyDeletes'.tr,
           ),
           const SizedBox(height: AppSpacing.lg),
           AppCard(
@@ -46,89 +46,79 @@ class ClearDataPage extends StatelessWidget {
               children: [
                 _ClearTile(
                   icon: Symbols.inventory_2,
-                  label: 'Boxes',
+                  label: 'common.boxes'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.boxes,
-                    title: 'Apagar todas as Boxes?',
-                    message: 'Isso remove todas as Boxes e seus lançamentos/fechamentos. '
-                        'Esta ação não pode ser desfeita.',
+                    title: 'settings.deleteAllBoxes'.tr,
+                    message: 'settings.removesAllBoxesTheirEntries'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.shopping_basket,
-                  label: 'Produtos',
+                  label: 'common.products'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.products,
-                    title: 'Apagar todos os Produtos?',
-                    message: 'Isso remove todo o catálogo de produtos cadastrados. Categorias, tipos e '
-                        'unidades não são afetados. Esta ação não pode ser desfeita.',
+                    title: 'settings.deleteAllProducts'.tr,
+                    message: 'settings.removesWholeCatalogRegisteredProducts'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.history,
-                  label: 'Histórico de compras',
+                  label: 'settings.purchaseHistory'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.history,
-                    title: 'Apagar o histórico de compras?',
-                    message: 'Isso remove todos os lançamentos e fechamentos registrados nas Boxes. '
-                        'As Boxes e o catálogo de produtos continuam existindo. Esta ação não pode ser '
-                        'desfeita.',
+                    title: 'settings.deletePurchaseHistory'.tr,
+                    message: 'settings.removesAllEntriesClosingsRecorded'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.view_kanban,
-                  label: 'Planejamento',
+                  label: 'common.planning'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.planning,
-                    title: 'Apagar todo o planejamento?',
-                    message: 'Isso remove todos os quadros de planejamento e seus itens. '
-                        'Esta ação não pode ser desfeita.',
+                    title: 'settings.deleteAllPlanning'.tr,
+                    message: 'settings.removesAllPlanningBoardsTheir'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.description,
-                  label: 'Relatórios salvos',
+                  label: 'settings.savedReports'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.reports,
-                    title: 'Apagar os relatórios salvos?',
-                    message: 'Isso remove todas as combinações de filtros salvas na tela de Relatórios. '
-                        'Esta ação não pode ser desfeita.',
+                    title: 'settings.deleteSavedReports'.tr,
+                    message: 'settings.removesAllFilterCombinationsSaved'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.palette,
-                  label: 'Preferências',
+                  label: 'settings.preferences'.tr,
                   onTap: () => _run(
                     context,
                     ClearDataScope.preferences,
-                    title: 'Restaurar preferências?',
-                    message: 'Isso restaura as preferências de aparência e comportamento do app para o '
-                        'padrão. Esta ação não pode ser desfeita.',
+                    title: 'settings.resetPreferences'.tr,
+                    message: 'settings.restoresAppsAppearanceBehaviorPreferences'.tr,
                   ),
                 ),
                 const Divider(height: 1),
                 _ClearTile(
                   icon: Symbols.replay,
-                  label: 'Restaurar tudo',
+                  label: 'settings.resetEverything'.tr,
                   destructive: true,
                   onTap: () => _run(
                     context,
                     ClearDataScope.all,
-                    title: 'Restaurar o app para o estado inicial?',
-                    message: 'Isso apaga TODAS as Boxes, produtos, histórico de compras, planejamento e '
-                        'relatórios salvos, volta o tema para o automático, recria as categorias, tipos e '
-                        'unidades padrão e encerra sua sessão. '
-                        'Esta ação não pode ser desfeita.',
+                    title: 'settings.resetAppInitialState'.tr,
+                    message: 'settings.deletesAllBoxesProductsPurchase'.tr,
                   ),
                 ),
               ],

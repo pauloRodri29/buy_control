@@ -1,3 +1,4 @@
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 import 'package:buy_control/features/boxes/domain/usecases/archive_box.dart';
 import 'package:buy_control/features/boxes/domain/usecases/create_box.dart';
 import 'package:buy_control/features/boxes/domain/usecases/delete_box.dart';
@@ -8,7 +9,7 @@ import 'package:get/get.dart';
 class BoxesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => CreateBox(Get.find()));
+    Get.lazyPut(() => CreateBox(Get.find(), quota: Get.find<QuotaGuard>()));
     Get.lazyPut(() => UpdateBox(Get.find()));
     Get.lazyPut(() => DeleteBox(Get.find()));
     Get.lazyPut(() => ArchiveBox(Get.find()));

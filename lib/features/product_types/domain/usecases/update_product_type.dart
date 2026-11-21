@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -10,7 +11,7 @@ class UpdateProductType {
 
   Future<Result<void>> call(ProductTypeEntity productType) async {
     if (!Validators.isNotBlank(productType.name)) {
-      return const Failure(ValidationFailure('Nome do tipo de produto é obrigatório.'));
+      return Failure(ValidationFailure('productTypes.productTypeNameRequired'.tr));
     }
     return repository.update(productType);
   }

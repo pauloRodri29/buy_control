@@ -8,8 +8,10 @@ import 'package:buy_control/app/widgets/app_text_field.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:buy_control/features/subscription/presentation/widgets/plan_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -28,9 +30,9 @@ class ProfilePage extends StatelessWidget {
   Future<void> _logout(BuildContext context, AuthController controller) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Sair da conta?',
-      message: 'Você precisará entrar novamente com seu e-mail e senha para acessar o app.',
-      confirmLabel: 'Sair',
+      title: 'common.signOutAccount'.tr,
+      message: 'auth.youllNeedSignAgainEmail'.tr,
+      confirmLabel: 'common.signOut'.tr,
     );
     if (confirmed) await controller.logout();
   }
@@ -41,51 +43,80 @@ class ProfilePage extends StatelessWidget {
     final user = controller.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Perfil', )),
+      appBar: AppBar(title: AppText.heading('common.profile'.tr, )),
       body: user == null
           ? const SizedBox.shrink()
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                AppCard(
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: context.colors.primary,
-                        child: AppText.heading(
-                          _initials(user.name),
-                          color: context.colors.onPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                // Recarrega com o controller para refletir a edição do perfil.
+                GetBuilder<AuthController>(
+                  builder: (controller) {
+                    final current = controller.currentUser ?? user;
+                    return AppCard(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.xs, AppSpacing.xs),
+                      child: IntrinsicHeight(
+                        child: Row(
                           children: [
-                            AppText(user.name, fontWeight: FontWeight.w600),
-                            const SizedBox(height: AppSpacing.xs),
-                            AppText.subtitle(user.email),
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: context.colors.primary,
+                              child: AppText.heading(_initials(current.name), color: context.colors.onPrimary),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AppText(current.name, fontWeight: FontWeight.w600),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  AppText.subtitle(current.email),
+                                ],
+                              ),
+                            ),
+                            // Ações à direita: editar no topo, sair embaixo.
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  tooltip: 'auth.editProfile'.tr,
+                                  visualDensity: VisualDensity.compact,
+                                  icon: Icon(Symbols.edit, size: 20, color: context.colors.primary),
+                                  onPressed: () => _editProfile(context, controller),
+                                ),
+                                TextButton(
+                                  onPressed: () => _logout(context, controller),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: context.colors.error,
+                                    visualDensity: VisualDensity.compact,
+                                    minimumSize: const Size(0, 32),
+                                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                                    textStyle: context.text.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  child: Text('common.signOut'.tr),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                const PlanSummaryCard(),
+                const SizedBox(height: AppSpacing.md),
                 AppCard(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      AppText.subtitle('Membro desde'),
+                      AppText.subtitle('auth.memberSince'.tr),
                       AppText(DateTimeFormatter.ddMMyyyy(user.createdAt)),
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                AppButton.secondary(label: 'Editar perfil', onPressed: () => _editProfile(context, controller)),
-                const SizedBox(height: AppSpacing.md),
-                AppButton.danger(label: 'Sair', onPressed: () => _logout(context, controller)),
               ],
             ),
     );
@@ -136,17 +167,17 @@ class _ProfileEditFormState extends State<_ProfileEditForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading('Editar perfil', ),
+        AppText.heading('auth.editProfile'.tr, ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(controller: nameController, label: 'Nome'),
+        AppTextField(controller: nameController, label: 'common.name'.tr),
         const SizedBox(height: AppSpacing.md),
-        AppTextField(controller: emailController, label: 'E-mail', keyboardType: TextInputType.emailAddress),
+        AppTextField(controller: emailController, label: 'auth.email'.tr, keyboardType: TextInputType.emailAddress),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
           AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+        AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
       ],
     );
   }

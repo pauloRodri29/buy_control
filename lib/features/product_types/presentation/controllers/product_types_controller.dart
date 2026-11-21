@@ -6,8 +6,13 @@ import 'package:buy_control/features/product_types/domain/usecases/delete_produc
 import 'package:buy_control/features/product_types/domain/usecases/get_product_types.dart';
 import 'package:buy_control/features/product_types/domain/usecases/update_product_type.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 
-class ProductTypesController extends GetxController {
+class ProductTypesController extends GetxController with PlanLocks {
+  @override
+  ResourceKey get lockResource => ResourceKey.productTypes;
+
   final GetProductTypes getProductTypes;
   final CreateProductType createProductType;
   final UpdateProductType updateProductType;
@@ -30,9 +35,11 @@ class ProductTypesController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load() async {
     status = ViewStatus.loading;
     update();
+    await refreshLocks();
 
     final result = await getProductTypes();
     result.fold((data) {

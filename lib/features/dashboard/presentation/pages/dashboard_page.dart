@@ -17,6 +17,8 @@ import 'package:buy_control/features/dashboard/presentation/widgets/spending_by_
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_features.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -42,12 +44,12 @@ class DashboardPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
-              return const EmptyStateView(
+              return EmptyStateView(
                 icon: Symbols.dashboard,
-                title: 'Nenhum dado ainda',
-                message: 'Crie sua primeira Box e registre um lançamento para ver o resumo aqui.',
+                title: 'dashboard.noDataYet'.tr,
+                message: 'dashboard.createFirstBoxRecordEntry'.tr,
               );
             case ViewStatus.success:
               final summary = controller.summary!;
@@ -60,14 +62,13 @@ class DashboardPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppText.subtitle('Total no mês'),
+                          AppText.subtitle('dashboard.totalMonth'.tr),
                           const SizedBox(height: AppSpacing.xs),
                           Text(summary.currentMonthTotal.formatted, style: context.text.headlineLarge),
                           const SizedBox(height: AppSpacing.xs),
                           if (summary.percentChangeVsPreviousMonth != null)
                             AppText.small(
-                              '${summary.percentChangeVsPreviousMonth! >= 0 ? '+' : ''}'
-                              '${summary.percentChangeVsPreviousMonth!.toStringAsFixed(1)}% vs. mês anterior',
+                              'dashboard.vsLastMonthValueNumber'.trParams({'value': summary.percentChangeVsPreviousMonth! >= 0 ? '+' : '', 'toStringAsFixed': summary.percentChangeVsPreviousMonth!.toStringAsFixed(1)}),
                               color: summary.percentChangeVsPreviousMonth! > 0 ? context.colors.error : context.semantic.success,
                               
                             ),
@@ -82,7 +83,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Média diária'),
+                                AppText.subtitle('dashboard.dailyAverage'.tr),
                                 AppText(summary.dailyAverageCurrentMonth.formatted, fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -94,7 +95,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Lançamentos'),
+                                AppText.subtitle('common.entries'.tr),
                                 AppText('${summary.transactionCountCurrentMonth}', fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -106,7 +107,7 @@ class DashboardPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.subtitle('Boxes ativas'),
+                                AppText.subtitle('dashboard.activeBoxes'.tr),
                                 AppText('${summary.activeBoxCount}', fontWeight: FontWeight.w600),
                               ],
                             ),
@@ -116,7 +117,7 @@ class DashboardPage extends StatelessWidget {
                     ),
                     if (summary.topBoxesCurrentMonth.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.lg),
-                      const AppText.subtitle('Boxes com maiores gastos no mês'),
+                      AppText.subtitle('dashboard.boxesHighestSpendingMonth'.tr),
                       const SizedBox(height: AppSpacing.sm),
                       ...summary.topBoxesCurrentMonth.map(
                         (b) => Padding(
@@ -135,7 +136,7 @@ class DashboardPage extends StatelessWidget {
                     ],
                     if (summary.recentTransactions.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.lg),
-                      const AppText.subtitle('Gastos recentes'),
+                      AppText.subtitle('dashboard.recentSpending'.tr),
                       const SizedBox(height: AppSpacing.sm),
                       ...summary.recentTransactions.map(
                         (t) => Padding(
@@ -146,7 +147,7 @@ class DashboardPage extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: AppText(
-                                    t.title ?? (t.items.isNotEmpty ? t.items.first.nameSnapshot : 'Lançamento'),
+                                    t.title ?? (t.items.isNotEmpty ? t.items.first.nameSnapshot : 'common.entry'.tr),
                                     fontWeight: FontWeight.w600,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -188,14 +189,14 @@ class DashboardPage extends StatelessWidget {
         );
       case ViewStatus.error:
         return ErrorStateView(
-          message: controller.chartsErrorMessage ?? 'Erro ao carregar gráficos.',
+          message: controller.chartsErrorMessage ?? 'dashboard.errorLoadingCharts'.tr,
           onRetry: controller.load,
         );
       case ViewStatus.empty:
-        return const EmptyStateView(
+        return EmptyStateView(
           icon: Symbols.insert_chart,
-          title: 'Nenhum gasto no período selecionado.',
-          message: 'Ajuste os filtros ou registre lançamentos para ver os gráficos aqui.',
+          title: 'dashboard.noSpendingSelectedPeriod'.tr,
+          message: 'dashboard.adjustFiltersRecordEntriesSee'.tr,
         );
       case ViewStatus.success:
         final charts = controller.charts!;
@@ -203,9 +204,15 @@ class DashboardPage extends StatelessWidget {
           children: [
             MonthlyEvolutionChart(points: charts.monthlyEvolution),
             const SizedBox(height: AppSpacing.md),
-            SpendingByCategoryChart(items: charts.spendingByCategory),
-            const SizedBox(height: AppSpacing.md),
-            SpendingByBoxChart(items: charts.spendingByBox),
+            if (PlanFeatures.has(FeatureKey.dashboardCharts)) ...[
+              SpendingByCategoryChart(items: charts.spendingByCategory),
+              const SizedBox(height: AppSpacing.md),
+              SpendingByBoxChart(items: charts.spendingByBox),
+            ] else
+              LockedFeatureCard(
+                feature: FeatureKey.dashboardCharts,
+                title: 'dashboard.chartsCategoryBox'.tr,
+              ),
           ],
         );
     }

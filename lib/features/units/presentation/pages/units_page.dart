@@ -24,10 +24,9 @@ class UnitsPage extends StatelessWidget {
   Future<void> _delete(BuildContext context, UnitsController controller, UnitEntity unit) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir a unidade "${unit.name}"?',
+      title: 'units.deleteUnitName'.trParams({'name': unit.name}),
       message:
-          'Esta unidade deixará de aparecer para novos produtos e lançamentos. '
-          'Itens já cadastrados com ela continuam funcionando normalmente.',
+          'units.unitWillNoLongerAppear'.tr,
     );
     if (confirmed) await controller.delete(unit.id);
   }
@@ -35,7 +34,7 @@ class UnitsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Unidades', )),
+      appBar: AppBar(title: AppText.heading('common.units'.tr, )),
       body: GetBuilder<UnitsController>(
         builder: (controller) {
           switch (controller.status) {
@@ -43,13 +42,13 @@ class UnitsPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
                 icon: Symbols.straighten,
-                title: 'Nenhuma unidade cadastrada',
-                message: 'Crie unidades como Quilo, Litro ou Unidade para usar nos produtos.',
-                actionLabel: 'Nova unidade',
+                title: 'units.noUnitsRegistered'.tr,
+                message: 'units.createUnitsLikeKilogramLiter'.tr,
+                actionLabel: 'units.newUnit'.tr,
                 onAction: () => _openForm(context),
               );
             case ViewStatus.success:
@@ -62,11 +61,14 @@ class UnitsPage extends StatelessWidget {
                   return AppListCard(
                     title: unit.name,
                     subtitle: unit.abbreviation,
-                    details: [if (unit.allowsDecimal) 'Aceita quantidade fracionada'],
-                    onTap: () => _openForm(context, unit: unit),
+                    details: [if (unit.allowsDecimal) 'units.allowsFractionalQuantity'.tr],
+                    locked: controller.isLocked(unit.id),
+                    onTap: controller.isLocked(unit.id)
+                        ? controller.showLockedPrompt
+                        : () => _openForm(context, unit: unit),
                     actions: [
-                      AppListCardAction('Editar', () => _openForm(context, unit: unit)),
-                      AppListCardAction('Excluir', () => _delete(context, controller, unit), destructive: true),
+                      AppListCardAction('common.edit'.tr, () => _openForm(context, unit: unit)),
+                      AppListCardAction('common.delete'.tr, () => _delete(context, controller, unit), destructive: true),
                     ],
                   );
                 },

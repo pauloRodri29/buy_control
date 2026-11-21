@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
@@ -24,14 +25,14 @@ class SpendingByCategoryChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText.subtitle('Gastos por categoria'),
+          AppText.subtitle('dashboard.spendingCategory'.tr),
           const SizedBox(height: AppSpacing.md),
           if (entries.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
               child: Center(
                 child: AppText.small(
-                  'Sem dados no período.',
+                  'common.noDataPeriod'.tr,
                   
                   color: context.colors.onSurfaceVariant,
                 ),
@@ -97,7 +98,7 @@ class SpendingByCategoryChart extends StatelessWidget {
 
     final visible = nonZero.take(_maxSlices).toList();
     final othersTotal = nonZero.skip(_maxSlices).fold(Money.zero, (sum, e) => sum + e.total);
-    return [...visible, NamedSpend(id: _othersId, name: 'Outros', total: othersTotal)];
+    return [...visible, NamedSpend(id: _othersId, name: 'common.other'.tr, total: othersTotal)];
   }
 
   Color _colorFor(BuildContext context, NamedSpend entry, int index) {

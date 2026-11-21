@@ -42,7 +42,7 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
     final transaction = widget.transaction;
     final title = (transaction.title != null && transaction.title!.trim().isNotEmpty)
         ? transaction.title!
-        : (transaction.items.isNotEmpty ? transaction.items.first.nameSnapshot : 'Lançamento');
+        : (transaction.items.isNotEmpty ? transaction.items.first.nameSnapshot : 'common.entry'.tr);
 
     return SingleChildScrollView(
       child: Column(
@@ -84,13 +84,13 @@ class _TransactionDetailSheetState extends State<TransactionDetailSheet> {
             );
           }),
           const Divider(),
-          _SummaryRow(label: 'Subtotal', value: transaction.itemsTotal.formatted),
+          _SummaryRow(label: 'transactions.subtotal'.tr, value: transaction.itemsTotal.formatted),
           if (!transaction.discount.isZero)
-            _SummaryRow(label: 'Desconto', value: '- ${transaction.discount.formatted}'),
+            _SummaryRow(label: 'common.discount'.tr, value: '- ${transaction.discount.formatted}'),
           if (!transaction.additionalCost.isZero)
-            _SummaryRow(label: 'Acréscimo', value: '+ ${transaction.additionalCost.formatted}'),
+            _SummaryRow(label: 'common.surcharge'.tr, value: '+ ${transaction.additionalCost.formatted}'),
           const SizedBox(height: AppSpacing.xs),
-          _SummaryRow(label: 'Total', value: transaction.total.formatted, emphasize: true),
+          _SummaryRow(label: 'common.total'.tr, value: transaction.total.formatted, emphasize: true),
         ],
       ),
     );

@@ -16,6 +16,8 @@ import 'package:buy_control/features/reports/presentation/pages/multi_select_pic
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_features.dart';
 
 /// Bottom sheet único que concentra todos os filtros do relatório: período,
 /// Boxes, categoria, tipo de produto, produto e faixa de valor. Quando o
@@ -55,10 +57,10 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
             children: [
               Row(
                 children: [
-                  Expanded(child: AppText.heading('Filtros', )),
+                  Expanded(child: AppText.heading('reports.filters'.tr)),
                   GestureDetector(
                     onTap: () => controller.clearFilters(_side),
-                    child: AppText.small('Limpar',  color: context.colors.primary),
+                    child: AppText.small('common.clear'.tr, color: context.colors.primary),
                   ),
                 ],
               ),
@@ -68,7 +70,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                   children: [
                     Expanded(
                       child: AppButton(
-                        label: 'Lado A',
+                        label: 'reports.side'.tr,
                         variant: _side == ReportSide.a ? AppButtonVariant.primary : AppButtonVariant.secondary,
                         onPressed: () => _switchSide(ReportSide.a),
                       ),
@@ -76,7 +78,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: AppButton(
-                        label: 'Lado B',
+                        label: 'reports.sideB'.tr,
                         variant: _side == ReportSide.b ? AppButtonVariant.primary : AppButtonVariant.secondary,
                         onPressed: () => _switchSide(ReportSide.b),
                       ),
@@ -85,7 +87,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Período'),
+              AppText.subtitle('common.period'.tr),
               const SizedBox(height: AppSpacing.sm),
               FilterChipsBar(
                 options: ReportPeriodPreset.values
@@ -104,9 +106,9 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                   Expanded(
                     child: AppText.small(
                       f.periodPreset == ReportPeriodPreset.custom
-                          ? 'Personalizado: ${f.periodLabel}'
-                          : 'Ou escolha um período personalizado',
-                      
+                          ? 'reports.customPeriodLabel'.trParams({'periodLabel': f.periodLabel})
+                          : 'reports.chooseCustomPeriod'.tr,
+
                       color: context.colors.onSurfaceVariant,
                     ),
                   ),
@@ -114,7 +116,7 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                     onTap: () async {
                       final range = await AppDatePicker.showRange(
                         context,
-                        title: 'Período personalizado',
+                        title: 'common.customPeriod'.tr,
                         firstDate: DateTime(2000),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                         initialRange: f.customRange,
@@ -122,146 +124,156 @@ class _ReportFiltersSheetState extends State<ReportFiltersSheet> {
                       );
                       if (range != null) controller.setCustomRange(_side, range);
                     },
-                    child: AppText.small('Personalizado',  color: context.colors.primary),
+                    child: AppText.small('common.custom'.tr, color: context.colors.primary),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(child: AppText.subtitle('Boxes')),
-                  GestureDetector(
-                    onTap: () => controller.selectAllBoxes(_side),
-                    child: AppText.small('Selecionar todas',  color: context.colors.primary),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              if (controller.boxes.isEmpty)
-                AppText('Nenhuma Box cadastrada.', color: context.colors.onSurfaceVariant)
-              else
-                Builder(
-                  builder: (_) {
-                    final hintTotalsById = {for (final b in controller.boxTotals) b.boxId: b};
-                    return ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.boxes.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (_, i) {
-                        final box = controller.boxes[i];
-                        final hintTotal = hintTotalsById[box.id];
-                        return SelectableListTile(
-                          title: box.name,
-                          subtitle: hintTotal == null ? null : 'Total histórico: ${hintTotal.total.formatted}',
-                          selected: controller.isBoxSelected(_side, box.id),
-                          onTap: () => controller.toggleBox(_side, box.id),
-                        );
-                      },
-                    );
-                  },
+              if (!PlanFeatures.has(FeatureKey.reportsAdvanced))
+                LockedFeatureCard(
+                  feature: FeatureKey.reportsAdvanced,
+                  title: 'reports.filterBoxCategoryProductValue'.tr,
+                )
+              else ...[
+                Row(
+                  children: [
+                    Expanded(child: AppText.subtitle('common.boxes'.tr)),
+                    GestureDetector(
+                      onTap: () => controller.selectAllBoxes(_side),
+                      child: AppText.small('reports.selectAll'.tr, color: context.colors.primary),
+                    ),
+                  ],
                 ),
-              const SizedBox(height: AppSpacing.lg),
-              _FilterLinkCard(
-                label: 'Categoria',
-                count: f.categoryIds.length,
-                onTap: () async {
-                  final result = await MultiSelectPickerSheet.show(
-                    context,
-                    title: 'Categorias',
-                    options: controller.categories.map((c) => MultiSelectOption(id: c.id, label: c.name)).toList(),
-                    selectedIds: f.categoryIds,
-                  );
-                  if (result != null) controller.toggleCategories(_side, result);
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _FilterLinkCard(
-                label: 'Tipo de produto',
-                count: f.productTypeIds.length,
-                onTap: () async {
-                  final result = await MultiSelectPickerSheet.show(
-                    context,
-                    title: 'Tipos de produto',
-                    options:
-                        controller.productTypes.map((t) => MultiSelectOption(id: t.id, label: t.name)).toList(),
-                    selectedIds: f.productTypeIds,
-                  );
-                  if (result != null) controller.toggleProductTypes(_side, result);
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _FilterLinkCard(
-                label: 'Produto',
-                count: f.productIds.length,
-                onTap: () async {
-                  final result = await MultiSelectPickerSheet.show(
-                    context,
-                    title: 'Produtos',
-                    options: controller.products.map((p) => MultiSelectOption(id: p.id, label: p.name)).toList(),
-                    selectedIds: f.productIds,
-                    showSearch: true,
-                  );
-                  if (result != null) controller.toggleProducts(_side, result);
-                },
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Faixa de valor'),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppMoneyField(
-                      key: ValueKey('min-$_side'),
-                      initialValue: f.minValue,
-                      hint: 'Mínimo',
-                      onChanged: (money) => controller.setMinValue(_side, money.isZero ? null : money),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: AppMoneyField(
-                      key: ValueKey('max-$_side'),
-                      initialValue: f.maxValue,
-                      hint: 'Máximo',
-                      onChanged: (money) => controller.setMaxValue(_side, money.isZero ? null : money),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              AppText.subtitle('Salvar combinação frequente'),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(child: AppTextField(controller: _presetNameController, hint: 'Nome da combinação')),
-                  const SizedBox(width: AppSpacing.sm),
-                  AppButton(
-                    label: 'Salvar',
-                    expanded: false,
-                    onPressed: () {
-                      controller.savePreset(_presetNameController.text);
-                      _presetNameController.clear();
+                const SizedBox(height: AppSpacing.sm),
+                if (controller.boxes.isEmpty)
+                  AppText('reports.noBoxesRegistered'.tr, color: context.colors.onSurfaceVariant)
+                else
+                  Builder(
+                    builder: (_) {
+                      final hintTotalsById = {for (final b in controller.boxTotals) b.boxId: b};
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.boxes.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (_, i) {
+                          final box = controller.boxes[i];
+                          final hintTotal = hintTotalsById[box.id];
+                          return SelectableListTile(
+                            title: box.name,
+                            subtitle: hintTotal == null ? null : 'reports.allTimeTotalAmount'.trParams({'formatted': hintTotal.total.formatted}),
+                            selected: controller.isBoxSelected(_side, box.id),
+                            onTap: () => controller.toggleBox(_side, box.id),
+                          );
+                        },
+                      );
                     },
                   ),
-                ],
-              ),
-              if (controller.savedPresets.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _FilterLinkCard(
+                  label: 'common.category'.tr,
+                  count: f.categoryIds.length,
+                  onTap: () async {
+                    final result = await MultiSelectPickerSheet.show(
+                      context,
+                      title: 'common.categories'.tr,
+                      options: controller.categories.map((c) => MultiSelectOption(id: c.id, label: c.name)).toList(),
+                      selectedIds: f.categoryIds,
+                    );
+                    if (result != null) controller.toggleCategories(_side, result);
+                  },
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: controller.savedPresets
-                      .map((preset) => _PresetChip(
+                _FilterLinkCard(
+                  label: 'common.productType'.tr,
+                  count: f.productTypeIds.length,
+                  onTap: () async {
+                    final result = await MultiSelectPickerSheet.show(
+                      context,
+                      title: 'common.productTypes2'.tr,
+                      options: controller.productTypes.map((t) => MultiSelectOption(id: t.id, label: t.name)).toList(),
+                      selectedIds: f.productTypeIds,
+                    );
+                    if (result != null) controller.toggleProductTypes(_side, result);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _FilterLinkCard(
+                  label: 'common.product'.tr,
+                  count: f.productIds.length,
+                  onTap: () async {
+                    final result = await MultiSelectPickerSheet.show(
+                      context,
+                      title: 'common.products'.tr,
+                      options: controller.products.map((p) => MultiSelectOption(id: p.id, label: p.name)).toList(),
+                      selectedIds: f.productIds,
+                      showSearch: true,
+                    );
+                    if (result != null) controller.toggleProducts(_side, result);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppText.subtitle('reports.valueRange'.tr),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppMoneyField(
+                        key: ValueKey('min-$_side'),
+                        initialValue: f.minValue,
+                        hint: 'reports.minimum'.tr,
+                        onChanged: (money) => controller.setMinValue(_side, money.isZero ? null : money),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: AppMoneyField(
+                        key: ValueKey('max-$_side'),
+                        initialValue: f.maxValue,
+                        hint: 'reports.maximum'.tr,
+                        onChanged: (money) => controller.setMaxValue(_side, money.isZero ? null : money),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppText.subtitle('reports.saveFrequentCombination'.tr),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(controller: _presetNameController, hint: 'reports.combinationName'.tr),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    AppButton(
+                      label: 'common.save'.tr,
+                      expanded: false,
+                      onPressed: () {
+                        controller.savePreset(_presetNameController.text);
+                        _presetNameController.clear();
+                      },
+                    ),
+                  ],
+                ),
+                if (controller.savedPresets.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: controller.savedPresets
+                        .map(
+                          (preset) => _PresetChip(
                             preset: preset,
                             onApply: () => controller.applyPreset(preset, side: _side),
                             onRemove: () => controller.removePreset(preset),
-                          ))
-                      .toList(),
-                ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
               ],
               const SizedBox(height: AppSpacing.lg),
-              AppButton(label: 'Concluir', onPressed: () => Navigator.of(context).pop()),
+              AppButton(label: 'common.done'.tr, onPressed: () => Navigator.of(context).pop()),
             ],
           ),
         );
@@ -284,11 +296,7 @@ class _FilterLinkCard extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: AppText(label, fontWeight: FontWeight.w600)),
-          AppText.small(
-            count == 0 ? 'Todas' : '$count selecionada(s)',
-            
-            color: context.colors.onSurfaceVariant,
-          ),
+          AppText.small(count == 0 ? 'reports.all'.tr : 'reports.selectedCount'.trParams({'count': '$count'}), color: context.colors.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
           Icon(Symbols.chevron_right, size: 18, color: context.colors.onSurfaceVariant),
         ],
@@ -317,7 +325,7 @@ class _PresetChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppText.small(preset.name, ),
+              AppText.small(preset.name),
               const SizedBox(width: AppSpacing.xs),
               GestureDetector(
                 onTap: onRemove,

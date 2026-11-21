@@ -19,6 +19,8 @@ import 'package:buy_control/features/units/domain/usecases/get_units.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_features.dart';
 
 /// Editor dos itens de uma compra (nova ou já lançada e ainda aberta).
 /// Trabalha direto sobre o [PurchaseDraft]: altera quantidade, preço,
@@ -105,12 +107,12 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
 
   void _continue() {
     if (_draft.items.isEmpty) {
-      setState(() => _errorMessage = 'Adicione ao menos um produto.');
+      setState(() => _errorMessage = 'transactions.addLeastOneProduct'.tr);
       return;
     }
     for (final item in _draft.items) {
       if (item.quantity <= 0) {
-        setState(() => _errorMessage = 'Quantidade inválida para "${item.nameSnapshot}".');
+        setState(() => _errorMessage = 'transactions.invalidQuantityNameSnapshot'.trParams({'nameSnapshot': item.nameSnapshot}));
         return;
       }
     }
@@ -124,12 +126,12 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading(_draft.isEditing ? 'Editar itens' : 'Detalhes dos itens', ),
+        AppText.heading(_draft.isEditing ? 'transactions.editItems'.tr : 'transactions.itemDetails'.tr),
         const SizedBox(height: AppSpacing.md),
         Expanded(
           child: ListView(
             children: [
-              AppTextField(controller: _notesController, label: 'Observação (opcional)', maxLines: 2),
+              AppTextField(controller: _notesController, label: 'transactions.noteOptional'.tr, maxLines: 2),
               const SizedBox(height: AppSpacing.md),
               for (var i = 0; i < _draft.items.length; i++) ...[
                 _ItemForm(
@@ -153,16 +155,12 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
                 Row(
                   children: [
                     Expanded(
-                      child: AppButton.secondary(
-                        label: 'Produto',
-                        icon: Symbols.add,
-                        onPressed: _addProducts,
-                      ),
+                      child: AppButton.secondary(label: 'common.product'.tr, icon: Symbols.add, onPressed: _addProducts),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: AppButton.secondary(
-                        label: 'Escanear',
+                        label: 'transactions.scan'.tr,
                         icon: Symbols.qr_code_scanner,
                         onPressed: _scanProducts,
                       ),
@@ -181,14 +179,14 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppText(
-              _draft.items.length == 1 ? '1 produto' : '${_draft.items.length} produtos',
+              _draft.items.length == 1 ? 'transactions.n1Product'.tr : 'transactions.productsCount'.trParams({'length': '${_draft.items.length}'}),
               color: context.colors.onSurfaceVariant,
             ),
             AppText(_draft.itemsTotal.formatted, fontWeight: FontWeight.bold, color: context.colors.primary),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppButton(label: 'Continuar', onPressed: _continue),
+        AppButton(label: 'common.continue'.tr, onPressed: _continue),
       ],
     );
   }
@@ -261,8 +259,9 @@ class _ItemFormState extends State<_ItemForm> {
   Widget build(BuildContext context) {
     final item = widget.item;
     final text = context.text;
-    final unitOptions =
-        widget.units.map((u) => AppDropdownOption(value: u.id, label: '${u.name} (${u.abbreviation})')).toList();
+    final unitOptions = widget.units
+        .map((u) => AppDropdownOption(value: u.id, label: '${u.name} (${u.abbreviation})'))
+        .toList();
     final hasUnit = unitOptions.any((o) => o.value == item.unitId);
 
     return Card.filled(
@@ -303,20 +302,20 @@ class _ItemFormState extends State<_ItemForm> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               IconButton.filledTonal(
-                tooltip: 'Diminuir',
+                tooltip: 'common.decrease'.tr,
                 icon: const Icon(Symbols.remove, size: 16),
                 onPressed: item.quantity > 1 ? () => _step(-1) : null,
               ),
               Expanded(
                 child: AppTextField(
                   controller: _quantityController,
-                  label: 'Quantidade',
+                  label: 'common.quantity'.tr,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: _onQuantityTyped,
                 ),
               ),
               IconButton.filledTonal(
-                tooltip: 'Aumentar',
+                tooltip: 'common.increase'.tr,
                 icon: const Icon(Symbols.add, size: 16),
                 onPressed: () => _step(1),
               ),
@@ -324,7 +323,7 @@ class _ItemFormState extends State<_ItemForm> {
               Expanded(
                 child: AppMoneyField(
                   initialValue: item.unitPrice,
-                  label: 'Preço unitário',
+                  label: 'transactions.unitPrice'.tr,
                   onChanged: (money) => widget.onChanged(widget.item.copyWith(unitPrice: money)),
                 ),
               ),
@@ -332,8 +331,8 @@ class _ItemFormState extends State<_ItemForm> {
           ),
           const SizedBox(height: AppSpacing.sm),
           AppDropdown<String>(
-            label: 'Unidade',
-            hint: 'Selecione',
+            label: 'common.unit'.tr,
+            hint: 'common.select'.tr,
             value: hasUnit ? item.unitId : null,
             options: unitOptions,
             onChanged: (value) {
@@ -341,22 +340,25 @@ class _ItemFormState extends State<_ItemForm> {
             },
           ),
           const SizedBox(height: AppSpacing.sm),
-          DiscountRuleEditor(
-            initialRule: item.discountRule,
-            onChanged: (rule) => widget.onChanged(
-              rule == null
-                  ? widget.item.copyWith(clearDiscountRule: true, discount: Money.zero)
-                  : widget.item.copyWith(discountRule: rule),
+          if (!PlanFeatures.has(FeatureKey.discountRules))
+            LockedFeatureCard(feature: FeatureKey.discountRules, title: 'transactions.promotionsBuy3Pay2'.tr)
+          else
+            DiscountRuleEditor(
+              initialRule: item.discountRule,
+              onChanged: (rule) => widget.onChanged(
+                rule == null
+                    ? widget.item.copyWith(clearDiscountRule: true, discount: Money.zero)
+                    : widget.item.copyWith(discountRule: rule),
+              ),
             ),
-          ),
           if (item.discountRule == null && !item.discount.isZero) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text('Desconto lançado anteriormente: ${item.discount.formatted}', style: text.bodySmall),
+            Text('transactions.previouslyEnteredDiscountAmount'.trParams({'formatted': item.discount.formatted}), style: text.bodySmall),
           ],
           const SizedBox(height: AppSpacing.sm),
           AppMoneyField(
             initialValue: item.additionalCost,
-            label: 'Acréscimo (opcional)',
+            label: 'transactions.surchargeOptional'.tr,
             onChanged: (money) => widget.onChanged(widget.item.copyWith(additionalCost: money)),
           ),
           if (widget.onRemove != null) ...[
@@ -365,7 +367,7 @@ class _ItemFormState extends State<_ItemForm> {
               onPressed: widget.onRemove,
               style: TextButton.styleFrom(foregroundColor: context.colors.error),
               icon: const Icon(Symbols.delete, size: 18),
-              label: const Text('Remover produto'),
+              label: Text('transactions.removeProduct'.tr),
             ),
           ],
         ],

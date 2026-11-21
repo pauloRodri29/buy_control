@@ -39,10 +39,10 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
   late final controller = Get.find<BoxDetailController>(tag: widget.box.id);
 
   static const _sortOptions = [
-    FilterChipOption(key: 'newest', label: 'Recentes'),
-    FilterChipOption(key: 'oldest', label: 'Mais antigos'),
-    FilterChipOption(key: 'highestValue', label: 'Maior valor'),
-    FilterChipOption(key: 'lowestValue', label: 'Menor valor'),
+    FilterChipOption(key: 'newest', label: 'boxes.recent'),
+    FilterChipOption(key: 'oldest', label: 'boxes.oldest'),
+    FilterChipOption(key: 'highestValue', label: 'boxes.highestValue'),
+    FilterChipOption(key: 'lowestValue', label: 'boxes.lowestValue'),
   ];
 
   @override
@@ -71,8 +71,8 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
   Future<void> _delete(TransactionEntity transaction) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir este lançamento?',
-      message: 'Esta ação não poderá ser desfeita.',
+      title: 'boxes.deleteEntry'.tr,
+      message: 'boxes.actionCantUndone'.tr,
     );
     if (confirmed) await controller.removeTransaction(transaction.id);
   }
@@ -88,15 +88,15 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
 
   Future<void> _closeBox() async {
     if (controller.transactions.isEmpty) {
-      AppFeedback.info('Esta Box não tem lançamentos abertos para fechar.', title: 'Nada para fechar');
+      AppFeedback.info('common.boxHasNoOpenEntries'.tr, title: 'boxes.nothingClose'.tr);
       return;
     }
 
     final now = DateTime.now();
     final referenceDate = await AppDatePicker.show(
       context,
-      title: 'Data de referência do fechamento',
-      confirmLabel: 'Continuar',
+      title: 'boxes.closingReferenceDate'.tr,
+      confirmLabel: 'common.continue'.tr,
       initialDate: now,
       firstDate: DateTime(2000),
       lastDate: DateTime(now.year + 1, 12, 31),
@@ -109,19 +109,16 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
     final openCount = controller.transactions.length;
     final carriedOver = controller.transactions.where((t) => t.carryOver).length;
     final carryOverMessage = carriedOver == 0
-        ? 'Nenhum lançamento está marcado para repetir: a Box fica vazia para a próxima compra.'
+        ? 'boxes.noEntriesAreSetRepeat'.tr
         : carriedOver == openCount
-        ? 'Os mesmos lançamentos continuam na Box para a próxima compra — é só ajustar o que mudar.'
-        : '$carriedOver de $openCount lançamentos estão marcados para repetir e continuam na Box '
-              'para a próxima compra; os outros ficam só no histórico.';
+        ? 'boxes.sameEntriesStayBoxNext'.tr
+        : 'boxes.entriesAreSetRepeatStayCarriedOverOpenCount'.trParams({'carriedOver': '$carriedOver', 'openCount': '$openCount'});
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Fechar compras de ${DateTimeFormatter.ddMMyyyy(referenceDate)}?',
+      title: 'boxes.closePurchasesDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(referenceDate)}),
       message:
-          '$itemCount itens totalizando ${total.formatted} viram registro definitivo e entram no '
-          'balanço e nos relatórios. Depois de fechado não é possível reabrir nem editar.\n\n'
-          '$carryOverMessage',
-      confirmLabel: 'Fechar Box',
+          'boxes.itemsTotalingBecomePermanentRecordItemCountAmountCarryOverMessage'.trParams({'itemCount': '$itemCount', 'formatted': total.formatted, 'carryOverMessage': carryOverMessage}),
+      confirmLabel: 'boxes.closeBox'.tr,
       isDestructive: false,
     );
     if (!confirmed) return;
@@ -130,7 +127,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
     if (error != null) {
       AppFeedback.error(error);
     } else {
-      AppFeedback.success('Compras de ${DateTimeFormatter.ddMMyyyy(referenceDate)} salvas no histórico.', title: 'Box fechada');
+      AppFeedback.success('boxes.purchasesSavedHistoryDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(referenceDate)}), title: 'boxes.boxClosed'.tr);
     }
   }
 
@@ -157,7 +154,7 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Column(
                   children: [
-                    SearchFieldDebounced(hint: 'Buscar lançamento', onChanged: controller.search),
+                    SearchFieldDebounced(hint: 'boxes.searchEntry'.tr, onChanged: controller.search),
                     const SizedBox(height: AppSpacing.sm),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -190,13 +187,13 @@ class _BoxDetailPageState extends State<BoxDetailPage> {
       case ViewStatus.loading:
         return const LoadingSkeletonList();
       case ViewStatus.error:
-        return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+        return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
           icon: Symbols.receipt,
-          title: 'Nenhum lançamento nesta caixa',
-          message: 'Adicione produtos ou um lançamento avulso para começar.',
-          actionLabel: 'Adicionar itens',
+          title: 'boxes.noEntriesBox'.tr,
+          message: 'boxes.addProductsOneOffEntry'.tr,
+          actionLabel: 'common.addItems'.tr,
           onAction: _addItems,
         );
       case ViewStatus.success:
@@ -233,7 +230,7 @@ class _SummaryHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AppText.subtitle('Total'),
+                AppText.subtitle('common.total'.tr),
                 AppText.title(total, color: context.colors.primary),
               ],
             ),
@@ -241,8 +238,8 @@ class _SummaryHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              AppText.subtitle(_plural(summary?.transactionCount ?? 0, 'lançamento', 'lançamentos')),
-              AppText.subtitle(_plural(summary?.itemCount ?? 0, 'produto', 'produtos')),
+              AppText.subtitle(_plural(summary?.transactionCount ?? 0, 'boxes.entry'.tr, 'boxes.entries'.tr)),
+              AppText.subtitle(_plural(summary?.itemCount ?? 0, 'common.productLower'.tr, 'common.productsLower'.tr)),
             ],
           ),
         ],
@@ -285,7 +282,7 @@ class _TransactionCard extends StatelessWidget {
   }
 
   Widget _deleteButton() => IconButton(
-        tooltip: 'Excluir lançamento',
+        tooltip: 'boxes.deleteEntry2'.tr,
         icon: const Icon(Symbols.delete, size: 18),
         onPressed: onDelete,
       );
@@ -325,10 +322,10 @@ class _TransactionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${item.unitPrice.formatted} cada · $date', style: text.bodySmall),
+                  Text('boxes.eachAmountDate'.trParams({'formatted': item.unitPrice.formatted, 'date': date}), style: text.bodySmall),
                   if (!item.discount.isZero)
                     Text(
-                      '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
+                      '${item.discountRule?.description ?? 'common.discount'.tr} · - ${item.discount.formatted}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(color: context.colors.primary),
@@ -348,7 +345,7 @@ class _TransactionCard extends StatelessWidget {
     final text = context.text;
     final title = (transaction.title != null && transaction.title!.trim().isNotEmpty)
         ? transaction.title!
-        : 'Compra com ${_plural(transaction.itemCount, 'produto', 'produtos')}';
+        : 'boxes.purchasePluralCount'.trParams({'_plural': _plural(transaction.itemCount, 'common.productLower'.tr, 'common.productsLower'.tr)});
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +364,7 @@ class _TransactionCard extends StatelessWidget {
                   ),
                   Text(
                     '${DateTimeFormatter.ddMMyyyy(transaction.occurredAt)} · '
-                    '${_plural(transaction.itemCount, 'produto', 'produtos')}',
+                    '${_plural(transaction.itemCount, 'common.productLower'.tr, 'common.productsLower'.tr)}',
                     style: text.bodySmall,
                   ),
                 ],
@@ -392,7 +389,7 @@ class _TransactionCard extends StatelessWidget {
                     Text(
                       item.discount.isZero
                           ? item.unitPrice.formatted
-                          : '${item.unitPrice.formatted} · ${item.discountRule?.description ?? 'com desconto'}',
+                          : '${item.unitPrice.formatted} · ${item.discountRule?.description ?? 'boxes.discounted'.tr}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall,
@@ -428,7 +425,7 @@ class _QuantityStepper extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          tooltip: 'Diminuir',
+          tooltip: 'common.decrease'.tr,
           visualDensity: VisualDensity.compact,
           icon: const Icon(Symbols.remove, size: 16),
           onPressed: item.quantity > 1 ? () => onChange(-1) : null,
@@ -442,7 +439,7 @@ class _QuantityStepper extends StatelessWidget {
           ),
         ),
         IconButton(
-          tooltip: 'Aumentar',
+          tooltip: 'common.increase'.tr,
           visualDensity: VisualDensity.compact,
           icon: const Icon(Symbols.add, size: 16),
           onPressed: () => onChange(1),

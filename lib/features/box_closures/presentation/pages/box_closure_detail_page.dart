@@ -39,7 +39,7 @@ class _BoxClosureDetailPageState extends State<BoxClosureDetailPage> {
     return GetBuilder<BoxClosureDetailController>(
       tag: widget.closureId,
       builder: (controller) => Scaffold(
-        appBar: AppBar(title: const AppText.heading('Fechamento', )),
+        appBar: AppBar(title: AppText.heading('boxClosures.closing'.tr, )),
         body: _buildBody(controller),
       ),
     );
@@ -51,12 +51,12 @@ class _BoxClosureDetailPageState extends State<BoxClosureDetailPage> {
       case ViewStatus.loading:
         return const LoadingSkeletonList();
       case ViewStatus.error:
-        return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+        return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
       case ViewStatus.empty:
       case ViewStatus.success:
         final details = controller.details;
         if (details == null) {
-          return ErrorStateView(message: 'Fechamento não encontrado.', onRetry: controller.load);
+          return ErrorStateView(message: 'boxClosures.closingNotFound'.tr, onRetry: controller.load);
         }
         return _ClosureDetailBody(details: details);
     }
@@ -91,11 +91,11 @@ class _ClosureDetailBody extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               AppText.heading(
-                'Compras de ${DateTimeFormatter.ddMMyyyy(closure.referenceDate)}',
+                'boxClosures.purchasesDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(closure.referenceDate)}),
                 
               ),
               const SizedBox(height: AppSpacing.xs),
-              AppText.subtitle('${items.length} itens · fechado em ${DateTimeFormatter.ddMMyyyy(closure.closedAt)}'),
+              AppText.subtitle('boxClosures.itemsClosedCountDate'.trParams({'length': '${items.length}', 'ddMMyyyy': DateTimeFormatter.ddMMyyyy(closure.closedAt)})),
               const SizedBox(height: AppSpacing.sm),
               AppText.title(
                 closure.total.formatted,
@@ -109,7 +109,7 @@ class _ClosureDetailBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        const AppText.subtitle('Produtos'),
+        AppText.subtitle('common.products'.tr),
         const SizedBox(height: AppSpacing.sm),
         ...items.map((item) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -117,9 +117,9 @@ class _ClosureDetailBody extends StatelessWidget {
             )),
         if (generalDiscount != 0 || generalExtra != 0) ...[
           const Divider(),
-          if (generalDiscount != 0) _TotalRow(label: 'Desconto na compra', value: '- ${Money(generalDiscount).formatted}'),
-          if (generalExtra != 0) _TotalRow(label: 'Acréscimo', value: '+ ${Money(generalExtra).formatted}'),
-          _TotalRow(label: 'Total', value: closure.total.formatted),
+          if (generalDiscount != 0) _TotalRow(label: 'boxClosures.purchaseDiscount'.tr, value: '- ${Money(generalDiscount).formatted}'),
+          if (generalExtra != 0) _TotalRow(label: 'common.surcharge'.tr, value: '+ ${Money(generalExtra).formatted}'),
+          _TotalRow(label: 'common.total'.tr, value: closure.total.formatted),
         ],
       ],
     );
@@ -165,7 +165,7 @@ class _ItemRow extends StatelessWidget {
               AppText.subtitle('$_quantity × ${item.unitPrice.formatted}'),
               if (!item.discount.isZero)
                 AppText.small(
-                  '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
+                  '${item.discountRule?.description ?? 'common.discount'.tr} · - ${item.discount.formatted}',
                   color: context.colors.primary,
                   
                 ),

@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:buy_control/app/bindings/initial_binding.dart';
 import 'package:buy_control/app/bootstrap/seed_defaults.dart';
+import 'package:buy_control/app/i18n/app_translations.dart';
+import 'package:buy_control/app/i18n/locale_controller.dart';
 import 'package:buy_control/app/navigation/main_shell.dart';
 import 'package:buy_control/app/theme/app_theme.dart';
 import 'package:buy_control/app/theme/theme_controller.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/core/database/app_meta_store.dart';
 import 'package:buy_control/core/database/hive_box_registry.dart';
+import 'package:buy_control/core/i18n/app_locale.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
@@ -29,6 +32,9 @@ import 'package:buy_control/features/settings/presentation/bindings/settings_bin
 import 'package:buy_control/features/settings/presentation/pages/about_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/settings_page.dart';
+import 'package:buy_control/features/auth/presentation/pages/profile_page.dart';
+import 'package:buy_control/features/subscription/presentation/pages/my_plan_page.dart';
+import 'package:buy_control/features/subscription/presentation/pages/plans_page.dart';
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
 import 'package:buy_control/features/units/presentation/bindings/units_binding.dart';
 import 'package:buy_control/features/units/presentation/pages/units_page.dart';
@@ -39,13 +45,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 /// Teste de fumaça das telas: abre cada aba e as telas do menu Mais, nos
-/// temas claro e escuro, num tamanho de celular, com dados de exemplo.
+/// temas claro e escuro, em português e em inglês, num tamanho de celular,
+/// com dados de exemplo.
 /// Qualquer exceção de build/layout (ex.: overflow) faz o teste falhar.
 void main() {
   late Directory tempDir;
 
   setUpAll(() async {
     await initializeDateFormatting('pt_BR');
+    await initializeDateFormatting('en_US');
     tempDir = await Directory.systemTemp.createTemp('buy_control_screens_test');
     Hive.init(tempDir.path);
     for (final name in [
@@ -61,6 +69,7 @@ void main() {
       HiveBoxRegistry.reportPresets,
       HiveBoxRegistry.planBoards,
       HiveBoxRegistry.planItems,
+      HiveBoxRegistry.subscription,
     ]) {
       await Hive.openBox(name);
     }
@@ -68,6 +77,7 @@ void main() {
     Get.testMode = true;
     InitialBinding().dependencies();
     Get.put(ThemeController(AppMetaStore()), permanent: true);
+    Get.put(LocaleController(AppMetaStore()), permanent: true);
 
     await SeedDefaults(
       metaStore: AppMetaStore(),
@@ -84,8 +94,12 @@ void main() {
     if (await tempDir.exists()) await tempDir.delete(recursive: true);
   });
 
-  for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-    testWidgets('telas principais abrem sem erros no tema ${mode.name}', (tester) async {
+  final cases = [
+    for (final locale in AppLocale.supported)
+      for (final mode in [ThemeMode.light, ThemeMode.dark]) (locale, mode),
+  ];
+  for (final (locale, mode) in cases) {
+    testWidgets('telas principais abrem sem erros no tema ${mode.name} ($locale)', (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(tester.view.reset);
@@ -94,39 +108,45 @@ void main() {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: mode,
+        translations: AppTranslations(),
+        locale: locale,
+        fallbackLocale: AppLocale.ptBR,
         scaffoldMessengerKey: appScaffoldMessengerKey,
         home: const MainShell(),
       ));
       await _settle(tester);
 
       final tabs = <String, String>{
-        'Boxes': 'Mercado do mês com um nome bem comprido para testar quebra',
-        'Produtos': 'Café torrado e moído extra forte',
-        'Planejar': 'Fim de ano',
-        'Mais': 'Relatórios',
-        'Início': 'Início',
+        'common.boxes': 'Mercado do mês com um nome bem comprido para testar quebra',
+        'common.products': 'Café torrado e moído extra forte',
+        'common.plan': 'Fim de ano',
+        'common.more': 'common.reports'.tr,
+        'common.home': 'common.home'.tr,
       };
       for (final MapEntry(key: tab, value: expected) in tabs.entries) {
-        await tester.tap(find.text(tab).last);
+        await tester.tap(find.text(tab.tr).last);
         await _settle(tester);
         expect(tester.takeException(), isNull, reason: 'aba $tab');
         expect(find.textContaining(expected), findsWidgets, reason: 'conteúdo da aba $tab');
       }
 
       final pages = <String, (Widget Function(), Bindings?)>{
-        'Relatórios': (() => const ReportsPage(), ReportsBinding()),
-        'Categorias': (() => const CategoriesPage(), CategoriesBinding()),
-        'Tipos de Produto': (() => const ProductTypesPage(), ProductTypesBinding()),
-        'Unidades': (() => const UnitsPage(), UnitsBinding()),
-        'Configurações': (() => const SettingsPage(), SettingsBinding()),
-        'Limpar dados': (() => const ClearDataPage(), SettingsBinding()),
-        'Sobre o sistema': (() => const AboutPage(), null),
+        'common.reports': (() => const ReportsPage(), ReportsBinding()),
+        'common.categories': (() => const CategoriesPage(), CategoriesBinding()),
+        'common.productTypes': (() => const ProductTypesPage(), ProductTypesBinding()),
+        'common.units': (() => const UnitsPage(), UnitsBinding()),
+        'common.settings': (() => const SettingsPage(), SettingsBinding()),
+        'settings.clearData': (() => const ClearDataPage(), SettingsBinding()),
+        'settings.aboutApp': (() => const AboutPage(), null),
+        'common.myPlan': (() => const MyPlanPage(), null),
+        'subscription.plans': (() => const PlansPage(), null),
+        'common.profile': (() => const ProfilePage(), null),
       };
       for (final MapEntry(key: name, value: (page, binding)) in pages.entries) {
         Get.to(page, binding: binding);
         await _settle(tester);
         expect(tester.takeException(), isNull, reason: 'tela $name');
-        expect(find.text(name), findsWidgets, reason: 'título da tela $name');
+        expect(find.text(name.tr), findsWidgets, reason: 'título da tela $name');
         Get.back();
         await _settle(tester);
       }

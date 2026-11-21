@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,11 @@ class CarryOverSwitch extends StatelessWidget {
       value: value,
       activeTrackColor: context.colors.primary,
       onChanged: onChanged,
-      title: const AppText('Repetir no próximo ciclo', fontWeight: FontWeight.w600),
+      title: AppText('transactions.repeatNextCycle'.tr, fontWeight: FontWeight.w600),
       subtitle: AppText.subtitle(
         value
-            ? 'Ao fechar a Box, este lançamento continua nela para a próxima compra.'
-            : 'Ao fechar a Box, este lançamento vai só para o histórico.',
+            ? 'transactions.whenBoxClosedEntryStays'.tr
+            : 'transactions.whenBoxClosedEntryGoes'.tr,
       ),
     );
   }

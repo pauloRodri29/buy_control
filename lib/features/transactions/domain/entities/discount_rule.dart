@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/formatters/quantity_formatter.dart';
 import 'package:buy_control/core/money/money.dart';
 
@@ -25,15 +26,15 @@ extension DiscountTypeLabel on DiscountType {
   String get label {
     switch (this) {
       case DiscountType.fixed:
-        return 'Valor fixo (R\$)';
+        return 'transactions.fixedAmountR'.tr;
       case DiscountType.percent:
-        return 'Percentual (%)';
+        return 'transactions.percentage'.tr;
       case DiscountType.bundlePrice:
-        return 'Leve N por R\$ X';
+        return 'transactions.buyNRX'.tr;
       case DiscountType.buyXPayY:
-        return 'Leve N, pague M';
+        return 'transactions.buyNPayM'.tr;
       case DiscountType.wholesale:
-        return 'Preço a partir de N un.';
+        return 'transactions.priceFromNUnits'.tr;
     }
   }
 }
@@ -109,16 +110,16 @@ class DiscountRule {
   String get description {
     switch (type) {
       case DiscountType.fixed:
-        return '${amount.formatted} de desconto';
+        return 'transactions.offAmount'.trParams({'formatted': amount.formatted});
       case DiscountType.percent:
         final value = QuantityFormatter.format(percent);
-        return '$value% de desconto';
+        return 'transactions.offValue'.trParams({'value': value});
       case DiscountType.bundlePrice:
-        return 'Leve $quantity por ${amount.formatted}';
+        return 'transactions.buyQuantityAmount'.trParams({'quantity': '$quantity', 'formatted': amount.formatted});
       case DiscountType.buyXPayY:
-        return 'Leve $quantity, pague $payQuantity';
+        return 'transactions.buyPayQuantityPayQuantity'.trParams({'quantity': '$quantity', 'payQuantity': '$payQuantity'});
       case DiscountType.wholesale:
-        return 'A partir de $quantity un., ${amount.formatted} cada';
+        return 'transactions.fromUnitsEachQuantityAmount'.trParams({'quantity': '$quantity', 'formatted': amount.formatted});
     }
   }
 

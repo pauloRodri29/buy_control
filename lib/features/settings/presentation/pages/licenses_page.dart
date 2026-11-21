@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/foundation.dart';
@@ -32,7 +33,7 @@ class _LicensesPageState extends State<LicensesPage> {
     return {for (final name in names) name: byPackage[name]!};
   }
 
-  static String _countLabel(int count) => count == 1 ? '1 licença' : '$count licenças';
+  static String _countLabel(int count) => count == 1 ? 'settings.n1License'.tr : 'settings.licensesCount'.trParams({'count': '$count'});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,7 @@ class _LicensesPageState extends State<LicensesPage> {
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Licenças')),
+      appBar: AppBar(title: Text('settings.licenses'.tr)),
       body: FutureBuilder<Map<String, List<LicenseEntry>>>(
         future: _licenses,
         builder: (context, snapshot) {
@@ -49,13 +50,13 @@ class _LicensesPageState extends State<LicensesPage> {
             Text(widget.applicationName, textAlign: TextAlign.center, style: text.headlineSmall),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Versão ${widget.applicationVersion}',
+              'settings.versionApplicationVersion'.trParams({'applicationVersion': widget.applicationVersion}),
               textAlign: TextAlign.center,
               style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Desenvolvido com Flutter',
+              'settings.builtFlutter'.tr,
               textAlign: TextAlign.center,
               style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
             ),
@@ -66,9 +67,9 @@ class _LicensesPageState extends State<LicensesPage> {
             return ListView(
               children: [
                 ...header,
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(AppSpacing.lg),
-                  child: Text('Não foi possível carregar as licenças.', textAlign: TextAlign.center),
+                  child: Text('settings.couldntLoadLicenses'.tr, textAlign: TextAlign.center),
                 ),
               ],
             );
@@ -128,10 +129,7 @@ class _PackageLicensesPage extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'As licenças são documentos jurídicos publicados pelos autores de cada '
-                  'pacote e só têm validade no idioma original (geralmente inglês). '
-                  'Por isso, o texto completo é exibido como foi publicado, com um resumo '
-                  'em português quando a licença é conhecida.',
+                  'settings.licensesAreLegalDocumentsPublished'.tr,
                   style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
                 ),
               ),
@@ -146,7 +144,7 @@ class _PackageLicensesPage extends StatelessWidget {
 
       children.add(SizedBox(height: i == 0 ? AppSpacing.lg : AppSpacing.xxl));
       if (entries.length > 1) {
-        children.add(Text('Licença ${i + 1} de ${entries.length}', style: text.titleSmall));
+        children.add(Text('settings.licenseValueCount'.trParams({'value': '${i + 1}', 'length': '${entries.length}'}), style: text.titleSmall));
         children.add(const SizedBox(height: AppSpacing.sm));
       }
       if (summary != null) {
@@ -160,12 +158,12 @@ class _PackageLicensesPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Resumo em português — ${summary.name}',
+                    'settings.summaryName'.trParams({'name': summary.name.tr}),
                     style: text.titleSmall?.copyWith(color: colors.onSecondaryContainer),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    summary.description,
+                    summary.text,
                     style: text.bodyMedium?.copyWith(color: colors.onSecondaryContainer),
                   ),
                 ],
@@ -177,7 +175,7 @@ class _PackageLicensesPage extends StatelessWidget {
       }
       children.add(
         Text(
-          'Texto original',
+          'settings.originalText'.tr,
           style: text.labelLarge?.copyWith(color: colors.onSurfaceVariant),
         ),
       );
@@ -204,7 +202,7 @@ class _PackageLicensesPage extends StatelessWidget {
           children: [
             Text(packageName),
             Text(
-              entries.length == 1 ? '1 licença' : '${entries.length} licenças',
+              entries.length == 1 ? 'settings.n1License'.tr : 'settings.licensesCount2'.trParams({'length': '${entries.length}'}),
               style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
             ),
           ],
@@ -228,6 +226,9 @@ class _LicenseSummary {
 
   const _LicenseSummary(this.name, this.description);
 
+  /// Resumo no idioma atual, sempre com o aviso de "sem garantia".
+  String get text => '${description.tr} ${_semGarantia.tr}';
+
   static _LicenseSummary? detect(String original) {
     final t = original.toLowerCase();
     if (t.contains('apache license') && t.contains('version 2.0')) return _apache2;
@@ -250,97 +251,65 @@ class _LicenseSummary {
   }
 
   static const _semGarantia =
-      'O software é fornecido "no estado em que se encontra", sem garantias de nenhum tipo, '
-      'e os autores não se responsabilizam por danos decorrentes do seu uso.';
+      'settings.softwareProvidedWithoutWarrantyAny';
 
   static const _apache2 = _LicenseSummary(
-    'Licença Apache 2.0',
-    'Permite usar, copiar, modificar e distribuir o software, inclusive em produtos comerciais. '
-        'Quem redistribuir deve incluir uma cópia desta licença, manter os avisos de direitos '
-        'autorais e o arquivo NOTICE (se existir) e indicar os arquivos que modificou. '
-        'Também concede licença de uso das patentes dos colaboradores, que é revogada de quem '
-        'mover processo por violação de patente relacionada ao software. $_semGarantia',
+    'settings.apacheLicense20',
+    'settings.allowsUsingCopyingModifyingDistributing2',
   );
 
   static const _mit = _LicenseSummary(
-    'Licença MIT',
-    'Permite, gratuitamente, usar, copiar, modificar, mesclar, publicar, distribuir, '
-        'sublicenciar e vender cópias do software, desde que o aviso de direitos autorais e '
-        'esta permissão sejam incluídos em todas as cópias ou partes substanciais. $_semGarantia',
+    'settings.mitLicense',
+    'settings.allowsFreeChargeUsingCopying',
   );
 
   static const _bsd3 = _LicenseSummary(
-    'Licença BSD de 3 cláusulas',
-    'Permite redistribuir e usar o software, com ou sem modificações, em código-fonte ou '
-        'binário, desde que: (1) o código-fonte mantenha o aviso de direitos autorais, esta '
-        'lista de condições e o aviso de isenção; (2) as distribuições binárias reproduzam '
-        'esses avisos na documentação; e (3) o nome dos autores não seja usado para promover '
-        'produtos derivados sem permissão por escrito. $_semGarantia',
+    'settings.n3ClauseBsdLicense',
+    'settings.allowsRedistributionUseSoftwareWithout2',
   );
 
   static const _bsd2 = _LicenseSummary(
-    'Licença BSD de 2 cláusulas',
-    'Permite redistribuir e usar o software, com ou sem modificações, em código-fonte ou '
-        'binário, desde que o aviso de direitos autorais, esta lista de condições e o aviso '
-        'de isenção sejam mantidos no código-fonte e reproduzidos na documentação das '
-        'distribuições binárias. $_semGarantia',
+    'settings.n2ClauseBsdLicense',
+    'settings.allowsRedistributionUseSoftwareWithout',
   );
 
   static const _isc = _LicenseSummary(
-    'Licença ISC',
-    'Permite usar, copiar, modificar e distribuir o software para qualquer finalidade, com '
-        'ou sem cobrança, desde que o aviso de direitos autorais e esta permissão apareçam em '
-        'todas as cópias. $_semGarantia',
+    'settings.iscLicense',
+    'settings.allowsUsingCopyingModifyingDistributing',
   );
 
   static const _zlib = _LicenseSummary(
-    'Licença zlib',
-    'Permite usar o software para qualquer finalidade, inclusive comercial, e alterá-lo e '
-        'redistribuí-lo livremente, desde que: a origem não seja deturpada (não se pode alegar '
-        'ter escrito o software original); versões alteradas sejam identificadas como tal; e '
-        'este aviso não seja removido das distribuições do código-fonte. $_semGarantia',
+    'settings.zlibLicense',
+    'settings.allowsUsingSoftwareAnyPurpose',
   );
 
   static const _mpl2 = _LicenseSummary(
-    'Mozilla Public License 2.0',
-    'Permite usar, modificar e distribuir o software, inclusive junto com código de outras '
-        'licenças. Os arquivos cobertos por esta licença que forem modificados devem continuar '
-        'sob a MPL e ter o código-fonte disponibilizado; o restante do projeto pode usar outra '
-        'licença. $_semGarantia',
+    'settings.mozillaPublicLicense20',
+    'settings.allowsUsingModifyingDistributingSoftware',
   );
 
   static const _lgpl = _LicenseSummary(
-    'GNU LGPL',
-    'Permite usar a biblioteca, inclusive em software proprietário, desde que ela possa ser '
-        'substituída por outra versão pelo usuário. Modificações feitas na própria biblioteca '
-        'devem ser distribuídas sob a mesma licença, com o código-fonte disponível. $_semGarantia',
+    'settings.gnuLgpl',
+    'settings.allowsUsingLibraryIncludingProprietary',
   );
 
   static const _gpl = _LicenseSummary(
-    'GNU GPL',
-    'Permite usar, estudar, modificar e distribuir o software. Quem distribuir o software ou '
-        'trabalhos derivados deve fazê-lo sob a mesma licença e disponibilizar o código-fonte '
-        'correspondente. $_semGarantia',
+    'settings.gnuGpl',
+    'settings.allowsUsingStudyingModifyingDistributing',
   );
 
   static const _unicode = _LicenseSummary(
-    'Licença Unicode',
-    'Permite usar, copiar, modificar e distribuir os arquivos de dados e o software Unicode, '
-        'desde que o aviso de direitos autorais e esta permissão acompanhem todas as cópias ou '
-        'a documentação. $_semGarantia',
+    'settings.unicodeLicense',
+    'settings.allowsUsingCopyingModifyingDistributing3',
   );
 
   static const _freetype = _LicenseSummary(
-    'Licença FreeType',
-    'Permite usar, modificar e distribuir o FreeType, inclusive em produtos comerciais, desde '
-        'que a documentação mencione o uso do FreeType e os avisos de direitos autorais sejam '
-        'mantidos no código-fonte. $_semGarantia',
+    'settings.freetypeLicense',
+    'settings.allowsUsingModifyingDistributingFreetype',
   );
 
   static const _ofl = _LicenseSummary(
-    'SIL Open Font License',
-    'Permite usar, estudar, modificar e redistribuir a fonte, inclusive embutida em software. '
-        'A fonte não pode ser vendida sozinha, e versões modificadas devem usar outro nome e '
-        'continuar sob a mesma licença. $_semGarantia',
+    'settings.silOpenFontLicense',
+    'settings.allowsUsingStudyingModifyingRedistributing',
   );
 }

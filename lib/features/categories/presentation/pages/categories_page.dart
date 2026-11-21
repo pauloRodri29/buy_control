@@ -24,8 +24,8 @@ class CategoriesPage extends StatelessWidget {
   Future<void> _delete(BuildContext context, CategoriesController controller, CategoryEntity category) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir a categoria "${category.name}"?',
-      message: 'Produtos e lançamentos que já usam esta categoria continuam funcionando normalmente.',
+      title: 'categories.deleteCategoryName'.trParams({'name': category.name}),
+      message: 'categories.productsEntriesAlreadyUseCategory'.tr,
     );
     if (confirmed) await controller.delete(category.id);
   }
@@ -33,7 +33,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Categorias', )),
+      appBar: AppBar(title: AppText.heading('common.categories'.tr, )),
       body: GetBuilder<CategoriesController>(
         builder: (controller) {
           switch (controller.status) {
@@ -41,13 +41,13 @@ class CategoriesPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
                 icon: Symbols.sell,
-                title: 'Nenhuma categoria cadastrada',
-                message: 'Crie categorias como Bebidas ou Limpeza para organizar seus produtos.',
-                actionLabel: 'Nova categoria',
+                title: 'categories.noCategoriesRegistered'.tr,
+                message: 'categories.createCategoriesLikeDrinksCleaning'.tr,
+                actionLabel: 'categories.newCategory'.tr,
                 onAction: () => _openForm(context),
               );
             case ViewStatus.success:
@@ -59,10 +59,13 @@ class CategoriesPage extends StatelessWidget {
                   final category = controller.categories[i];
                   return AppListCard(
                     title: category.name,
-                    onTap: () => _openForm(context, category: category),
+                    locked: controller.isLocked(category.id),
+                    onTap: controller.isLocked(category.id)
+                        ? controller.showLockedPrompt
+                        : () => _openForm(context, category: category),
                     actions: [
-                      AppListCardAction('Editar', () => _openForm(context, category: category)),
-                      AppListCardAction('Excluir', () => _delete(context, controller, category), destructive: true),
+                      AppListCardAction('common.edit'.tr, () => _openForm(context, category: category)),
+                      AppListCardAction('common.delete'.tr, () => _delete(context, controller, category), destructive: true),
                     ],
                   );
                 },

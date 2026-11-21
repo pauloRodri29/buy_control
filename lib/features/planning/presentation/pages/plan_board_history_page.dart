@@ -38,14 +38,13 @@ class PlanBoardHistoryPage extends StatelessWidget {
       case _HistoryMenu.delete:
         final confirmed = await ConfirmDialog.show(
           context,
-          title: 'Excluir "${board.title}" do histórico?',
-          message: 'As compras deste quadro deixam de contar nos relatórios. Itens que estão em '
-              'Pendências continuam lá. Esta ação não pode ser desfeita.',
+          title: 'planning.deleteFromHistoryTitle'.trParams({'title': board.title}),
+          message: 'planning.boardsPurchasesWillNoLonger'.tr,
         );
         if (!confirmed) return;
         final error = await _controller.removeBoard(board.id, deleteItems: false);
         if (error != null) {
-          AppFeedback.error(error, title: 'Não foi possível excluir');
+          AppFeedback.error(error, title: 'planning.couldntDelete'.tr);
           return;
         }
         if (context.mounted) Navigator.of(context).pop();
@@ -75,9 +74,9 @@ class PlanBoardHistoryPage extends StatelessWidget {
               PopupMenuButton<_HistoryMenu>(
                 icon: const Icon(Symbols.more_vert),
                 onSelected: (option) => _onMenu(context, board, option),
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: _HistoryMenu.useAsTemplate, child: Text('Usar como modelo')),
-                  PopupMenuItem(value: _HistoryMenu.delete, child: Text('Excluir do histórico')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: _HistoryMenu.useAsTemplate, child: Text('planning.useTemplate'.tr)),
+                  PopupMenuItem(value: _HistoryMenu.delete, child: Text('planning.deleteFromHistory'.tr)),
                 ],
               ),
             ],
@@ -88,8 +87,7 @@ class PlanBoardHistoryPage extends StatelessWidget {
               Row(children: [PlanBoardStatusChip(board: board)]),
               const SizedBox(height: AppSpacing.sm),
               AppText.subtitle(
-                '${board.isCancelled ? 'Cancelado' : 'Finalizado'} em ${DateTimeFormatter.ddMMyyyy(board.finishedAt!)}'
-                ' · previsão ${DateTimeFormatter.ddMMyyyy(board.targetDate)}',
+                'planning.plannedValueDate'.trParams({'value': board.isCancelled ? 'planning.cancelled'.tr : 'planning.finished'.tr, 'ddMMyyyy': DateTimeFormatter.ddMMyyyy(board.finishedAt!), 'vBDdMMyyyy': DateTimeFormatter.ddMMyyyy(board.targetDate)}),
                 color: secondary,
               ),
               if (board.description != null) ...[
@@ -99,11 +97,11 @@ class PlanBoardHistoryPage extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               _Summary(spent: progress.purchased, goal: progress.goal, purchased: purchased.length, total: items.length),
               const SizedBox(height: AppSpacing.lg),
-              AppText('Comprados (${purchased.length})', fontWeight: FontWeight.bold),
+              AppText('planning.purchasedCount'.trParams({'length': '${purchased.length}'}), fontWeight: FontWeight.bold),
               const SizedBox(height: AppSpacing.xs),
-              AppText.subtitle('Toque em uma compra para ajustar a data ou o valor pago.', color: secondary),
+              AppText.subtitle('planning.tapPurchaseAdjustDateAmount'.tr, color: secondary),
               const SizedBox(height: AppSpacing.sm),
-              if (purchased.isEmpty) AppText.subtitle('Nenhum item comprado.', color: secondary),
+              if (purchased.isEmpty) AppText.subtitle('planning.noItemsPurchased'.tr, color: secondary),
               for (final item in purchased)
                 _PurchasedTile(
                   item: item,
@@ -111,7 +109,7 @@ class PlanBoardHistoryPage extends StatelessWidget {
                 ),
               if (notPurchased.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.lg),
-                AppText('Não comprados (${notPurchased.length})', fontWeight: FontWeight.bold),
+                AppText('planning.notPurchasedCount'.trParams({'length': '${notPurchased.length}'}), fontWeight: FontWeight.bold),
                 const SizedBox(height: AppSpacing.sm),
                 for (final item in notPurchased)
                   ListTile(
@@ -119,7 +117,7 @@ class PlanBoardHistoryPage extends StatelessWidget {
                     leading: Icon(Symbols.remove_shopping_cart, color: secondary),
                     title: AppText(item.title),
                     subtitle: AppText.subtitle(
-                      [if (item.notPurchasedReason != null) item.notPurchasedReason!, 'em Pendências'].join(' · '),
+                      [if (item.notPurchasedReason != null) item.notPurchasedReason!, 'planning.pendingLower'.tr].join(' · '),
                       color: secondary,
                     ),
                   ),
@@ -152,10 +150,10 @@ class _Summary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.subtitle('Total gasto', color: secondary),
+          AppText.subtitle('planning.totalSpent'.tr, color: secondary),
           AppText.title(spent.formatted),
           const SizedBox(height: AppSpacing.xs),
-          AppText.subtitle('$purchased de $total itens comprados', color: secondary),
+          AppText.subtitle('planning.itemsPurchasedTotal'.trParams({'purchased': '$purchased', 'total': '$total'}), color: secondary),
           if (goal != null) ...[
             const SizedBox(height: AppSpacing.sm),
             ClipRRect(
@@ -170,8 +168,8 @@ class _Summary extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             AppText.subtitle(
               over
-                  ? '${(spent - goal).formatted} acima da meta de ${goal.formatted}'
-                  : '${(goal - spent).formatted} abaixo da meta de ${goal.formatted}',
+                  ? 'planning.overGoalAmount2'.trParams({'formatted': (spent - goal).formatted, 'vBFormatted': goal.formatted})
+                  : 'planning.belowGoalAmount'.trParams({'formatted': (goal - spent).formatted, 'vBFormatted': goal.formatted}),
               color: over ? context.colors.error : context.semantic.success,
             ),
           ],
@@ -191,19 +189,19 @@ class _PurchasedTile extends StatelessWidget {
     final secondary = context.colors.onSurfaceVariant;
     final value = item.value;
     final date = item.purchasedAt ?? item.updatedAt;
-    final valueLabel = item.paidValue != null && !item.paidValue!.isZero ? 'pago' : 'estimado';
+    final valueLabel = item.paidValue != null && !item.paidValue!.isZero ? 'planning.paid'.tr : 'planning.estimated'.tr;
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
       leading: Icon(Symbols.check_circle, fill: 1, color: context.semantic.success),
       title: AppText(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-      subtitle: AppText.subtitle('Comprado em ${DateTimeFormatter.ddMMyyyy(date)}', color: secondary),
+      subtitle: AppText.subtitle('planning.purchasedDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(date)}), color: secondary),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          AppText.small(value?.formatted ?? 'Sem valor', fontWeight: FontWeight.bold, color: value == null ? secondary : null),
+          AppText.small(value?.formatted ?? 'planning.noValue'.tr, fontWeight: FontWeight.bold, color: value == null ? secondary : null),
           if (value != null) AppText.subtitle(valueLabel, color: secondary),
         ],
       ),
@@ -241,7 +239,7 @@ class _PurchaseEditSheetState extends State<_PurchaseEditSheet> {
     final now = DateTime.now();
     final picked = await AppDatePicker.show(
       context,
-      title: 'Data da compra',
+      title: 'planning.purchaseDate'.tr,
       initialDate: purchasedAt,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 1, 12, 31),
@@ -287,27 +285,27 @@ class _PurchaseEditSheetState extends State<_PurchaseEditSheet> {
           const SizedBox(height: AppSpacing.lg),
           AppTextField(
             controller: dateController,
-            label: 'Data da compra',
+            label: 'planning.purchaseDate'.tr,
             readOnly: true,
             onTap: _pickDate,
             suffix: const Icon(Symbols.calendar_today, size: 18),
           ),
           const SizedBox(height: AppSpacing.md),
           AppMoneyField(
-            label: 'Valor pago',
+            label: 'planning.amountPaid'.tr,
             initialValue: widget.item.value,
             onChanged: (v) => paid = v,
           ),
           if (widget.item.estimatedValue != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            AppText.subtitle('Estimado: ${widget.item.estimatedValue!.formatted}'),
+            AppText.subtitle('planning.estimatedAmount'.trParams({'formatted': widget.item.estimatedValue!.formatted})),
           ],
           if (errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
             AppText(errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
-          AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+          AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
         ],
       ),
     );

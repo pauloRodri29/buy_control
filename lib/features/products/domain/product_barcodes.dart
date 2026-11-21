@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/barcode/barcode_parser.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
 
@@ -37,5 +38,5 @@ class ProductBarcodes {
   }
 
   static String conflictMessage(ProductEntity other) =>
-      'Este código de barras já pertence ao produto "${other.name}".';
+      'products.barcodeAlreadyBelongsProductName'.trParams({'name': other.name});
 }

@@ -1,7 +1,9 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Ação do menu ⋮ de um [AppListCard].
 class AppListCardAction {
@@ -31,6 +33,10 @@ class AppListCard extends StatelessWidget {
   final VoidCallback? onTap;
   final List<AppListCardAction> actions;
 
+  /// Item inacessível no plano atual: aparece esmaecido, com cadeado e sem
+  /// ações. [onTap] continua valendo (normalmente abre o aviso do plano).
+  final bool locked;
+
   const AppListCard({
     super.key,
     required this.title,
@@ -40,21 +46,25 @@ class AppListCard extends StatelessWidget {
     this.leading,
     this.onTap,
     this.actions = const [],
+    this.locked = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final text = context.text;
+    final showActions = actions.isNotEmpty && !locked;
 
     return AppCard(
       onTap: onTap,
-      padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, actions.isEmpty ? AppSpacing.md : 0, AppSpacing.md),
+      padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, showActions ? 0 : AppSpacing.md, AppSpacing.md),
       child: Row(
         children: [
           if (leading != null) ...[leading!, const SizedBox(width: AppSpacing.md)],
           Expanded(
-            child: Column(
+            child: Opacity(
+              opacity: locked ? 0.45 : 1,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -77,10 +87,16 @@ class AppListCard extends StatelessWidget {
                 ],
               ],
             ),
+            ),
           ),
-          if (actions.isNotEmpty)
+          if (locked)
+            Tooltip(
+              message: 'common.lockedPlan'.tr,
+              child: Icon(Symbols.lock, size: 20, color: colors.onSurfaceVariant),
+            ),
+          if (showActions)
             PopupMenuButton<AppListCardAction>(
-              tooltip: 'Mais ações',
+              tooltip: 'common.moreActions'.tr,
               onSelected: (action) => action.onSelected(),
               itemBuilder: (_) => [
                 for (final action in actions)

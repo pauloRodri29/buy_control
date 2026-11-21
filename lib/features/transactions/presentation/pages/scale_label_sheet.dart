@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
@@ -88,15 +89,15 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
   void _confirm() {
     final name = _product?.name ?? _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'Escolha um produto cadastrado ou informe um nome.');
+      setState(() => _error = 'transactions.chooseRegisteredProductEnterName'.tr);
       return;
     }
     if (_mode == ScaleValueMode.price && _price.cents <= 0) {
-      setState(() => _error = 'Informe o preço da etiqueta.');
+      setState(() => _error = 'transactions.enterLabelPrice'.tr);
       return;
     }
     if (_mode == ScaleValueMode.weight && _weightKg <= 0) {
-      setState(() => _error = 'Informe o peso da etiqueta.');
+      setState(() => _error = 'transactions.enterLabelWeight'.tr);
       return;
     }
     Navigator.of(context).pop(ScaleLabelResult(
@@ -119,9 +120,9 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.heading('Etiqueta de balança', ),
+          AppText.heading('transactions.scaleLabel'.tr, ),
           const SizedBox(height: AppSpacing.xs),
-          AppText.subtitle('Código ${widget.code.digits}'),
+          AppText.subtitle('transactions.codeDigits'.trParams({'digits': widget.code.digits})),
           const SizedBox(height: AppSpacing.lg),
           if (product != null)
             Row(
@@ -129,30 +130,30 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
                 const Icon(Symbols.fact_check, size: 18),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(child: AppText(product.name, fontWeight: FontWeight.w600)),
-                AppButton.text(label: 'Trocar', onPressed: _pickProduct),
+                AppButton.text(label: 'transactions.change'.tr, onPressed: _pickProduct),
               ],
             )
           else ...[
             AppText(
-              'Etiqueta ainda não vinculada a um produto. Vincule para o app reconhecer as próximas.',
+              'transactions.labelNotYetLinkedProduct'.tr,
               color: context.colors.onSurfaceVariant,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton.secondary(
-              label: 'Vincular a produto cadastrado',
+              label: 'transactions.linkRegisteredProduct'.tr,
               icon: Symbols.link,
               onPressed: _pickProduct,
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(controller: _nameController, label: 'Ou só um nome (avulso)', hint: 'Ex.: Patinho moído'),
+            AppTextField(controller: _nameController, label: 'transactions.justNameOneOff'.tr, hint: 'transactions.eGGroundBeef'.tr),
           ],
           const SizedBox(height: AppSpacing.lg),
-          const AppText.subtitle('O número da etiqueta é:'),
+          AppText.subtitle('transactions.labelNumber'.tr),
           const SizedBox(height: AppSpacing.xs),
           SegmentedButton<ScaleValueMode>(
-            segments: const [
-              ButtonSegment(value: ScaleValueMode.price, label: Text('Preço'), icon: Icon(Symbols.attach_money)),
-              ButtonSegment(value: ScaleValueMode.weight, label: Text('Peso'), icon: Icon(Symbols.scale)),
+            segments: [
+              ButtonSegment(value: ScaleValueMode.price, label: Text('transactions.price'.tr), icon: Icon(Symbols.attach_money)),
+              ButtonSegment(value: ScaleValueMode.weight, label: Text('transactions.weight'.tr), icon: Icon(Symbols.scale)),
             ],
             selected: {_mode},
             onSelectionChanged: (selection) => setState(() => _mode = selection.first),
@@ -161,22 +162,21 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
           if (_mode == ScaleValueMode.price)
             AppMoneyField(
               initialValue: _price,
-              label: 'Preço total da etiqueta',
+              label: 'transactions.labelTotalPrice'.tr,
               onChanged: (money) => setState(() => _price = money),
             )
           else ...[
             AppTextField(
               controller: _weightController,
-              label: 'Peso (kg)',
+              label: 'transactions.weightKg'.tr,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: AppSpacing.xs),
             AppText.subtitle(
               referencePrice == null
-                  ? 'Informe o preço por kg depois, na lista de itens.'
-                  : 'Estimado: ${(referencePrice * _weightKg).formatted} '
-                      '(${referencePrice.formatted}/kg de referência — ajuste depois se mudou).',
+                  ? 'transactions.enterPricePerKgLater'.tr
+                  : 'transactions.estimatedKgReferenceAdjustLaterAmount'.trParams({'formatted': (referencePrice * _weightKg).formatted, 'vBFormatted': referencePrice.formatted}),
             ),
           ],
           if (_error != null) ...[
@@ -184,7 +184,7 @@ class _ScaleLabelSheetState extends State<ScaleLabelSheet> {
             AppText(_error!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
-          AppButton(label: 'Adicionar', onPressed: _confirm),
+          AppButton(label: 'transactions.add'.tr, onPressed: _confirm),
         ],
       ),
     );

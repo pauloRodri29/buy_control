@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
@@ -7,8 +8,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 const _monthAbbreviations = [
-  'jan', 'fev', 'mar', 'abr', 'mai', 'jun', //
-  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+  'common.jan', 'common.feb', 'common.mar', 'common.apr', 'common.may', 'common.jun', //
+  'common.jul', 'common.aug', 'common.sep', 'common.oct', 'common.nov', 'common.dec',
 ];
 
 /// Evolução mensal do total do relatório. Investimento de gráfico
@@ -26,14 +27,14 @@ class ReportEvolutionChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText.subtitle('Evolução mensal'),
+          AppText.subtitle('common.monthlyTrend'.tr),
           const SizedBox(height: AppSpacing.md),
           if (points.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Center(
                 child: AppText.small(
-                  'Sem dados no período.',
+                  'common.noDataPeriod'.tr,
                   
                   color: context.colors.onSurfaceVariant,
                 ),
@@ -60,7 +61,7 @@ class _EvolutionRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         AppText(
-          '${_monthAbbreviations[point.month.month - 1]}/${point.month.year}',
+          '${_monthAbbreviations[point.month.month - 1].tr}/${point.month.year}',
           color: context.colors.onSurfaceVariant,
         ),
         AppText(point.total.formatted, fontWeight: FontWeight.w600),
@@ -107,7 +108,7 @@ class _Chart extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: AppSpacing.xs),
                   child: AppText.caption(
-                    _monthAbbreviations[month.month - 1],
+                    _monthAbbreviations[month.month - 1].tr,
                     
                     color: context.colors.onSurfaceVariant,
                   ),

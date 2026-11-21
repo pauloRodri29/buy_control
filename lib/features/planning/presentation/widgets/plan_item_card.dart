@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
@@ -40,7 +41,7 @@ class PlanItemCard extends StatelessWidget {
             children: [
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: item.isPurchased ? 'Marcar como não comprado' : 'Marcar como comprado',
+                tooltip: item.isPurchased ? 'planning.markNotPurchased'.tr : 'planning.markPurchased'.tr,
                 icon: Icon(
                   item.isPurchased ? Symbols.check_circle : Symbols.radio_button_unchecked,
                   fill: item.isPurchased ? 1 : 0,
@@ -75,7 +76,7 @@ class PlanItemCard extends StatelessWidget {
                       ],
                       const SizedBox(height: AppSpacing.xs),
                       AppText.small(
-                        value == null || value.isZero ? 'Sem valor' : value.formatted,
+                        value == null || value.isZero ? 'planning.noValue'.tr : value.formatted,
                         
                         fontWeight: value == null ? FontWeight.normal : FontWeight.bold,
                         color: value == null ? secondary : null,
@@ -87,10 +88,10 @@ class PlanItemCard extends StatelessWidget {
               PopupMenuButton<PlanItemAction>(
                 icon: Icon(Symbols.more_vert, size: 18, color: secondary),
                 onSelected: onAction,
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: PlanItemAction.move, child: Text('Mover para…')),
-                  PopupMenuItem(value: PlanItemAction.edit, child: Text('Editar')),
-                  PopupMenuItem(value: PlanItemAction.delete, child: Text('Excluir')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: PlanItemAction.move, child: Text('planning.move'.tr)),
+                  PopupMenuItem(value: PlanItemAction.edit, child: Text('common.edit'.tr)),
+                  PopupMenuItem(value: PlanItemAction.delete, child: Text('common.delete'.tr)),
                 ],
               ),
             ],

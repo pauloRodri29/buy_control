@@ -11,9 +11,9 @@ class ThemeModeSheet extends StatelessWidget {
   const ThemeModeSheet({super.key});
 
   static const _options = [
-    (ThemeMode.system, Symbols.smartphone, 'Automático', 'Segue o tema do aparelho'),
-    (ThemeMode.light, Symbols.light_mode, 'Claro', 'Sempre claro'),
-    (ThemeMode.dark, Symbols.dark_mode, 'Escuro', 'Sempre escuro'),
+    (ThemeMode.system, Symbols.smartphone, 'settings.automatic', 'settings.followsDeviceTheme'),
+    (ThemeMode.light, Symbols.light_mode, 'common.light', 'settings.alwaysLight'),
+    (ThemeMode.dark, Symbols.dark_mode, 'common.dark', 'settings.alwaysDark'),
   ];
 
   @override
@@ -23,14 +23,14 @@ class ThemeModeSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Tema', style: context.text.titleLarge),
+          Text('settings.theme'.tr, style: context.text.titleLarge),
           const SizedBox(height: AppSpacing.md),
           for (final (mode, icon, title, subtitle) in _options)
             ListTile(
               selected: controller.mode == mode,
               leading: Icon(icon),
-              title: Text(title),
-              subtitle: Text(subtitle),
+              title: Text(title.tr),
+              subtitle: Text(subtitle.tr),
               trailing: controller.mode == mode ? const Icon(Symbols.check) : null,
               onTap: () => controller.setMode(mode),
             ),

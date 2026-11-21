@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+import 'package:buy_control/core/i18n/app_locale.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
@@ -34,10 +36,10 @@ class AppDatePicker {
   static List<AppDateShortcut> futureShortcuts() {
     final today = _dateOnly(DateTime.now());
     return [
-      AppDateShortcut('Hoje', today),
-      AppDateShortcut('Fim do mês', DateTime(today.year, today.month + 1, 0)),
-      AppDateShortcut('Próximo mês', DateTime(today.year, today.month + 2, 0)),
-      AppDateShortcut('Fim do ano', DateTime(today.year, 12, 31)),
+      AppDateShortcut('common.today'.tr, today),
+      AppDateShortcut('common.endMonth'.tr, DateTime(today.year, today.month + 1, 0)),
+      AppDateShortcut('common.nextMonth'.tr, DateTime(today.year, today.month + 2, 0)),
+      AppDateShortcut('common.endYear'.tr, DateTime(today.year, 12, 31)),
     ];
   }
 
@@ -45,20 +47,20 @@ class AppDatePicker {
   static List<AppDateShortcut> recentShortcuts() {
     final today = _dateOnly(DateTime.now());
     return [
-      AppDateShortcut('Hoje', today),
-      AppDateShortcut('Ontem', today.subtract(const Duration(days: 1))),
-      AppDateShortcut('Fim do mês passado', DateTime(today.year, today.month, 0)),
+      AppDateShortcut('common.today'.tr, today),
+      AppDateShortcut('common.yesterday'.tr, today.subtract(const Duration(days: 1))),
+      AppDateShortcut('common.endLastMonth'.tr, DateTime(today.year, today.month, 0)),
     ];
   }
 
   static List<AppDateRangeShortcut> rangeShortcuts() {
     final today = _dateOnly(DateTime.now());
     return [
-      AppDateRangeShortcut('Últimos 7 dias', DateTimeRange(start: today.subtract(const Duration(days: 6)), end: today)),
-      AppDateRangeShortcut('Últimos 30 dias', DateTimeRange(start: today.subtract(const Duration(days: 29)), end: today)),
-      AppDateRangeShortcut('Este mês', DateTimeRange(start: DateTime(today.year, today.month, 1), end: today)),
+      AppDateRangeShortcut('common.last7Days'.tr, DateTimeRange(start: today.subtract(const Duration(days: 6)), end: today)),
+      AppDateRangeShortcut('common.last30Days'.tr, DateTimeRange(start: today.subtract(const Duration(days: 29)), end: today)),
+      AppDateRangeShortcut('common.month'.tr, DateTimeRange(start: DateTime(today.year, today.month, 1), end: today)),
       AppDateRangeShortcut(
-        'Mês passado',
+        'common.lastMonth'.tr,
         DateTimeRange(start: DateTime(today.year, today.month - 1, 1), end: DateTime(today.year, today.month, 0)),
       ),
     ];
@@ -70,7 +72,7 @@ class AppDatePicker {
     required DateTime initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
-    String confirmLabel = 'Confirmar',
+    String confirmLabel = 'common.confirm',
     List<AppDateShortcut> shortcuts = const [],
   }) {
     return AppBottomSheet.show<DateTime>(
@@ -92,7 +94,7 @@ class AppDatePicker {
     DateTimeRange? initialRange,
     required DateTime firstDate,
     required DateTime lastDate,
-    String confirmLabel = 'Aplicar',
+    String confirmLabel = 'common.apply',
     List<AppDateRangeShortcut> shortcuts = const [],
   }) {
     return AppBottomSheet.show<DateTimeRange>(
@@ -140,7 +142,7 @@ class _AppDatePickerSheet extends StatefulWidget {
 }
 
 class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
-  static const _locale = 'pt_BR';
+  String get _locale => AppLocale.intl;
 
   late DateTime focusedDay;
   DateTime? selectedDay;
@@ -179,16 +181,16 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
   String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
   String get _summary {
-    final fmt = DateFormat("EEE, d 'de' MMM 'de' y", _locale);
+    final fmt = DateFormat('format.weekdayDate'.tr, _locale);
     if (!widget.isRange) {
-      return selectedDay == null ? 'Nenhuma data selecionada' : _capitalize(fmt.format(selectedDay!));
+      return selectedDay == null ? 'common.noDateSelected'.tr : _capitalize(fmt.format(selectedDay!));
     }
-    if (rangeStart == null) return 'Toque no dia inicial';
-    final short = DateFormat('dd/MM/yyyy', _locale);
+    if (rangeStart == null) return 'common.tapStartDay'.tr;
+    final short = DateFormat('format.date'.tr, _locale);
     final end = rangeEnd ?? rangeStart!;
     final days = end.difference(rangeStart!).inDays + 1;
-    if (rangeEnd == null) return '${short.format(rangeStart!)} · toque no dia final';
-    return '${short.format(rangeStart!)} → ${short.format(end)} · $days ${days == 1 ? 'dia' : 'dias'}';
+    if (rangeEnd == null) return 'common.tapEndDayFormat'.trParams({'format': short.format(rangeStart!)});
+    return '${short.format(rangeStart!)} → ${short.format(end)} · $days ${days == 1 ? 'common.day'.tr : 'common.days'.tr}';
   }
 
   @override
@@ -345,10 +347,10 @@ class _AppDatePickerSheetState extends State<_AppDatePickerSheet> {
           Row(
             children: [
               Expanded(
-                child: AppButton.secondary(label: 'Cancelar', onPressed: () => Navigator.of(context).pop()),
+                child: AppButton.secondary(label: 'common.cancel'.tr, onPressed: () => Navigator.of(context).pop()),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(child: AppButton(label: widget.confirmLabel, onPressed: _canConfirm ? _confirm : null)),
+              Expanded(child: AppButton(label: widget.confirmLabel.tr, onPressed: _canConfirm ? _confirm : null)),
             ],
           ),
         ],
@@ -401,7 +403,7 @@ class _MonthHeader extends StatelessWidget {
             TextButton(
               onPressed: onToday,
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-              child: const Text('Hoje'),
+              child: Text('common.today'.tr),
             ),
           arrow(Symbols.chevron_left, canGoBack, onPrevious),
           const SizedBox(width: AppSpacing.xs),

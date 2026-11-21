@@ -72,16 +72,16 @@ class _UnitFormSheetState extends State<UnitFormSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading(widget.unit != null ? 'Editar unidade' : 'Nova unidade', ),
+        AppText.heading(widget.unit != null ? 'units.editUnit'.tr : 'units.newUnit'.tr, ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(controller: nameController, label: 'Nome', hint: 'Quilo'),
+        AppTextField(controller: nameController, label: 'common.name'.tr, hint: 'units.kilogram'.tr),
         const SizedBox(height: AppSpacing.md),
-        AppTextField(controller: abbreviationController, label: 'Abreviação', hint: 'KG'),
+        AppTextField(controller: abbreviationController, label: 'units.abbreviation'.tr, hint: 'KG'),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Checkbox(value: allowsDecimal, onChanged: (v) => setState(() => allowsDecimal = v ?? false)),
-            const AppText('Permite quantidade fracionada (ex: 1,5 kg)'),
+            AppText('units.allowsFractionalQuantityEG'.tr),
           ],
         ),
         if (errorMessage != null) ...[
@@ -89,7 +89,7 @@ class _UnitFormSheetState extends State<UnitFormSheet> {
           AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+        AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
       ],
     );
   }

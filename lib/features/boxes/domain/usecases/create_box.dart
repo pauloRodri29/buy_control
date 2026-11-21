@@ -1,9 +1,12 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/utils/id_generator.dart';
 import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/boxes/domain/entities/box_entity.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 
 class CreateBoxOutcome {
   final BoxEntity box;
@@ -13,7 +16,8 @@ class CreateBoxOutcome {
 
 class CreateBox {
   final BoxRepository repository;
-  const CreateBox(this.repository);
+  final QuotaGuard? quota;
+  const CreateBox(this.repository, {this.quota});
 
   Future<Result<CreateBoxOutcome>> call({
     required String name,
@@ -22,11 +26,13 @@ class CreateBox {
     String? color,
   }) async {
     if (!Validators.isNotBlank(name)) {
-      return const Failure(ValidationFailure('Nome da caixa é obrigatório.'));
+      return Failure(ValidationFailure('boxes.boxNameRequired'.tr));
     }
     if (!Validators.withinMaxLength(name, 40)) {
-      return const Failure(ValidationFailure('Nome da caixa deve ter no máximo 40 caracteres.'));
+      return Failure(ValidationFailure('boxes.boxNameMustHaveMost'.tr));
     }
+
+    if (await quota?.ensureCanAdd(ResourceKey.boxes) case final limit?) return Failure(limit);
 
     final existingResult = await repository.getAll();
     if (existingResult.isFailure) {

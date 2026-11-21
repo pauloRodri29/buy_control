@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
@@ -8,13 +9,15 @@ import 'package:buy_control/features/planning/domain/entities/plan_item_entity.d
 import 'package:buy_control/features/planning/domain/repositories/plan_board_repository.dart';
 import 'package:buy_control/features/planning/domain/repositories/plan_item_repository.dart';
 import 'package:buy_control/features/planning/domain/usecases/plan_item_positions.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 
 AppFailure? _validateBoard({required String title, Money? goal}) {
   if (!Validators.isNotBlank(title)) {
-    return const ValidationFailure('Título do quadro é obrigatório.');
+    return ValidationFailure('planning.boardTitleRequired'.tr);
   }
   if (goal != null && goal.isNegative) {
-    return const ValidationFailure('A meta não pode ser negativa.');
+    return ValidationFailure('planning.goalCantNegative'.tr);
   }
   return null;
 }
@@ -32,7 +35,8 @@ class GetPlanBoards {
 
 class CreatePlanBoard {
   final PlanBoardRepository repository;
-  const CreatePlanBoard(this.repository);
+  final QuotaGuard? quota;
+  const CreatePlanBoard(this.repository, {this.quota});
 
   Future<Result<PlanBoardEntity>> call({
     required String title,
@@ -42,6 +46,8 @@ class CreatePlanBoard {
   }) async {
     final failure = _validateBoard(title: title, goal: goal);
     if (failure != null) return Failure(failure);
+
+    if (await quota?.ensureCanAdd(ResourceKey.planBoards) case final limit?) return Failure(limit);
 
     final now = DateTime.now();
     final board = PlanBoardEntity(
@@ -104,7 +110,7 @@ class FinishPlanBoard {
     Map<String, Money> paidValues = const {},
     DateTime? now,
   }) async {
-    if (board.isFinished) return const Failure(ValidationFailure('Este quadro já está no histórico.'));
+    if (board.isFinished) return Failure(ValidationFailure('planning.boardAlreadyHistory'.tr));
 
     final itemsResult = await itemRepository.getAll();
     if (itemsResult case Failure(:final failure)) return Failure(failure);
@@ -125,7 +131,7 @@ class FinishPlanBoard {
       if (item.isPurchased) {
         final paid = paidValues[item.id];
         if (paid != null && paid.isNegative) {
-          return const Failure(ValidationFailure('O valor pago não pode ser negativo.'));
+          return Failure(ValidationFailure('planning.amountPaidCantNegative'.tr));
         }
         if (paid != null && !paid.isZero) updates.add(item.copyWith(paidValue: paid));
         continue;
@@ -133,20 +139,20 @@ class FinishPlanBoard {
 
       final destination = destinations[item.id];
       if (destination == null) {
-        return Failure(ValidationFailure('Escolha o destino de "${item.title}".'));
+        return Failure(ValidationFailure('planning.chooseDestinationTitle'.trParams({'title': item.title})));
       }
 
       final toBoardId = destination.toBoardId;
       if (toBoardId != null) {
         if (!openBoardIds.contains(toBoardId)) {
-          return Failure(ValidationFailure('O quadro escolhido para "${item.title}" não está mais aberto.'));
+          return Failure(ValidationFailure('planning.boardChosenNoLongerOpenTitle'.trParams({'title': item.title})));
         }
         final position = nextPositions[toBoardId] ?? PlanItemPositions.nextPosition(all, toBoardId);
         nextPositions[toBoardId] = position + 1;
         updates.add(item.copyWith(boardId: toBoardId, position: position));
       } else {
         if (!Validators.isNotBlank(destination.reason)) {
-          return Failure(ValidationFailure('Informe o motivo de não ter comprado "${item.title}".'));
+          return Failure(ValidationFailure('planning.enterReasonNotBuyingTitle'.trParams({'title': item.title})));
         }
         updates.add(item.copyWith(notPurchasedReason: destination.reason!.trim()));
       }

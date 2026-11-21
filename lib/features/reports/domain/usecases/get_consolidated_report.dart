@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
@@ -277,7 +278,7 @@ class GetConsolidatedReport {
         purchasedByBoard: byBoard.entries
             .map((e) => ReportNamedTotal(
                   id: e.key,
-                  name: e.key == 'sem_quadro' ? 'Sem quadro' : (boardTitleById[e.key] ?? 'Quadro removido'),
+                  name: e.key == 'sem_quadro' ? 'common.noBoard'.tr : (boardTitleById[e.key] ?? 'reports.deletedBoard'.tr),
                   total: Money(e.value),
                 ))
             .toList()
@@ -302,13 +303,13 @@ class GetConsolidatedReport {
     ReportNamedTotal? topBox;
     if (boxTotals.isNotEmpty) {
       final topEntry = boxTotals.entries.reduce((a, b) => a.value >= b.value ? a : b);
-      topBox = ReportNamedTotal(id: topEntry.key, name: boxNameById[topEntry.key] ?? 'Box removida', total: Money(topEntry.value));
+      topBox = ReportNamedTotal(id: topEntry.key, name: boxNameById[topEntry.key] ?? 'common.deletedBox'.tr, total: Money(topEntry.value));
     }
 
     ReportNamedTotal? topCategory;
     if (categoryTotals.isNotEmpty) {
       final topEntry = categoryTotals.entries.reduce((a, b) => a.value >= b.value ? a : b);
-      final name = topEntry.key == 'sem_categoria' ? 'Sem categoria' : (categoryNameById[topEntry.key] ?? 'Categoria removida');
+      final name = topEntry.key == 'sem_categoria' ? 'common.noCategory'.tr : (categoryNameById[topEntry.key] ?? 'common.deletedCategory'.tr);
       topCategory = ReportNamedTotal(id: topEntry.key, name: name, total: Money(topEntry.value));
     }
 
@@ -317,7 +318,7 @@ class GetConsolidatedReport {
       final topEntry = productQuantities.entries.reduce((a, b) => a.value >= b.value ? a : b);
       mostPurchasedProduct = ReportProductCount(
         id: topEntry.key,
-        name: productById[topEntry.key]?.name ?? 'Produto removido',
+        name: productById[topEntry.key]?.name ?? 'reports.deletedProduct'.tr,
         quantity: topEntry.value,
       );
     }
@@ -327,7 +328,7 @@ class GetConsolidatedReport {
       final topEntry = productTotals.entries.reduce((a, b) => a.value >= b.value ? a : b);
       highestImpactProduct = ReportNamedTotal(
         id: topEntry.key,
-        name: productById[topEntry.key]?.name ?? 'Produto removido',
+        name: productById[topEntry.key]?.name ?? 'reports.deletedProduct'.tr,
         total: Money(topEntry.value),
       );
     }
@@ -335,7 +336,7 @@ class GetConsolidatedReport {
     final productLines = productTotals.entries.map((entry) {
       return ReportProductLine(
         id: entry.key,
-        name: productById[entry.key]?.name ?? 'Produto removido',
+        name: productById[entry.key]?.name ?? 'reports.deletedProduct'.tr,
         quantity: productQuantities[entry.key] ?? 0,
         total: Money(entry.value),
       );

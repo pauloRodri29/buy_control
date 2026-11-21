@@ -35,13 +35,13 @@ class _PendingItemsViewState extends State<PendingItemsView> {
   Future<bool> _delete(PlanItemEntity item) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir "${item.title}"?',
-      message: 'A pendência será removida. Esta ação não pode ser desfeita.',
+      title: 'planning.deleteTitle'.trParams({'title': item.title}),
+      message: 'planning.pendingItemWillRemovedAction'.tr,
     );
     if (!confirmed) return false;
     final error = await _controller.removeItem(item.id);
     if (error != null) {
-      AppFeedback.error(error, title: 'Não foi possível excluir');
+      AppFeedback.error(error, title: 'planning.couldntDelete'.tr);
       return false;
     }
     setState(() => _resolved.add(item.id));
@@ -51,19 +51,19 @@ class _PendingItemsViewState extends State<PendingItemsView> {
   Future<bool> _sendToBoard(PlanItemEntity item) async {
     final boards = _controller.activeBoards;
     if (boards.isEmpty) {
-      AppFeedback.info('Crie um quadro na aba Quadros para enviar este item.', title: 'Nenhum quadro aberto');
+      AppFeedback.info('planning.createBoardBoardsTabSend'.tr, title: 'planning.noOpenBoard'.tr);
       return false;
     }
-    final board = await showPlanBoardPicker(context, title: 'Enviar "${item.title}" para', boards: boards);
+    final board = await showPlanBoardPicker(context, title: 'planning.sendTitle'.trParams({'title': item.title}), boards: boards);
     if (board == null || !mounted) return false;
 
     final error = await _controller.sendPendingTo(item, board.id);
     if (error != null) {
-      AppFeedback.error(error, title: 'Não foi possível enviar');
+      AppFeedback.error(error, title: 'planning.couldntSend'.tr);
       return false;
     }
     setState(() => _resolved.add(item.id));
-    AppFeedback.success('"${item.title}" voltou para "${board.title}".', title: 'Item enviado');
+    AppFeedback.success('planning.movedBackTitle'.trParams({'title': item.title, 'vBTitle': board.title}), title: 'planning.itemSent'.tr);
     return true;
   }
 
@@ -73,11 +73,10 @@ class _PendingItemsViewState extends State<PendingItemsView> {
       builder: (controller) {
         final items = controller.pendingItems.where((i) => !_resolved.contains(i.id)).toList();
         if (items.isEmpty) {
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Symbols.pending_actions,
-            title: 'Nenhuma pendência',
-            message: 'Itens que não foram comprados quando você finaliza um quadro aparecem aqui, '
-                'com o motivo, até você mandá-los para outro quadro.',
+            title: 'planning.noPendingItems'.tr,
+            message: 'planning.itemsWerentPurchasedWhenYou'.tr,
           );
         }
 
@@ -113,7 +112,7 @@ class _SwipeHint extends StatelessWidget {
         Icon(Symbols.swipe, size: 16, color: secondary),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
-          child: AppText.subtitle('Deslize para a esquerda para enviar a um quadro, ou para a direita para excluir.'),
+          child: AppText.subtitle('planning.swipeLeftSendBoardRight'.tr),
         ),
       ],
     );
@@ -145,7 +144,7 @@ class _PendingDismissible extends StatelessWidget {
         color: context.colors.error,
         foreground: context.colors.onError,
         icon: Symbols.delete,
-        label: 'Excluir',
+        label: 'common.delete'.tr,
       ),
       // Para a esquerda: enviar para um quadro.
       secondaryBackground: _SwipeBackground(
@@ -153,7 +152,7 @@ class _PendingDismissible extends StatelessWidget {
         color: context.colors.primary,
         foreground: context.colors.onPrimary,
         icon: Symbols.view_kanban,
-        label: 'Enviar para quadro',
+        label: 'planning.sendBoard'.tr,
       ),
       confirmDismiss: (direction) =>
           direction == DismissDirection.startToEnd ? onDelete() : onSend(),
@@ -217,7 +216,7 @@ class _PendingCard extends StatelessWidget {
     final secondary = context.colors.onSurfaceVariant;
     final value = item.value;
     final origin = [
-      if (originTitle != null) 'De "$originTitle"',
+      if (originTitle != null) 'planning.fromOriginTitle'.trParams({'originTitle': '$originTitle'}),
       if (originDate != null) DateTimeFormatter.ddMMyyyy(originDate!),
     ].join(' · ');
 
@@ -255,7 +254,7 @@ class _PendingCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xs),
             child: AppText.small(
-              value?.formatted ?? 'Sem valor',
+              value?.formatted ?? 'planning.noValue'.tr,
               fontWeight: value == null ? FontWeight.normal : FontWeight.bold,
               color: value == null ? secondary : null,
             ),
@@ -263,9 +262,9 @@ class _PendingCard extends StatelessWidget {
           PopupMenuButton<_PendingAction>(
             icon: Icon(Symbols.more_vert, size: 18, color: secondary),
             onSelected: onAction,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: _PendingAction.send, child: Text('Enviar para quadro…')),
-              PopupMenuItem(value: _PendingAction.delete, child: Text('Excluir')),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: _PendingAction.send, child: Text('planning.sendBoard2'.tr)),
+              PopupMenuItem(value: _PendingAction.delete, child: Text('common.delete'.tr)),
             ],
           ),
         ],

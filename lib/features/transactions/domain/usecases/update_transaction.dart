@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -12,33 +13,33 @@ class UpdateTransaction {
     // Lançamentos que já pertencem a um Fechamento estão congelados —
     // editá-los mudaria silenciosamente um relatório histórico já emitido.
     if (transaction.isClosed) {
-      return const Failure(
-        ValidationFailure('Este lançamento faz parte de um Fechamento e não pode mais ser editado.'),
+      return Failure(
+        ValidationFailure('transactions.entryPartClosingCanNo'.tr),
       );
     }
     if (!Validators.isNotBlank(transaction.boxId)) {
-      return const Failure(ValidationFailure('Box é obrigatória.'));
+      return Failure(ValidationFailure('transactions.boxRequired'.tr));
     }
     if (transaction.items.isEmpty) {
-      return const Failure(
-        ValidationFailure('Informe ao menos um item ou lançamento avulso.'),
+      return Failure(
+        ValidationFailure('transactions.addLeastOneItemOne'.tr),
       );
     }
     for (final item in transaction.items) {
       if (!Validators.isPositive(item.quantity)) {
         return Failure(
-          ValidationFailure('Quantidade inválida para "${item.nameSnapshot}".'),
+          ValidationFailure('transactions.invalidQuantityNameSnapshot'.trParams({'nameSnapshot': item.nameSnapshot})),
         );
       }
       if (item.unitPrice.cents < 0) {
         return Failure(
-          ValidationFailure('Preço unitário inválido para "${item.nameSnapshot}".'),
+          ValidationFailure('transactions.invalidUnitPriceNameSnapshot'.trParams({'nameSnapshot': item.nameSnapshot})),
         );
       }
     }
     if (transaction.total.isNegative) {
-      return const Failure(
-        ValidationFailure('O desconto não pode tornar o total negativo.'),
+      return Failure(
+        ValidationFailure('transactions.discountCantMakeTotalNegative'.tr),
       );
     }
 

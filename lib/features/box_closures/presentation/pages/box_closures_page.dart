@@ -43,7 +43,7 @@ class _BoxClosuresPageState extends State<BoxClosuresPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Fechamentos', )),
+      appBar: AppBar(title: AppText.heading('common.closings'.tr, )),
       body: GetBuilder<BoxClosuresController>(
         tag: widget.box.id,
         builder: (controller) => _buildBody(controller),
@@ -57,12 +57,12 @@ class _BoxClosuresPageState extends State<BoxClosuresPage> {
       case ViewStatus.loading:
         return const LoadingSkeletonList();
       case ViewStatus.error:
-        return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+        return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
       case ViewStatus.empty:
-        return const EmptyStateView(
+        return EmptyStateView(
           icon: Symbols.archive,
-          title: 'Nenhum Fechamento ainda',
-          message: 'Feche a Box para começar o histórico.',
+          title: 'boxClosures.noClosingsYet'.tr,
+          message: 'boxClosures.closeBoxStartHistory'.tr,
         );
       case ViewStatus.success:
         return ListView.separated(
@@ -93,9 +93,9 @@ class _ClosureCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText('Compras de ${DateTimeFormatter.ddMMyyyy(closure.referenceDate)}', fontWeight: FontWeight.w600),
+                AppText('boxClosures.purchasesDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(closure.referenceDate)}), fontWeight: FontWeight.w600),
                 const SizedBox(height: AppSpacing.xs),
-                AppText.subtitle('${closure.itemCount} itens'),
+                AppText.subtitle('boxClosures.itemsItemCount'.trParams({'itemCount': '${closure.itemCount}'})),
               ],
             ),
           ),

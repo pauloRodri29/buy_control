@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
@@ -104,7 +105,7 @@ class GetDashboardCharts {
       }
     }
     final spendingByCategory = categoryTotals.entries.map((e) {
-      final name = e.key == 'sem_categoria' ? 'Sem categoria' : (categoryNameById[e.key] ?? 'Categoria removida');
+      final name = e.key == 'sem_categoria' ? 'common.noCategory'.tr : (categoryNameById[e.key] ?? 'common.deletedCategory'.tr);
       return NamedSpend(id: e.key, name: name, total: Money(e.value));
     }).toList()
       ..sort((a, b) => b.total.cents.compareTo(a.total.cents));
@@ -115,7 +116,7 @@ class GetDashboardCharts {
       boxTotals[t.boxId] = (boxTotals[t.boxId] ?? 0) + itemsTotalForCategory(t, categoryId).cents;
     }
     final spendingByBox = boxTotals.entries.map((e) {
-      return NamedSpend(id: e.key, name: boxNameById[e.key] ?? 'Box removida', total: Money(e.value));
+      return NamedSpend(id: e.key, name: boxNameById[e.key] ?? 'common.deletedBox'.tr, total: Money(e.value));
     }).toList()
       ..sort((a, b) => b.total.cents.compareTo(a.total.cents));
 

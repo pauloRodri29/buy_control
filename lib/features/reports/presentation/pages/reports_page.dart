@@ -17,6 +17,8 @@ import 'package:buy_control/features/reports/presentation/widgets/report_evoluti
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_features.dart';
 
 /// Relatório consolidado: filtros de período/Boxes/categoria/tipo/produto/
 /// valor, métricas detalhadas, modo de comparação (dois conjuntos de
@@ -37,7 +39,7 @@ class ReportsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.heading('Relatórios', ),
+        title: AppText.heading('common.reports'.tr, ),
         actions: [
           GetBuilder<ReportsController>(
             builder: (controller) => IconButton(
@@ -45,18 +47,22 @@ class ReportsPage extends StatelessWidget {
                 Symbols.compare_arrows,
                 color: controller.compareMode ? context.colors.primary : null,
               ),
-              tooltip: 'Comparar',
-              onPressed: controller.toggleCompareMode,
+              tooltip: 'reports.compare'.tr,
+              onPressed: () {
+                if (controller.compareMode || PlanFeatures.ensure(FeatureKey.reportsCompare)) {
+                  controller.toggleCompareMode();
+                }
+              },
             ),
           ),
           IconButton(
             icon: const Icon(Symbols.filter_list),
-            tooltip: 'Filtros',
+            tooltip: 'reports.filters'.tr,
             onPressed: () => _openFilters(context),
           ),
           IconButton(
             icon: const Icon(Symbols.share),
-            tooltip: 'Exportar',
+            tooltip: 'reports.export'.tr,
             onPressed: () => _openExport(context),
           ),
         ],
@@ -68,13 +74,13 @@ class ReportsPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
                 icon: Symbols.bar_chart,
-                title: 'Nenhuma Box com dados ainda',
-                message: 'Crie Boxes e registre lançamentos para consolidar relatórios aqui.',
-                actionLabel: 'Filtros',
+                title: 'reports.noBoxesDataYet'.tr,
+                message: 'reports.createBoxesRecordEntriesConsolidate'.tr,
+                actionLabel: 'reports.filters'.tr,
                 onAction: () => _openFilters(context),
               );
             case ViewStatus.success:
@@ -84,7 +90,7 @@ class ReportsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
                     _ReportSection(
-                      title: controller.compareMode ? 'Lado A' : null,
+                      title: controller.compareMode ? 'reports.side'.tr : null,
                       periodLabel: controller.filterFor(ReportSide.a).periodLabel,
                       report: controller.reportA,
                       onOpenFilters: () => _openFilters(context),
@@ -94,7 +100,7 @@ class ReportsPage extends StatelessWidget {
                       const Divider(),
                       const SizedBox(height: AppSpacing.xl),
                       _ReportSection(
-                        title: 'Lado B',
+                        title: 'reports.sideB'.tr,
                         periodLabel: controller.filterFor(ReportSide.b).periodLabel,
                         report: controller.reportB,
                         onOpenFilters: () => _openFilters(context),
@@ -146,29 +152,29 @@ class _ReportSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         if (r == null || r.isEmpty)
-          const EmptyStateView(
+          EmptyStateView(
             icon: Symbols.bar_chart,
-            title: 'Nenhum lançamento nos filtros atuais',
-            message: 'Ajuste o período, as Boxes ou os demais filtros para ver o relatório.',
+            title: 'reports.noEntriesCurrentFilters'.tr,
+            message: 'reports.adjustPeriodBoxesOtherFilters'.tr,
           )
         else ...[
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText.subtitle('Total consolidado'),
+                AppText.subtitle('reports.consolidatedTotal'.tr),
                 const SizedBox(height: AppSpacing.xs),
                 AppText.title(r.total.formatted, ),
                 const SizedBox(height: AppSpacing.xs),
                 AppText.small(
-                  '${r.transactionCount} lançamentos · ${r.itemCount} itens',
+                  'reports.entriesItemsTransactionCountItemCount'.trParams({'transactionCount': '${r.transactionCount}', 'itemCount': '${r.itemCount}'}),
                   
                   color: context.colors.onSurfaceVariant,
                 ),
                 if (r.planning != null && r.planning!.purchasedCount > 0) ...[
                   const SizedBox(height: AppSpacing.xs),
                   AppText.small(
-                    'Boxes ${r.boxesTotal.formatted} · Planejamento ${r.planning!.purchasedTotal.formatted}',
+                    'reports.boxesPlanningAmount'.trParams({'formatted': r.boxesTotal.formatted, 'vBFormatted': r.planning!.purchasedTotal.formatted}),
                     
                     color: context.colors.onSurfaceVariant,
                   ),
@@ -179,9 +185,9 @@ class _ReportSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              Expanded(child: _MetricCard(label: 'Média por Box', value: r.averagePerBox.formatted)),
+              Expanded(child: _MetricCard(label: 'reports.averagePerBox'.tr, value: r.averagePerBox.formatted)),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(child: _MetricCard(label: 'Média por dia', value: r.averagePerDay.formatted)),
+              Expanded(child: _MetricCard(label: 'reports.averagePerDay'.tr, value: r.averagePerDay.formatted)),
             ],
           ),
           if (r.topBox != null || r.topCategory != null) ...[
@@ -189,12 +195,12 @@ class _ReportSection extends StatelessWidget {
             Row(
               children: [
                 if (r.topBox != null)
-                  Expanded(child: _MetricCard(label: 'Box com maior gasto', value: r.topBox!.name, hint: r.topBox!.total.formatted)),
+                  Expanded(child: _MetricCard(label: 'reports.boxHighestSpending'.tr, value: r.topBox!.name, hint: r.topBox!.total.formatted)),
                 if (r.topBox != null && r.topCategory != null) const SizedBox(width: AppSpacing.sm),
                 if (r.topCategory != null)
                   Expanded(
                     child: _MetricCard(
-                      label: 'Categoria com maior gasto',
+                      label: 'reports.categoryHighestSpending'.tr,
                       value: r.topCategory!.name,
                       hint: r.topCategory!.total.formatted,
                     ),
@@ -209,16 +215,16 @@ class _ReportSection extends StatelessWidget {
                 if (r.mostPurchasedProduct != null)
                   Expanded(
                     child: _MetricCard(
-                      label: 'Produto mais comprado',
+                      label: 'reports.mostPurchasedProduct'.tr,
                       value: r.mostPurchasedProduct!.name,
-                      hint: '${r.mostPurchasedProduct!.quantity.toStringAsFixed(r.mostPurchasedProduct!.quantity % 1 == 0 ? 0 : 1)} un.',
+                      hint: 'reports.unitsNumber'.trParams({'toStringAsFixed': r.mostPurchasedProduct!.quantity.toStringAsFixed(r.mostPurchasedProduct!.quantity % 1 == 0 ? 0 : 1)}),
                     ),
                   ),
                 if (r.mostPurchasedProduct != null && r.highestImpactProduct != null) const SizedBox(width: AppSpacing.sm),
                 if (r.highestImpactProduct != null)
                   Expanded(
                     child: _MetricCard(
-                      label: 'Maior impacto financeiro',
+                      label: 'reports.biggestFinancialImpact'.tr,
                       value: r.highestImpactProduct!.name,
                       hint: r.highestImpactProduct!.total.formatted,
                     ),
@@ -277,19 +283,19 @@ class _PlanningCard extends StatelessWidget {
             children: [
               Icon(Symbols.view_kanban, size: 16, color: secondary),
               const SizedBox(width: AppSpacing.xs),
-              const AppText('Planejamento', fontWeight: FontWeight.bold),
+              AppText('common.planning'.tr, fontWeight: FontWeight.bold),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          row('Comprado (${planning.purchasedCount} itens)', planning.purchasedTotal.formatted),
-          row('Ainda previsto (${planning.pendingCount} itens)', planning.forecastPending.formatted),
-          row('Projeção de gasto do período', projected.formatted, bold: true),
+          row('reports.purchasedItemsPurchasedCount'.trParams({'purchasedCount': '${planning.purchasedCount}'}), planning.purchasedTotal.formatted),
+          row('reports.stillPlannedItemsPendingCount'.trParams({'pendingCount': '${planning.pendingCount}'}), planning.forecastPending.formatted),
+          row('reports.spendingForecastPeriod'.tr, projected.formatted, bold: true),
           if (hasGoal) ...[
             const SizedBox(height: AppSpacing.sm),
-            row('Metas dos quadros (${planning.boardsInPeriod})', planning.goalTotal.formatted),
-            row('Planejado nesses quadros', planning.plannedInBoards.formatted),
+            row('reports.boardGoalsBoardsInPeriod'.trParams({'boardsInPeriod': '${planning.boardsInPeriod}'}), planning.goalTotal.formatted),
+            row('reports.plannedTheseBoards'.tr, planning.plannedInBoards.formatted),
             row(
-              overGoal ? 'Acima das metas' : 'Margem até as metas',
+              overGoal ? 'reports.overGoals'.tr : 'reports.roomLeftWithinGoals'.tr,
               (overGoal
                       ? planning.plannedInBoards - planning.goalTotal
                       : planning.goalTotal - planning.plannedInBoards)
@@ -299,14 +305,13 @@ class _PlanningCard extends StatelessWidget {
           ],
           if (planning.purchasedByBoard.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText.subtitle('Comprado por quadro', color: secondary),
+            AppText.subtitle('reports.purchasedPerBoard'.tr, color: secondary),
             const SizedBox(height: AppSpacing.xs),
             for (final b in planning.purchasedByBoard) row(b.name, b.total.formatted),
           ],
           const SizedBox(height: AppSpacing.sm),
           AppText.subtitle(
-            'Projeção = total realizado no período (Boxes + Planejamento) + itens pendentes dos quadros '
-            'com previsão no período.',
+            'reports.forecastActualTotalPeriodBoxes'.tr,
             color: secondary,
           ),
         ],

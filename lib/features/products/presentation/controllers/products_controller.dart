@@ -13,8 +13,13 @@ import 'package:buy_control/features/products/domain/usecases/update_product.dar
 import 'package:buy_control/features/units/domain/entities/unit_entity.dart';
 import 'package:buy_control/features/units/domain/usecases/get_units.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 
-class ProductsController extends GetxController {
+class ProductsController extends GetxController with PlanLocks {
+  @override
+  ResourceKey get lockResource => ResourceKey.products;
+
   final SearchProducts searchProducts;
   final GetCategories getCategories;
   final GetProductTypes getProductTypes;
@@ -50,9 +55,11 @@ class ProductsController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load() async {
     status = ViewStatus.loading;
     update();
+    await refreshLocks();
 
     final categoriesResult = await getCategories();
     categoriesResult.fold((data) => categories = data, (_) {});

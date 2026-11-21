@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 
 import 'package:buy_control/core/errors/app_failure.dart';
@@ -54,15 +55,15 @@ class ImportBackup {
     try {
       final decoded = jsonDecode(jsonString);
       if (decoded is! Map<String, dynamic>) {
-        return const Failure(ValidationFailure('Arquivo inválido: não é um backup do GastoLog.'));
+        return Failure(ValidationFailure('backup.invalidFileNotGastologBackup'.tr));
       }
       data = decoded;
     } catch (_) {
-      return const Failure(ValidationFailure('Arquivo inválido: o conteúdo não é um JSON válido.'));
+      return Failure(ValidationFailure('backup.invalidFileContentNotValid'.tr));
     }
 
     if (!data.containsKey('version')) {
-      return const Failure(ValidationFailure('Arquivo inválido: não é um backup do GastoLog.'));
+      return Failure(ValidationFailure('backup.invalidFileNotGastologBackup'.tr));
     }
 
     try {
@@ -100,7 +101,7 @@ class ImportBackup {
 
       return const Success(null);
     } catch (_) {
-      return const Failure(CacheFailure('Falha ao importar o backup. Verifique se o arquivo não está corrompido.'));
+      return Failure(CacheFailure('backup.failedImportBackupCheckFile'.tr));
     }
   }
 

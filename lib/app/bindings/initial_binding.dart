@@ -1,3 +1,13 @@
+import 'package:buy_control/features/subscription/data/billing/fake_billing_gateway.dart';
+import 'package:buy_control/features/subscription/data/repositories/local_subscription_repository.dart';
+import 'package:buy_control/features/subscription/domain/repositories/billing_gateway.dart';
+import 'package:buy_control/features/subscription/domain/repositories/subscription_repository.dart';
+import 'package:buy_control/features/subscription/domain/resource_inventory.dart';
+import 'package:buy_control/features/subscription/domain/usecases/plan_access_usecases.dart';
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
+import 'package:buy_control/features/subscription/domain/usecases/subscription_usecases.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
+import 'package:buy_control/features/subscription/presentation/widgets/simulated_payment_sheet.dart';
 import 'package:buy_control/features/auth/data/repositories/fake_auth_repository.dart';
 import 'package:buy_control/features/auth/domain/repositories/auth_repository.dart';
 import 'package:buy_control/features/auth/domain/usecases/get_current_user.dart';
@@ -109,5 +119,40 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
+
+    _subscription();
+  }
+
+  /// Planos: assinatura salva no aparelho e pagamento simulado. Para ligar
+  /// a loja, troque o [FakeBillingGateway] (e, com backend, o repositório).
+  void _subscription() {
+    Get.put<SubscriptionRepository>(LocalSubscriptionRepository(), permanent: true);
+    Get.put<BillingGateway>(const FakeBillingGateway(confirm: SimulatedPaymentSheet.ask), permanent: true);
+    Get.put(
+      ResourceInventory(
+        boxRepository: Get.find(),
+        productRepository: Get.find(),
+        categoryRepository: Get.find(),
+        productTypeRepository: Get.find(),
+        unitRepository: Get.find(),
+        planBoardRepository: Get.find(),
+        planItemRepository: Get.find(),
+      ),
+      permanent: true,
+    );
+    final controller = Get.put(
+      SubscriptionController(
+        getEntitlement: GetEntitlement(repository: Get.find(), billing: Get.find()),
+        purchasePlan: PurchasePlan(repository: Get.find(), billing: Get.find()),
+        setAutoRenew: SetAutoRenew(Get.find()),
+        getPlanUsage: GetPlanUsage(Get.find()),
+        inventory: Get.find(),
+        repository: Get.find(),
+        billing: Get.find(),
+      ),
+      permanent: true,
+    );
+    Get.put<EntitlementSource>(controller, permanent: true);
+    Get.put(QuotaGuard(source: controller, inventory: Get.find()), permanent: true);
   }
 }

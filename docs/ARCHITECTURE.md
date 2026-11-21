@@ -80,6 +80,18 @@ O app usa só o tema nativo do Material 3:
 
 O GetX fica com injeção de dependência, estado (`GetBuilder`) e navegação. `SnackBar`, diálogos, bottom sheets e tema são nativos do Flutter. Os avisos usam o `ScaffoldMessenger` raiz (`appScaffoldMessengerKey`), por isso também podem ser chamados dos controllers.
 
+## Idiomas (i18n)
+
+O app fala português (Brasil) e inglês, com as traduções do GetX:
+- **Chaves semânticas.** O código não tem texto visível: usa a chave com `.tr` (`'common.save'.tr`) ou, com valores, `.trParams` (`'subscription.planName'.trParams({'name': plano})`). A chave é `<feature>.<nome>` (`boxes.deleteBox`, `planning.purchasedCount`); textos usados em várias features ficam em `common.*`, mensagens de erro em `errors.*`, catálogos padrão em `catalog.*` e padrões de data em `format.*`.
+- **Um JSON por idioma em `assets/i18n/`** (`pt_BR.json`, `en_US.json`), todos com as mesmas chaves e os mesmos `@parâmetros`. `AppLocale.loadTranslations()` lê os arquivos no `main`, antes do bootstrap. Chave que faltar num idioma aparece em português. O teste `test/core/i18n/translations_test.dart` falha se alguma chave usada no código faltar em algum JSON, se os JSON tiverem chaves diferentes ou se os parâmetros divergirem. Nos testes, `test/flutter_test_config.dart` carrega os JSON e deixa o português ativo.
+- **Idiomas registrados em `AppLocale.languages`** (`lib/core/i18n/app_locale.dart`). Para um idioma novo: criar `assets/i18n/<código>.json` e adicionar um `AppLanguage` na lista. Seletor, `GetMaterialApp`, datas e catálogos padrão passam a incluí-lo sozinhos.
+- **Textos em `const`, enums e listas estáticas** guardam a chave crua e traduzem na leitura (getter com `.tr`, ex.: `ResourceKey.label`, `PlanDefinition.name`, `BackupCollection.label`) ou no ponto de exibição (`FilterChipsBar`, rótulos padrão de `ConfirmDialog`, `TextInputDialog`, `AppDatePicker`). Assim tudo acompanha a troca de idioma sem reiniciar.
+- **Falhas do domínio**: as mensagens padrão das `AppFailure` são chaves; o `FailurePresenter.present` aplica `.tr`.
+- **Datas** usam `AppLocale.intl` (`pt_BR`/`en_US`) e padrões traduzidos (em inglês, mês/dia). Valores em dinheiro continuam no formato do Real (`R$ 1.234,56`), que é a moeda do app.
+- `LocaleController` guarda a escolha (Configurações → Preferências → Idioma) no `AppMetaStore` e aplica com `Get.updateLocale`. Sem escolha salva, segue o aparelho: português se estiver em português, senão inglês.
+- Os catálogos padrão (categorias, tipos e unidades) são criados no idioma da primeira execução; `DefaultCatalogs` reconhece os nomes em todos os idiomas. Depois disso são dados do usuário e não mudam com o idioma.
+
 ## Money
 
 Todo valor monetário passa por `Money` (`lib/core/money/money.dart`), que guarda centavos como `int` — nunca `double` bruto em cálculo financeiro, evitando erros de arredondamento. `MoneyInputFormatter` + o widget `AppMoneyField` aplicam máscara de moeda em tempo real em todo formulário do app, eliminando a duplicação de parsing manual que existia antes.
@@ -101,7 +113,11 @@ Esse mesmo `closureId` é o que garante a regra "relatórios nunca refletem o es
 ## Backup/Import (JSON) vs. Exportação de Relatório (PDF)
 
 São dois recursos intencionalmente separados:
-- `lib/features/backup/`: dump/restauração de **todos** os dados do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, Planejamento) em um único JSON, usado para backup manual e migração de aparelho.
+- `lib/features/backup/`: dump/restauração de **todos** os dados do app (Boxes, Produtos, Categorias, Tipos, Unidades, Transações, Fechamentos, Planejamento) em um único JSON, usado para backup manual, na nuvem e migração de aparelho.
+  - `domain/entities/`: `BackupSnapshot` (leitura validada do JSON, sem tocar no banco) e `BackupDiff` (comparação por id entre o que existe e o que chega — base da tela de resumo).
+  - `domain/repositories/backup_remote.dart`: contrato do destino na nuvem (testar, último backup, enviar com sha esperado, histórico, baixar versão). `data/github_backup_remote.dart` implementa via API "Contents" do GitHub; outro provedor entra implementando a mesma interface.
+  - `data/backup_settings_store.dart`: repositório configurado e registro de atividade no `app_meta`; token no `flutter_secure_storage`. `data/safety_snapshot_store.dart`: cópia pré-importação (desfazer).
+  - `presentation/controllers/backup_controller.dart`: todo fluxo é ler → `BackupDiff` → `BackupPreviewPage` → agir.
 - `lib/features/reports/data/exporters/`: gera um **PDF de um relatório filtrado** (não é um backup de dados). Implementa a interface `ReportExporter`, hoje via `AppReportExporter` (pacote `pdf`+`printing`); CSV e JSON-a-partir-do-relatório ficam com stub (`NotImplementedFailure`), prontos para implementação futura sem mudar o contrato.
 
 ## Migração e bootstrap

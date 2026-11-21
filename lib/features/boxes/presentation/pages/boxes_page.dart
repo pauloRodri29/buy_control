@@ -25,9 +25,9 @@ class BoxesPage extends StatelessWidget {
   const BoxesPage({super.key});
 
   static const _sortOptions = [
-    FilterChipOption(key: 'date', label: 'Recentes'),
-    FilterChipOption(key: 'name', label: 'Nome'),
-    FilterChipOption(key: 'value', label: 'Valor'),
+    FilterChipOption(key: 'date', label: 'boxes.recent'),
+    FilterChipOption(key: 'name', label: 'common.name'),
+    FilterChipOption(key: 'value', label: 'common.value'),
   ];
 
   void _openForm(BuildContext context, {BoxEntity? box}) {
@@ -50,10 +50,9 @@ class BoxesPage extends StatelessWidget {
     final count = summary?.transactionCount ?? 0;
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir a caixa "${box.name}"?',
+      title: 'boxes.deleteBoxName'.trParams({'name': box.name}),
       message:
-          'Isso não apaga o histórico: os $count lançamentos registrados nela deixam de '
-          'aparecer nas listagens, mas continuam preservados.',
+          'boxes.doesntDeleteHistoryEntriesRecordedCount'.trParams({'count': '$count'}),
     );
     if (confirmed) await controller.delete(box.id);
   }
@@ -83,7 +82,7 @@ class BoxesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Caixas', )),
+      appBar: AppBar(title: AppText.heading('common.boxes2'.tr, )),
       body: GetBuilder<BoxesController>(
         builder: (controller) {
           return Column(
@@ -92,7 +91,7 @@ class BoxesPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
                 child: Column(
                   children: [
-                    SearchFieldDebounced(hint: 'Buscar caixa', onChanged: controller.search),
+                    SearchFieldDebounced(hint: 'boxes.searchBox'.tr, onChanged: controller.search),
                     const SizedBox(height: AppSpacing.sm),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -124,13 +123,13 @@ class BoxesPage extends StatelessWidget {
       case ViewStatus.loading:
         return const LoadingSkeletonList();
       case ViewStatus.error:
-        return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+        return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
       case ViewStatus.empty:
         return EmptyStateView(
           icon: Symbols.inventory_2,
-          title: 'Nenhuma caixa cadastrada',
-          message: 'Crie caixas para organizar suas compras, como "Mercado" ou "Farmácia".',
-          actionLabel: 'Nova caixa',
+          title: 'boxes.noBoxesRegistered'.tr,
+          message: 'boxes.createBoxesOrganizePurchasesLike'.tr,
+          actionLabel: 'boxes.newBox'.tr,
           onAction: () => _openForm(context),
         );
       case ViewStatus.success:
@@ -141,10 +140,12 @@ class BoxesPage extends StatelessWidget {
           itemBuilder: (_, i) {
             final box = controller.boxes[i];
             final summary = controller.summaries[box.id];
+            final locked = controller.isLocked(box.id);
             return _BoxCard(
               box: box,
               summary: summary,
-              onTap: () => _openDetail(context, box),
+              locked: locked,
+              onTap: locked ? controller.showLockedPrompt : () => _openDetail(context, box),
               onEdit: () => _openForm(context, box: box),
               onArchive: () => controller.archive(box.id, archived: !box.isArchived),
               onDelete: () => _delete(context, controller, box),
@@ -158,6 +159,7 @@ class BoxesPage extends StatelessWidget {
 class _BoxCard extends StatelessWidget {
   final BoxEntity box;
   final BoxSummary? summary;
+  final bool locked;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onArchive;
@@ -166,6 +168,7 @@ class _BoxCard extends StatelessWidget {
   const _BoxCard({
     required this.box,
     required this.summary,
+    required this.locked,
     required this.onTap,
     required this.onEdit,
     required this.onArchive,
@@ -182,16 +185,17 @@ class _BoxCard extends StatelessWidget {
       title: box.name,
       highlight: total,
       details: [
-        '$transactionCount lançamentos',
+        'boxes.entriesTransactionCount'.trParams({'transactionCount': '$transactionCount'}),
         lastMovement == null
-            ? 'Sem movimentações'
-            : 'Última movimentação: ${DateTimeFormatter.relative(lastMovement)}',
+            ? 'boxes.noActivity'.tr
+            : 'boxes.lastActivityRelative'.trParams({'relative': DateTimeFormatter.relative(lastMovement)}),
       ],
       onTap: onTap,
+      locked: locked,
       actions: [
-        AppListCardAction('Editar', onEdit),
-        AppListCardAction(box.isArchived ? 'Desarquivar' : 'Arquivar', onArchive),
-        AppListCardAction('Excluir', onDelete, destructive: true),
+        AppListCardAction('common.edit'.tr, onEdit),
+        AppListCardAction(box.isArchived ? 'common.unarchive'.tr : 'common.archive'.tr, onArchive),
+        AppListCardAction('common.delete'.tr, onDelete, destructive: true),
       ],
     );
   }

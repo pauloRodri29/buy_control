@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:flutter/material.dart';
 
@@ -9,17 +10,17 @@ extension ReportPeriodPresetLabel on ReportPeriodPreset {
   String get label {
     switch (this) {
       case ReportPeriodPreset.today:
-        return 'Hoje';
+        return 'common.today'.tr;
       case ReportPeriodPreset.last7Days:
-        return 'Últimos 7 dias';
+        return 'common.last7Days'.tr;
       case ReportPeriodPreset.currentMonth:
-        return 'Mês atual';
+        return 'reports.currentMonth'.tr;
       case ReportPeriodPreset.previousMonth:
-        return 'Mês anterior';
+        return 'common.previousMonth'.tr;
       case ReportPeriodPreset.currentYear:
-        return 'Ano atual';
+        return 'reports.year'.tr;
       case ReportPeriodPreset.custom:
-        return 'Personalizado';
+        return 'common.custom'.tr;
     }
   }
 }
@@ -102,8 +103,13 @@ class ReportFilterState {
     if (periodPreset == ReportPeriodPreset.custom && customRange != null) {
       final s = customRange!.start;
       final e = customRange!.end;
-      return '${s.day.toString().padLeft(2, '0')}/${s.month.toString().padLeft(2, '0')} a '
-          '${e.day.toString().padLeft(2, '0')}/${e.month.toString().padLeft(2, '0')}';
+      String two(int n) => n.toString().padLeft(2, '0');
+      return 'reports.startMonthStartDayEndMonthEndDay'.trParams({
+        'startDay': two(s.day),
+        'startMonth': two(s.month),
+        'endDay': two(e.day),
+        'endMonth': two(e.month),
+      });
     }
     return periodPreset.label;
   }

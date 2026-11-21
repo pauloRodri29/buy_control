@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
@@ -23,22 +24,22 @@ class CreateTransaction {
     bool carryOver = true,
   }) async {
     if (!Validators.isNotBlank(boxId)) {
-      return const Failure(ValidationFailure('Box é obrigatória.'));
+      return Failure(ValidationFailure('transactions.boxRequired'.tr));
     }
     if (items.isEmpty) {
-      return const Failure(
-        ValidationFailure('Informe ao menos um item ou lançamento avulso.'),
+      return Failure(
+        ValidationFailure('transactions.addLeastOneItemOne'.tr),
       );
     }
     for (final item in items) {
       if (!Validators.isPositive(item.quantity)) {
         return Failure(
-          ValidationFailure('Quantidade inválida para "${item.nameSnapshot}".'),
+          ValidationFailure('transactions.invalidQuantityNameSnapshot'.trParams({'nameSnapshot': item.nameSnapshot})),
         );
       }
       if (item.unitPrice.cents < 0) {
         return Failure(
-          ValidationFailure('Preço unitário inválido para "${item.nameSnapshot}".'),
+          ValidationFailure('transactions.invalidUnitPriceNameSnapshot'.trParams({'nameSnapshot': item.nameSnapshot})),
         );
       }
     }
@@ -63,8 +64,8 @@ class CreateTransaction {
     // O total nunca pode ficar negativo: desconto maior que o valor dos
     // itens indicaria um lançamento inconsistente.
     if (draft.total.isNegative) {
-      return const Failure(
-        ValidationFailure('O desconto não pode tornar o total negativo.'),
+      return Failure(
+        ValidationFailure('transactions.discountCantMakeTotalNegative'.tr),
       );
     }
 

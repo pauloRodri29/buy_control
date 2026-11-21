@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:developer' as developer;
 
 import 'package:buy_control/app/widgets/app_feedback.dart';
@@ -16,7 +17,7 @@ import 'package:material_symbols_icons/symbols.dart';
 class AppErrorHandler {
   AppErrorHandler._();
 
-  static const _genericMessage = 'Algo deu errado. Tente novamente.';
+  static String get _genericMessage => 'errors.somethingWentWrongPleaseTry'.tr;
 
   static void install() {
     FlutterError.onError = (details) {
@@ -26,7 +27,7 @@ class AppErrorHandler {
 
     PlatformDispatcher.instance.onError = (error, stack) {
       _log(error, stack);
-      AppFeedback.error(_genericMessage, title: 'Erro inesperado');
+      AppFeedback.error(_genericMessage, title: 'errors.unexpectedError'.tr);
       return true;
     };
 
@@ -69,7 +70,7 @@ class AppErrorWidget extends StatelessWidget {
                 Icon(Symbols.warning, color: colors.error, size: 32),
                 const SizedBox(height: 8),
                 Text(
-                  'Não foi possível mostrar este conteúdo.',
+                  'errors.couldntDisplayContent'.tr,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
                 ),

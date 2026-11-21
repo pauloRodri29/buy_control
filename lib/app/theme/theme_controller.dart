@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 
 extension ThemeModeLabel on ThemeMode {
   String get label => switch (this) {
-        ThemeMode.system => 'Automático (do sistema)',
-        ThemeMode.light => 'Claro',
-        ThemeMode.dark => 'Escuro',
+        ThemeMode.system => 'common.automaticSystem'.tr,
+        ThemeMode.light => 'common.light'.tr,
+        ThemeMode.dark => 'common.dark'.tr,
       };
 }
 

@@ -21,6 +21,9 @@ class HiveBoxRegistry {
   static const planBoards = 'plan_boards';
   static const planItems = 'plan_items';
 
+  /// Assinatura de cada usuário (plano em vigor). Não entra no backup.
+  static const subscription = 'subscription';
+
   static const _allBoxNames = [
     legacyBox,
     appMeta,
@@ -36,6 +39,7 @@ class HiveBoxRegistry {
     reportPresets,
     planBoards,
     planItems,
+    subscription,
   ];
 
   static Future<void> initHive() async {

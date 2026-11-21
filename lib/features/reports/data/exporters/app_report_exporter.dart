@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:buy_control/core/errors/app_failure.dart';
@@ -36,13 +37,13 @@ class AppReportExporter implements ReportExporter {
       await file.writeAsBytes(bytes);
       return Success(filePath);
     } catch (_) {
-      return const Failure(UnknownFailure('Não foi possível gerar o PDF do relatório.'));
+      return Failure(UnknownFailure('reports.couldntGenerateReportPdf'.tr));
     }
   }
 
   @override
   Future<Result<String>> exportToCsv(ConsolidatedReport report, {required String title}) async {
-    return const Failure(NotImplementedFailure('Exportação em CSV estará disponível em breve.'));
+    return Failure(NotImplementedFailure('reports.csvExportWillAvailableSoon'.tr));
   }
 
   @override
@@ -62,7 +63,7 @@ class AppReportExporter implements ReportExporter {
       await Printing.sharePdf(bytes: bytes, filename: 'relatorio.pdf');
       return const Success(null);
     } catch (_) {
-      return const Failure(UnknownFailure('Não foi possível compartilhar o relatório.'));
+      return Failure(UnknownFailure('reports.couldntShareReport'.tr));
     }
   }
 
@@ -83,7 +84,7 @@ class AppReportExporter implements ReportExporter {
       await Printing.layoutPdf(onLayout: (format) async => bytes);
       return const Success(null);
     } catch (_) {
-      return const Failure(UnknownFailure('Não foi possível imprimir o relatório.'));
+      return Failure(UnknownFailure('reports.couldntPrintReport'.tr));
     }
   }
 
@@ -92,6 +93,6 @@ class AppReportExporter implements ReportExporter {
     // Backup completo do app em JSON é uma feature separada
     // (lib/features/backup/), fora do escopo deste exportador que só lida
     // com o relatório consolidado.
-    return const Failure(NotImplementedFailure('Backup em JSON estará disponível em breve.'));
+    return Failure(NotImplementedFailure('reports.jsonBackupWillAvailableSoon'.tr));
   }
 }

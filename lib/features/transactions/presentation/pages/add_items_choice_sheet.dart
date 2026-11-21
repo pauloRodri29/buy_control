@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -16,20 +17,20 @@ class AddItemsChoiceSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading('Adicionar itens', ),
+        AppText.heading('common.addItems'.tr, ),
         const SizedBox(height: AppSpacing.lg),
         AppButton(
-          label: 'Escanear produtos (câmera)',
+          label: 'transactions.scanProductsCamera'.tr,
           onPressed: () => Navigator.of(context).pop(AddItemsChoice.scan),
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton.secondary(
-          label: 'Selecionar produtos',
+          label: 'transactions.selectProducts'.tr,
           onPressed: () => Navigator.of(context).pop(AddItemsChoice.products),
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton.secondary(
-          label: 'Lançamento avulso',
+          label: 'transactions.oneOffEntry'.tr,
           onPressed: () => Navigator.of(context).pop(AddItemsChoice.standalone),
         ),
       ],

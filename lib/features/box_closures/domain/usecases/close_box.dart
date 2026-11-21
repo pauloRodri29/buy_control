@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
@@ -45,7 +46,7 @@ class CloseBox {
 
     final openTransactions = transactionsResult.dataOrNull!.where((t) => !t.isClosed).toList();
     if (openTransactions.isEmpty) {
-      return const Failure(ValidationFailure('Esta Box não tem lançamentos abertos para fechar.'));
+      return Failure(ValidationFailure('common.boxHasNoOpenEntries'.tr));
     }
 
     final now = DateTime.now();

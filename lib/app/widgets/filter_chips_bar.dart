@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +34,7 @@ class FilterChipsBar extends StatelessWidget {
           final option = options[i];
           final selected = option.key == selectedKey;
           return ChoiceChip(
-            label: Text(option.label),
+            label: Text(option.label.tr),
             selected: selected,
             onSelected: (_) => onSelected(selected ? null : option.key),
           );

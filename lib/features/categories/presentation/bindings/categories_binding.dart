@@ -1,3 +1,4 @@
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 import 'package:buy_control/features/categories/domain/usecases/create_category.dart';
 import 'package:buy_control/features/categories/domain/usecases/delete_category.dart';
 import 'package:buy_control/features/categories/domain/usecases/get_categories.dart';
@@ -8,7 +9,7 @@ import 'package:get/get.dart';
 class CategoriesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => CreateCategory(Get.find()));
+    Get.lazyPut(() => CreateCategory(Get.find(), quota: Get.find<QuotaGuard>()));
     Get.lazyPut(() => UpdateCategory(Get.find()));
     Get.lazyPut(() => DeleteCategory(Get.find()));
     Get.lazyPut(() => CategoriesController(

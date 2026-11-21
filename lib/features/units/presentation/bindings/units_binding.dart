@@ -1,3 +1,4 @@
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 import 'package:buy_control/features/units/data/datasources/local/unit_hive_data_source.dart';
 import 'package:buy_control/features/units/data/repositories/local_unit_repository.dart';
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
@@ -14,7 +15,7 @@ class UnitsBinding extends Bindings {
     Get.lazyPut<UnitHiveDataSource>(() => UnitHiveDataSource());
     Get.lazyPut<UnitRepository>(() => LocalUnitRepository(localDataSource: Get.find()));
     Get.lazyPut(() => GetUnits(Get.find()));
-    Get.lazyPut(() => CreateUnit(Get.find()));
+    Get.lazyPut(() => CreateUnit(Get.find(), quota: Get.find<QuotaGuard>()));
     Get.lazyPut(() => UpdateUnit(Get.find()));
     Get.lazyPut(() => DeleteUnit(Get.find()));
     Get.lazyPut(() => UnitsController(

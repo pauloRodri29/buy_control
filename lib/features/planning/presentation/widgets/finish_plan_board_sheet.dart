@@ -16,8 +16,9 @@ import 'package:get/get.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 /// Motivos prontos para um item não comprado (o último abre texto livre).
-const notPurchasedReasons = ['Sem estoque', 'Preço alto', 'Não precisei', 'Deixei para depois', 'Outro'];
-const _otherReason = 'Outro';
+/// Chaves de `assets/i18n`: exibidas e salvas já traduzidas (`.tr`).
+const notPurchasedReasons = ['planning.outStock', 'planning.tooExpensive', 'planning.didntNeed', 'planning.leftLater', 'planning.other'];
+const _otherReason = 'planning.other';
 
 /// Valor do seletor de destino que manda o item para Pendências.
 const _toPending = '__pending__';
@@ -74,7 +75,8 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
       final text = otherReason[itemId]?.text.trim() ?? '';
       return text.isEmpty ? null : text;
     }
-    return selected;
+    // O motivo pronto é salvo já no idioma atual (vira texto do usuário).
+    return selected?.tr;
   }
 
   /// Monta os destinos; devolve a mensagem do primeiro problema, se houver.
@@ -82,10 +84,10 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
     final result = <String, PendingItemDestination>{};
     for (final item in unpurchased) {
       final target = destination[item.id];
-      if (target == null) return (result, 'Escolha para onde vai "${item.title}".');
+      if (target == null) return (result, 'planning.chooseWhereGoesTitle'.trParams({'title': item.title}));
       if (target == _toPending) {
         final why = _reasonFor(item.id);
-        if (why == null) return (result, 'Informe o motivo de não ter comprado "${item.title}".');
+        if (why == null) return (result, 'planning.enterReasonNotBuyingTitle'.trParams({'title': item.title}));
         result[item.id] = PendingItemDestination.pending(why);
       } else {
         result[item.id] = PendingItemDestination.board(target);
@@ -122,11 +124,11 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
     final pendingCount = destinations.values.where((d) => d.toBoardId == null).length;
     final moved = destinations.length - pendingCount;
     final details = [
-      'Está no Histórico.',
-      if (moved > 0) '$moved ${moved == 1 ? 'item foi' : 'itens foram'} para outro quadro.',
-      if (pendingCount > 0) '$pendingCount ${pendingCount == 1 ? 'item foi' : 'itens foram'} para Pendências.',
+      'planning.history'.tr,
+      if (moved > 0) 'planning.anotherBoardMovedValue'.trParams({'moved': '$moved', 'value': moved == 1 ? 'planning.itemWas'.tr : 'planning.itemsWere'.tr}),
+      if (pendingCount > 0) 'planning.pendingPendingCountValue'.trParams({'pendingCount': '$pendingCount', 'value': pendingCount == 1 ? 'planning.itemWas'.tr : 'planning.itemsWere'.tr}),
     ].join(' ');
-    AppFeedback.success(details, title: isCancel ? 'Quadro cancelado' : 'Quadro finalizado');
+    AppFeedback.success(details, title: isCancel ? 'planning.boardCancelled'.tr : 'planning.boardFinished'.tr);
   }
 
   void _setAll(String target) {
@@ -145,13 +147,13 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
     final spent = progress.purchased + extra;
 
     final rows = <(String, String, Color?)>[
-      ('Comprados', '${progress.purchasedCount} de ${progress.itemCount}', null),
-      ('Total gasto', spent.formatted, null),
-      if (progress.hasGoal) ('Meta', progress.goal!.formatted, null),
+      ('planning.purchased'.tr, 'planning.purchasedCountItemCount'.trParams({'purchasedCount': '${progress.purchasedCount}', 'itemCount': '${progress.itemCount}'}), null),
+      ('planning.totalSpent'.tr, spent.formatted, null),
+      if (progress.hasGoal) ('planning.goal'.tr, progress.goal!.formatted, null),
       if (progress.hasGoal)
         spent > progress.goal!
-            ? ('Acima da meta', (spent - progress.goal!).formatted, context.colors.error)
-            : ('Abaixo da meta', (progress.goal! - spent).formatted, context.semantic.success),
+            ? ('planning.overGoal'.tr, (spent - progress.goal!).formatted, context.colors.error)
+            : ('planning.belowGoal'.tr, (progress.goal! - spent).formatted, context.semantic.success),
     ];
 
     return SingleChildScrollView(
@@ -160,16 +162,14 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppText.heading(
-            isCancel ? 'Cancelar "${widget.board.title}"?' : 'Finalizar "${widget.board.title}"?',
+            isCancel ? 'planning.cancelTitle'.trParams({'title': widget.board.title}) : 'planning.finishTitle'.trParams({'title': widget.board.title}),
             maxLines: 2,
           ),
           const SizedBox(height: AppSpacing.sm),
           AppText(
             isCancel
-                ? 'O quadro vai para o Histórico como cancelado e não pode ser reaberto. '
-                    'O que já foi comprado continua nos relatórios.'
-                : 'O quadro vai para o Histórico e não pode ser reaberto. '
-                    'Você ainda poderá ajustar datas e valores das compras por lá.',
+                ? 'planning.boardGoesHistoryCancelledCant'.tr
+                : 'planning.boardGoesHistoryCantReopened'.tr,
             color: secondary,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -178,15 +178,15 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
             const SizedBox(height: AppSpacing.lg),
             _SectionTitle(
               icon: Symbols.remove_shopping_cart,
-              title: 'Não comprados (${unpurchased.length})',
+              title: 'planning.notPurchasedCount'.trParams({'length': '${unpurchased.length}'}),
               subtitle: otherBoards.isEmpty
-                  ? 'Não há outro quadro aberto, então eles vão para Pendências. Conte o motivo.'
-                  : 'Escolha para onde vai cada item.',
+                  ? 'planning.theresNoOtherOpenBoard'.tr
+                  : 'planning.chooseWhereEachItemGoes'.tr,
             ),
             if (otherBoards.isNotEmpty && unpurchased.length > 1) ...[
               const SizedBox(height: AppSpacing.sm),
               _DestinationField(
-                label: 'Enviar todos para…',
+                label: 'planning.sendAll'.tr,
                 boards: otherBoards,
                 value: null,
                 onChanged: (v) => v == null ? null : _setAll(v),
@@ -209,12 +209,12 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
             const SizedBox(height: AppSpacing.lg),
             _SectionTitle(
               icon: Symbols.payments,
-              title: 'Comprados sem valor (${withoutValue.length})',
-              subtitle: 'Sem valor, eles entram com R\$ 0,00 nos relatórios.',
+              title: 'planning.purchasedWithoutValueCount'.trParams({'length': '${withoutValue.length}'}),
+              subtitle: 'planning.withoutValueTheyCountR'.tr,
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Informar quanto paguei'),
+              title: Text('planning.enterHowMuchIPaid'.tr),
               value: registerValues,
               onChanged: (v) => setState(() => registerValues = v),
             ),
@@ -236,13 +236,13 @@ class _FinishPlanBoardSheetState extends State<FinishPlanBoardSheet> {
           Row(
             children: [
               Expanded(
-                child: AppButton.secondary(label: 'Voltar', onPressed: () => Navigator.of(context).pop()),
+                child: AppButton.secondary(label: 'common.back'.tr, onPressed: () => Navigator.of(context).pop()),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: isCancel
-                    ? AppButton.danger(label: 'Cancelar quadro', onPressed: submitting ? null : _submit)
-                    : AppButton(label: 'Finalizar', onPressed: submitting ? null : _submit),
+                    ? AppButton.danger(label: 'planning.cancelBoard'.tr, onPressed: submitting ? null : _submit)
+                    : AppButton(label: 'planning.finish'.tr, onPressed: submitting ? null : _submit),
               ),
             ],
           ),
@@ -335,13 +335,13 @@ class _DestinationField extends StatelessWidget {
               ],
             ),
           ),
-        const DropdownMenuItem(
+        DropdownMenuItem(
           value: _toPending,
           child: Row(
             children: [
               Icon(Symbols.pending_actions, size: 18),
               SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text('Pendências (não comprei)', overflow: TextOverflow.ellipsis)),
+              Expanded(child: Text('planning.pendingDidntBuy'.tr, overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
@@ -385,16 +385,16 @@ class _UnpurchasedTile extends StatelessWidget {
           Row(
             children: [
               Expanded(child: AppText(item.title, fontWeight: FontWeight.w600, maxLines: 2)),
-              AppText.subtitle(value?.formatted ?? 'Sem valor'),
+              AppText.subtitle(value?.formatted ?? 'planning.noValue'.tr),
             ],
           ),
           if (boards.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            _DestinationField(label: 'Destino', boards: boards, value: destination, onChanged: onDestination),
+            _DestinationField(label: 'planning.destination'.tr, boards: boards, value: destination, onChanged: onDestination),
           ],
           if (destination == _toPending) ...[
             const SizedBox(height: AppSpacing.sm),
-            AppText.subtitle('Por que não comprou?'),
+            AppText.subtitle('planning.whyDidntYouBuy'.tr),
             const SizedBox(height: AppSpacing.xs),
             Wrap(
               spacing: AppSpacing.xs,
@@ -402,7 +402,7 @@ class _UnpurchasedTile extends StatelessWidget {
               children: [
                 for (final r in notPurchasedReasons)
                   ChoiceChip(
-                    label: Text(r),
+                    label: Text(r.tr),
                     selected: reason == r,
                     onSelected: (_) => onReason(r),
                   ),
@@ -412,8 +412,8 @@ class _UnpurchasedTile extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 controller: otherReasonController!,
-                label: 'Motivo',
-                hint: 'Ex.: loja fechada',
+                label: 'planning.reason'.tr,
+                hint: 'planning.eGStoreClosed'.tr,
                 textCapitalization: TextCapitalization.sentences,
               ),
             ],

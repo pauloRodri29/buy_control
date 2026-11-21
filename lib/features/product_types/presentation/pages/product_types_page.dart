@@ -24,8 +24,8 @@ class ProductTypesPage extends StatelessWidget {
   Future<void> _delete(BuildContext context, ProductTypesController controller, ProductTypeEntity type) async {
     final confirmed = await ConfirmDialog.show(
       context,
-      title: 'Excluir o tipo "${type.name}"?',
-      message: 'Produtos e lançamentos que já usam este tipo continuam funcionando normalmente.',
+      title: 'productTypes.deleteTypeName'.trParams({'name': type.name}),
+      message: 'productTypes.productsEntriesAlreadyUseType'.tr,
     );
     if (confirmed) await controller.delete(type.id);
   }
@@ -33,7 +33,7 @@ class ProductTypesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppText.heading('Tipos de Produto', )),
+      appBar: AppBar(title: AppText.heading('common.productTypes'.tr, )),
       body: GetBuilder<ProductTypesController>(
         builder: (controller) {
           switch (controller.status) {
@@ -41,13 +41,13 @@ class ProductTypesPage extends StatelessWidget {
             case ViewStatus.loading:
               return const LoadingSkeletonList();
             case ViewStatus.error:
-              return ErrorStateView(message: controller.errorMessage ?? 'Erro inesperado.', onRetry: controller.load);
+              return ErrorStateView(message: controller.errorMessage ?? 'common.unexpectedError'.tr, onRetry: controller.load);
             case ViewStatus.empty:
               return EmptyStateView(
                 icon: Symbols.category,
-                title: 'Nenhum tipo cadastrado',
-                message: 'Crie tipos de produto para classificar seu catálogo.',
-                actionLabel: 'Novo tipo',
+                title: 'productTypes.noTypesRegistered'.tr,
+                message: 'productTypes.createProductTypesClassifyCatalog'.tr,
+                actionLabel: 'productTypes.newType'.tr,
                 onAction: () => _openForm(context),
               );
             case ViewStatus.success:
@@ -59,10 +59,13 @@ class ProductTypesPage extends StatelessWidget {
                   final type = controller.productTypes[i];
                   return AppListCard(
                     title: type.name,
-                    onTap: () => _openForm(context, type: type),
+                    locked: controller.isLocked(type.id),
+                    onTap: controller.isLocked(type.id)
+                        ? controller.showLockedPrompt
+                        : () => _openForm(context, type: type),
                     actions: [
-                      AppListCardAction('Editar', () => _openForm(context, type: type)),
-                      AppListCardAction('Excluir', () => _delete(context, controller, type), destructive: true),
+                      AppListCardAction('common.edit'.tr, () => _openForm(context, type: type)),
+                      AppListCardAction('common.delete'.tr, () => _delete(context, controller, type), destructive: true),
                     ],
                   );
                 },

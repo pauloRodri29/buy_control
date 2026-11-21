@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
@@ -34,7 +35,7 @@ class SavePurchaseItems {
     bool carryOver = true,
   }) async {
     if (items.isEmpty) {
-      return const Failure(ValidationFailure('Adicione ao menos um produto.'));
+      return Failure(ValidationFailure('transactions.addLeastOneProduct'.tr));
     }
 
     final existingResult = await repository.getAll(boxId: boxId);

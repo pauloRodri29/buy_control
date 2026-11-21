@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/transactions/domain/repositories/transaction_repository.dart';
@@ -10,8 +11,8 @@ class DeleteTransaction {
     final existing = await repository.getById(id);
     return existing.fold((transaction) {
       if (transaction.isClosed) {
-        return Future.value(const Failure(
-          ValidationFailure('Este lançamento faz parte de um Fechamento e não pode mais ser excluído.'),
+        return Future.value(Failure(
+          ValidationFailure('transactions.entryPartClosingCanNo2'.tr),
         ));
       }
       final now = DateTime.now();

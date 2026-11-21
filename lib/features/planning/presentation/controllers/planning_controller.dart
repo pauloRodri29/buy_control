@@ -8,11 +8,21 @@ import 'package:buy_control/features/planning/domain/entities/plan_item_entity.d
 import 'package:buy_control/features/planning/domain/usecases/plan_board_usecases.dart';
 import 'package:buy_control/features/planning/domain/usecases/plan_item_positions.dart';
 import 'package:buy_control/features/planning/domain/usecases/plan_item_usecases.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 import 'package:get/get.dart';
 
 /// Estado do Planejamento: quadros abertos (kanban), Pendências e
 /// Histórico (quadros finalizados ou cancelados).
-class PlanningController extends GetxController {
+class PlanningController extends GetxController with PlanLocks {
+  /// [lockedIds] = quadros além do limite; [lockedItemIds] = itens além do
+  /// limite de itens por quadro.
+  @override
+  ResourceKey get lockResource => ResourceKey.planBoards;
+
+  Set<String> lockedItemIds = const {};
+
   final GetPlanBoards getBoards;
   final CreatePlanBoard createBoard;
   final CreatePlanBoardFromTemplate createBoardFromTemplate;
@@ -56,9 +66,10 @@ class PlanningController extends GetxController {
   List<PlanBoardEntity> get boards =>
       _allBoards.where((b) => b.isOpen && (showArchived || !b.isArchived)).toList();
 
-  /// Quadros disponíveis como destino ao mover/criar itens: abertos e não
-  /// arquivados.
-  List<PlanBoardEntity> get activeBoards => _allBoards.where((b) => b.isOpen && !b.isArchived).toList();
+  /// Quadros disponíveis como destino ao mover/criar itens: abertos, não
+  /// arquivados e não bloqueados pelo plano.
+  List<PlanBoardEntity> get activeBoards =>
+      _allBoards.where((b) => b.isOpen && !b.isArchived && !isLocked(b.id)).toList();
 
   /// Destinos para os itens não comprados de [board] ao finalizá-lo.
   List<PlanBoardEntity> destinationsFor(PlanBoardEntity board) =>
@@ -80,6 +91,7 @@ class PlanningController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load({bool silent = false}) async {
     if (!silent) {
       status = ViewStatus.loading;
@@ -96,6 +108,10 @@ class PlanningController extends GetxController {
     } else {
       _allBoards = boardsResult.dataOrNull!;
       _items = itemsResult.dataOrNull!;
+      await refreshLocks();
+      lockedItemIds = Get.isRegistered<SubscriptionController>()
+          ? await Get.find<SubscriptionController>().lockedIds(ResourceKey.planItemsPerBoard)
+          : const {};
       status = ViewStatus.success;
     }
     update();

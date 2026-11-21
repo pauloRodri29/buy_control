@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -11,10 +12,10 @@ class Login {
   Future<Result<UserEntity>> call({required String email, required String password}) async {
     final trimmedEmail = email.trim();
     if (!Validators.isNotBlank(trimmedEmail) || !trimmedEmail.contains('@')) {
-      return const Failure(ValidationFailure('Informe um e-mail válido.'));
+      return Failure(ValidationFailure('auth.enterValidEmail'.tr));
     }
     if (password.length < 4) {
-      return const Failure(ValidationFailure('A senha deve ter ao menos 4 caracteres.'));
+      return Failure(ValidationFailure('auth.passwordMustHaveLeast4'.tr));
     }
     return repository.login(email: trimmedEmail, password: password);
   }

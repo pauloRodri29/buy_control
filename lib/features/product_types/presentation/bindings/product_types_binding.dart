@@ -1,3 +1,4 @@
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 import 'package:buy_control/features/product_types/domain/usecases/create_product_type.dart';
 import 'package:buy_control/features/product_types/domain/usecases/delete_product_type.dart';
 import 'package:buy_control/features/product_types/domain/usecases/get_product_types.dart';
@@ -8,7 +9,7 @@ import 'package:get/get.dart';
 class ProductTypesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => CreateProductType(Get.find()));
+    Get.lazyPut(() => CreateProductType(Get.find(), quota: Get.find<QuotaGuard>()));
     Get.lazyPut(() => UpdateProductType(Get.find()));
     Get.lazyPut(() => DeleteProductType(Get.find()));
     Get.lazyPut(() => ProductTypesController(

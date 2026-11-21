@@ -6,8 +6,13 @@ import 'package:buy_control/features/categories/domain/usecases/delete_category.
 import 'package:buy_control/features/categories/domain/usecases/get_categories.dart';
 import 'package:buy_control/features/categories/domain/usecases/update_category.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 
-class CategoriesController extends GetxController {
+class CategoriesController extends GetxController with PlanLocks {
+  @override
+  ResourceKey get lockResource => ResourceKey.categories;
+
   final GetCategories getCategories;
   final CreateCategory createCategory;
   final UpdateCategory updateCategory;
@@ -30,9 +35,11 @@ class CategoriesController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load() async {
     status = ViewStatus.loading;
     update();
+    await refreshLocks();
 
     final result = await getCategories();
     result.fold((data) {

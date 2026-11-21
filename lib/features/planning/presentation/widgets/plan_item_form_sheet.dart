@@ -94,35 +94,35 @@ class _PlanItemFormSheetState extends State<PlanItemFormSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.heading(widget.item != null ? 'Editar item' : 'Novo item', ),
+          AppText.heading(widget.item != null ? 'planning.editItem'.tr : 'planning.newItem'.tr, ),
           const SizedBox(height: AppSpacing.lg),
           AppTextField(
             controller: titleController,
-            label: 'Título',
-            hint: 'Air fryer',
+            label: 'common.title'.tr,
+            hint: 'planning.airFryer'.tr,
             autofocus: widget.item == null,
             textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             controller: descriptionController,
-            label: 'Descrição (opcional)',
-            hint: 'Modelo, loja, link...',
+            label: 'common.descriptionOptional'.tr,
+            hint: 'planning.modelStoreLink'.tr,
             maxLines: 3,
             textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: AppSpacing.md),
           AppMoneyField(
-            label: 'Valor estimado (opcional)',
+            label: 'planning.estimatedValueOptional'.tr,
             initialValue: widget.item?.estimatedValue,
             onChanged: (v) => value = v,
           ),
           const SizedBox(height: AppSpacing.md),
           AppDropdown<String>(
-            label: 'Quadro',
+            label: 'planning.board'.tr,
             value: boardId,
             options: [
-              const AppDropdownOption(value: _noBoard, label: 'Sem quadro'),
+              AppDropdownOption(value: _noBoard, label: 'common.noBoard'.tr),
               for (final b in boards)
                 AppDropdownOption(value: b.id, label: '${b.title} · ${DateTimeFormatter.ddMMyyyy(b.targetDate)}'),
             ],
@@ -133,7 +133,7 @@ class _PlanItemFormSheetState extends State<PlanItemFormSheet> {
             AppText(errorMessage!, color: context.colors.error),
           ],
           const SizedBox(height: AppSpacing.lg),
-          AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+          AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
         ],
       ),
     );

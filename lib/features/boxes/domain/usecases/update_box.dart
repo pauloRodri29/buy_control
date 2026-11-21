@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -10,10 +11,10 @@ class UpdateBox {
 
   Future<Result<void>> call(BoxEntity box) async {
     if (!Validators.isNotBlank(box.name)) {
-      return const Failure(ValidationFailure('Nome da caixa é obrigatório.'));
+      return Failure(ValidationFailure('boxes.boxNameRequired'.tr));
     }
     if (!Validators.withinMaxLength(box.name, 40)) {
-      return const Failure(ValidationFailure('Nome da caixa deve ter no máximo 40 caracteres.'));
+      return Failure(ValidationFailure('boxes.boxNameMustHaveMost'.tr));
     }
     return repository.update(box);
   }

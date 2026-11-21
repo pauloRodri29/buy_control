@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_text.dart';
@@ -20,24 +21,24 @@ class UnknownBarcodeSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading('Produto não encontrado', ),
+        AppText.heading('transactions.productNotFound'.tr, ),
         const SizedBox(height: AppSpacing.xs),
-        AppText.subtitle('Código ${code.digits}'),
+        AppText.subtitle('transactions.codeDigits'.trParams({'digits': code.digits})),
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Cadastrar produto novo', onPressed: () => choose(UnknownBarcodeAction.create)),
+        AppButton(label: 'transactions.registerNewProduct'.tr, onPressed: () => choose(UnknownBarcodeAction.create)),
         const SizedBox(height: AppSpacing.sm),
         AppButton.secondary(
-          label: 'Vincular a produto já cadastrado',
+          label: 'transactions.linkExistingProduct'.tr,
           onPressed: () => choose(UnknownBarcodeAction.link),
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton.secondary(
-          label: 'Lançar avulso (sem cadastrar)',
+          label: 'transactions.addOneOffWithoutRegistering'.tr,
           onPressed: () => choose(UnknownBarcodeAction.standalone),
         ),
         const SizedBox(height: AppSpacing.sm),
         Center(
-          child: AppButton.text(label: 'Ignorar', onPressed: () => Navigator.of(context).pop()),
+          child: AppButton.text(label: 'transactions.ignore'.tr, onPressed: () => Navigator.of(context).pop()),
         ),
       ],
     );

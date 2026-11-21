@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
@@ -32,6 +33,15 @@ class PlanColumn extends StatelessWidget {
   final ValueChanged<Offset>? onDragUpdate;
   final VoidCallback? onDragEnd;
 
+  /// Quadro inacessível no plano atual (passa do limite de quadros).
+  final bool locked;
+
+  /// Itens desta coluna que passam do limite de itens por quadro.
+  final Set<String> lockedItemIds;
+
+  /// Toque em algo bloqueado: abre o aviso do plano.
+  final VoidCallback? onLockedTap;
+
   const PlanColumn({
     super.key,
     required this.board,
@@ -46,10 +56,15 @@ class PlanColumn extends StatelessWidget {
     required this.onDropItem,
     this.onDragUpdate,
     this.onDragEnd,
+    this.locked = false,
+    this.lockedItemIds = const {},
+    this.onLockedTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (locked) return _LockedColumn(board: board, width: width, itemCount: items.length, onTap: onLockedTap);
+
     return DragTarget<PlanItemEntity>(
       onAcceptWithDetails: (details) => onDropItem(details.data, null),
       builder: (context, candidates, _) {
@@ -76,8 +91,8 @@ class PlanColumn extends StatelessWidget {
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           child: AppText.subtitle(
                             board == null
-                                ? 'Itens sem contexto ficam aqui. Arraste-os para um quadro.'
-                                : 'Nenhum item ainda.',
+                                ? 'planning.itemsWithoutContextStayHere'.tr
+                                : 'planning.noItemsYet'.tr,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -88,6 +103,8 @@ class PlanColumn extends StatelessWidget {
                         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                         itemBuilder: (_, i) => _DraggableItem(
                           item: items[i],
+                          locked: lockedItemIds.contains(items[i].id),
+                          onLockedTap: onLockedTap,
                           width: width - AppSpacing.lg,
                           onEdit: () => onEditItem(items[i]),
                           onTogglePurchased: () => onTogglePurchased(items[i]),
@@ -103,7 +120,7 @@ class PlanColumn extends StatelessWidget {
                 child: TextButton.icon(
                   onPressed: onAddItem,
                   icon: const Icon(Symbols.add, size: 18),
-                  label: const Text('Adicionar item'),
+                  label: Text('planning.addItem'.tr),
                 ),
               ),
             ],
@@ -116,6 +133,8 @@ class PlanColumn extends StatelessWidget {
 
 class _DraggableItem extends StatelessWidget {
   final PlanItemEntity item;
+  final bool locked;
+  final VoidCallback? onLockedTap;
   final double width;
   final VoidCallback onEdit;
   final VoidCallback onTogglePurchased;
@@ -126,6 +145,8 @@ class _DraggableItem extends StatelessWidget {
 
   const _DraggableItem({
     required this.item,
+    this.locked = false,
+    this.onLockedTap,
     required this.width,
     required this.onEdit,
     required this.onTogglePurchased,
@@ -137,6 +158,20 @@ class _DraggableItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Item além do limite por quadro: visível, mas sem editar, marcar nem arrastar.
+    if (locked) {
+      return Stack(
+        children: [
+          Opacity(opacity: 0.45, child: PlanItemCard(item: item, onTap: onLockedTap)),
+          Positioned(
+            top: AppSpacing.sm,
+            right: AppSpacing.sm,
+            child: Icon(Symbols.lock, size: 16, color: context.colors.onSurfaceVariant),
+          ),
+        ],
+      );
+    }
+
     final card = PlanItemCard(item: item, onTap: onEdit, onTogglePurchased: onTogglePurchased, onAction: onAction);
 
     return DragTarget<PlanItemEntity>(
@@ -200,7 +235,7 @@ class _Header extends StatelessWidget {
               ],
               Expanded(
                 child: AppText(
-                  board?.title ?? 'Sem quadro',
+                  board?.title ?? 'common.noBoard'.tr,
                   
                   fontWeight: FontWeight.bold,
                   maxLines: 2,
@@ -212,13 +247,13 @@ class _Header extends StatelessWidget {
                   icon: Icon(Symbols.more_vert, size: 18, color: secondary),
                   onSelected: onAction,
                   itemBuilder: (_) => [
-                    const PopupMenuItem(value: PlanBoardAction.edit, child: Text('Editar quadro')),
-                    const PopupMenuItem(value: PlanBoardAction.finish, child: Text('Finalizar quadro')),
-                    const PopupMenuItem(value: PlanBoardAction.cancel, child: Text('Cancelar quadro')),
+                    PopupMenuItem(value: PlanBoardAction.edit, child: Text('planning.editBoard'.tr)),
+                    PopupMenuItem(value: PlanBoardAction.finish, child: Text('planning.finishBoard'.tr)),
+                    PopupMenuItem(value: PlanBoardAction.cancel, child: Text('planning.cancelBoard'.tr)),
                     board.isArchived
-                        ? const PopupMenuItem(value: PlanBoardAction.unarchive, child: Text('Desarquivar'))
-                        : const PopupMenuItem(value: PlanBoardAction.archive, child: Text('Arquivar')),
-                    const PopupMenuItem(value: PlanBoardAction.delete, child: Text('Excluir quadro')),
+                        ? PopupMenuItem(value: PlanBoardAction.unarchive, child: Text('common.unarchive'.tr))
+                        : PopupMenuItem(value: PlanBoardAction.archive, child: Text('common.archive'.tr)),
+                    PopupMenuItem(value: PlanBoardAction.delete, child: Text('planning.deleteBoard'.tr)),
                   ],
                 )
               else
@@ -232,7 +267,7 @@ class _Header extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
                 AppText.subtitle(
                   overdue
-                      ? '${DateTimeFormatter.ddMMyyyy(board.targetDate)} · atrasado'
+                      ? 'planning.overdueDate'.trParams({'ddMMyyyy': DateTimeFormatter.ddMMyyyy(board.targetDate)})
                       : DateTimeFormatter.ddMMyyyy(board.targetDate),
                   color: overdue ? context.colors.error : secondary,
                 ),
@@ -240,7 +275,7 @@ class _Header extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Icon(Symbols.archive, size: 14, color: secondary),
                   const SizedBox(width: AppSpacing.xs),
-                  AppText.subtitle('Arquivado', color: secondary),
+                  AppText.subtitle('planning.archived'.tr, color: secondary),
                 ],
               ],
             ),
@@ -282,14 +317,13 @@ class _ProgressSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final secondary = context.colors.onSurfaceVariant;
 
-    final counts = '${progress.purchasedCount}/${progress.itemCount} comprados'
-        '${progress.itemsWithoutValue > 0 ? ' · ${progress.itemsWithoutValue} sem valor' : ''}';
+    final counts = 'planning.purchased@valuePurchasedCountItemCountValue'.trParams({'purchasedCount': '${progress.purchasedCount}', 'itemCount': '${progress.itemCount}', 'value': progress.itemsWithoutValue > 0 ? 'planning.withoutValueItemsWithoutValue'.trParams({'itemsWithoutValue': '${progress.itemsWithoutValue}'}) : ''});
 
     if (!progress.hasGoal) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.small('Planejado: ${progress.planned.formatted}',  fontWeight: FontWeight.w600),
+          AppText.small('planning.plannedAmount'.trParams({'formatted': progress.planned.formatted}),  fontWeight: FontWeight.w600),
           AppText.subtitle(counts, color: secondary),
         ],
       );
@@ -305,7 +339,7 @@ class _ProgressSummary extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: AppText.small(
-                '${progress.planned.formatted} de ${progress.goal!.formatted}',
+                'planning.amount'.trParams({'formatted': progress.planned.formatted, 'vBFormatted': progress.goal!.formatted}),
                 
                 fontWeight: FontWeight.w600,
               ),
@@ -325,8 +359,8 @@ class _ProgressSummary extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         AppText.subtitle(
           progress.isOverGoal
-              ? '${(progress.planned - progress.goal!).formatted} acima da meta'
-              : 'Ainda cabe ${remaining.formatted}',
+              ? 'planning.overGoalAmount'.trParams({'formatted': (progress.planned - progress.goal!).formatted})
+              : 'planning.stillFitsAmount'.trParams({'formatted': remaining.formatted}),
           color: progress.isOverGoal ? context.colors.error : secondary,
         ),
         AppText.subtitle(counts, color: secondary),
@@ -354,13 +388,61 @@ class _FinishBanner extends StatelessWidget {
         children: [
           Icon(Symbols.task_alt, size: 18, color: success),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(child: AppText.small('Tudo comprado!', fontWeight: FontWeight.bold, color: success)),
+          Expanded(child: AppText.small('planning.allPurchased'.tr, fontWeight: FontWeight.bold, color: success)),
           FilledButton.tonalIcon(
             onPressed: onFinish,
             icon: const Icon(Symbols.flag, size: 18),
-            label: const Text('Finalizar'),
+            label: Text('planning.finish'.tr),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Quadro que passou do limite de quadros do plano: só o título e o aviso.
+class _LockedColumn extends StatelessWidget {
+  final PlanBoardEntity? board;
+  final double width;
+  final int itemCount;
+  final VoidCallback? onTap;
+
+  const _LockedColumn({required this.board, required this.width, required this.itemCount, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: colors.surfaceContainerHighest,
+      borderRadius: AppRadius.borderLg,
+      child: InkWell(
+        borderRadius: AppRadius.borderLg,
+        onTap: onTap,
+        child: SizedBox(
+          width: width,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Symbols.lock, size: 32, color: colors.onSurfaceVariant),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  board?.title ?? 'common.noBoard'.tr,
+                  textAlign: TextAlign.center,
+                  style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colors.onSurfaceVariant),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                AppText.subtitle(
+                  'planning.boardLockedPlanItemsSavedItemCount'.trParams({'itemCount': '$itemCount'}),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text('planning.tapSeePlans'.tr, style: context.text.labelMedium?.copyWith(color: colors.primary)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

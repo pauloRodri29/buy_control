@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/core/validators/validators.dart';
@@ -10,7 +11,7 @@ class UpdateCategory {
 
   Future<Result<void>> call(CategoryEntity category) async {
     if (!Validators.isNotBlank(category.name)) {
-      return const Failure(ValidationFailure('Nome da categoria é obrigatório.'));
+      return Failure(ValidationFailure('categories.categoryNameRequired'.tr));
     }
     return repository.update(category);
   }

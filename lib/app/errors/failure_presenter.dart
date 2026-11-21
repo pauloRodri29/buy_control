@@ -1,6 +1,8 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/result/result.dart';
+import 'package:buy_control/features/subscription/presentation/widgets/plan_limit_prompt.dart';
 
 /// Ponte entre as falhas do domínio ([AppFailure]) e o que o usuário vê.
 ///
@@ -10,16 +12,26 @@ import 'package:buy_control/core/result/result.dart';
 class FailurePresenter {
   FailurePresenter._();
 
-  static String present(AppFailure failure) => failure.message;
+  /// As mensagens padrão das falhas são chaves de tradução; `.tr` as
+  /// traduz (as que já vêm traduzidas passam intactas).
+  static String present(AppFailure failure) => failure.message.tr;
 
   static void show(AppFailure failure, {String? title}) {
     switch (failure) {
       case NotImplementedFailure():
-        AppFeedback.info(present(failure), title: title ?? 'Em breve');
+        AppFeedback.info(present(failure), title: title ?? 'common.comingSoon'.tr);
       case ValidationFailure():
-        AppFeedback.error(present(failure), title: title ?? 'Confira os dados');
+        AppFeedback.error(present(failure), title: title ?? 'errors.checkData'.tr);
+      case NetworkFailure():
+        AppFeedback.error(present(failure), title: title ?? 'errors.connectionFailed'.tr);
+      case PlanLimitFailure():
+        PlanLimitPrompt.show(present(failure));
+      case PurchaseCancelledFailure():
+        break;
+      case PurchaseDeclinedFailure():
+        AppFeedback.error(present(failure), title: title ?? 'errors.paymentDeclined'.tr);
       case CacheFailure() || NotFoundFailure() || UnknownFailure():
-        AppFeedback.error(present(failure), title: title ?? 'Não foi possível concluir');
+        AppFeedback.error(present(failure), title: title ?? 'common.couldntComplete'.tr);
     }
   }
 

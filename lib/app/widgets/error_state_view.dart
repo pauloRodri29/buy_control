@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -23,7 +24,7 @@ class ErrorStateView extends StatelessWidget {
             Text(message, textAlign: TextAlign.center, style: context.text.bodyLarge),
             if (onRetry != null) ...[
               const SizedBox(height: AppSpacing.lg),
-              AppButton(label: 'Tentar novamente', onPressed: onRetry, expanded: false),
+              AppButton(label: 'common.tryAgain'.tr, onPressed: onRetry, expanded: false),
             ],
           ],
         ),

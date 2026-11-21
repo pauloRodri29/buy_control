@@ -269,22 +269,22 @@ class ReportsController extends GetxController {
     final applied = <String, String>{};
     if (filter.boxIds.isNotEmpty) {
       final names = boxes.where((b) => filter.boxIds.contains(b.id)).map((b) => b.name).join(', ');
-      if (names.isNotEmpty) applied['Boxes'] = names;
+      if (names.isNotEmpty) applied['common.boxes'.tr] = names;
     }
     if (filter.categoryIds.isNotEmpty) {
       final names = categories.where((c) => filter.categoryIds.contains(c.id)).map((c) => c.name).join(', ');
-      if (names.isNotEmpty) applied['Categorias'] = names;
+      if (names.isNotEmpty) applied['common.categories'.tr] = names;
     }
     if (filter.productTypeIds.isNotEmpty) {
       final names = productTypes.where((t) => filter.productTypeIds.contains(t.id)).map((t) => t.name).join(', ');
-      if (names.isNotEmpty) applied['Tipos de produto'] = names;
+      if (names.isNotEmpty) applied['common.productTypes2'.tr] = names;
     }
     if (filter.productIds.isNotEmpty) {
       final names = products.where((p) => filter.productIds.contains(p.id)).map((p) => p.name).join(', ');
-      if (names.isNotEmpty) applied['Produtos'] = names;
+      if (names.isNotEmpty) applied['common.products'.tr] = names;
     }
-    if (filter.minValue != null) applied['Valor mínimo'] = filter.minValue!.formatted;
-    if (filter.maxValue != null) applied['Valor máximo'] = filter.maxValue!.formatted;
+    if (filter.minValue != null) applied['reports.minimumValue'.tr] = filter.minValue!.formatted;
+    if (filter.maxValue != null) applied['reports.maximumValue'.tr] = filter.maxValue!.formatted;
     return applied;
   }
 
@@ -294,15 +294,15 @@ class ReportsController extends GetxController {
     final result = await exportReport(
       format,
       report: reportA,
-      title: 'Relatório',
+      title: 'reports.report'.tr,
       periodLabel: filter.periodLabel,
       appliedFilters: appliedFilters.isEmpty ? null : appliedFilters,
     );
     result.fold(
-      (path) => AppFeedback.success(path == null ? 'Ação concluída.' : 'Arquivo gerado: $path', title: 'Exportação'),
+      (path) => AppFeedback.success(path == null ? 'reports.actionCompleted'.tr : 'reports.fileGeneratedPath'.trParams({'path': path}), title: 'reports.export2'.tr),
       (failure) => FailurePresenter.show(
         failure,
-        title: failure is NotImplementedFailure ? null : 'Erro ao exportar',
+        title: failure is NotImplementedFailure ? null : 'reports.exportError'.tr,
       ),
     );
   }

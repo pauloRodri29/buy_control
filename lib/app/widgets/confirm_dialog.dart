@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,7 @@ class ConfirmDialog extends StatelessWidget {
     super.key,
     required this.title,
     required this.message,
-    this.confirmLabel = 'Confirmar',
+    this.confirmLabel = 'common.confirm',
     this.isDestructive = true,
   });
 
@@ -22,7 +23,7 @@ class ConfirmDialog extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String message,
-    String confirmLabel = 'Excluir',
+    String confirmLabel = 'common.delete',
     bool isDestructive = true,
   }) async {
     final result = await showDialog<bool>(
@@ -50,11 +51,11 @@ class ConfirmDialog extends StatelessWidget {
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(false), child: Text('common.cancel'.tr)),
         FilledButton(
           style: (confirmStyle ?? const ButtonStyle()).merge(compact),
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(confirmLabel),
+          child: Text(confirmLabel.tr),
         ),
       ],
     );

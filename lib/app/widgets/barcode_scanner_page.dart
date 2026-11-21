@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:buy_control/app/theme/app_radius.dart';
@@ -34,7 +35,7 @@ class BarcodeScannerPage extends StatefulWidget {
 
   const BarcodeScannerPage._({required this.title, this.onScanned});
 
-  static Future<ScannedCode?> scanOnce(BuildContext context, {String title = 'Ler código de barras'}) {
+  static Future<ScannedCode?> scanOnce(BuildContext context, {String title = 'common.scanBarcode'}) {
     return Navigator.of(context).push<ScannedCode>(
       MaterialPageRoute(builder: (_) => BarcodeScannerPage._(title: title)),
     );
@@ -43,7 +44,7 @@ class BarcodeScannerPage extends StatefulWidget {
   static Future<void> scanContinuous(
     BuildContext context, {
     required OnBarcodeScanned onScanned,
-    String title = 'Escanear produtos',
+    String title = 'common.scanProducts',
   }) {
     return Navigator.of(context).push<void>(
       MaterialPageRoute(builder: (_) => BarcodeScannerPage._(title: title, onScanned: onScanned)),
@@ -164,15 +165,15 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   Future<void> _typeCode() async {
     final typed = await TextInputDialog.show(
       context,
-      title: 'Digitar código',
-      hint: 'Números do código de barras',
+      title: 'common.typeCode'.tr,
+      hint: 'common.barcodeDigits'.tr,
       keyboardType: TextInputType.number,
     );
     if (typed == null || typed.isEmpty || !mounted) return;
 
     final code = BarcodeParser.parse(typed);
     if (code == null) {
-      AppFeedback.error('Confira os números (o último dígito é de verificação).', title: 'Código inválido');
+      AppFeedback.error('common.checkNumbersLastDigitCheck'.tr, title: 'common.invalidCode'.tr);
       return;
     }
     _lastDigits = null; // digitado à mão sempre conta
@@ -189,14 +190,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
       // Fundo do preview da câmera: preto independente do tema.
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title.tr),
         actions: [
           IconButton(
-            tooltip: 'Lanterna',
+            tooltip: 'common.flashlight'.tr,
             icon: const Icon(Symbols.flashlight_on),
             onPressed: () => _controller.toggleTorch(),
           ),
-          IconButton(tooltip: 'Digitar código', icon: const Icon(Symbols.keyboard), onPressed: _typeCode),
+          IconButton(tooltip: 'common.typeCode'.tr, icon: const Icon(Symbols.keyboard), onPressed: _typeCode),
         ],
       ),
       body: LayoutBuilder(
@@ -247,8 +248,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                             child: Text(
                               _feedback ??
                                   (_continuous
-                                      ? 'Centralize o código de barras no retângulo. Cada leitura adiciona o produto.'
-                                      : 'Centralize o código de barras no retângulo.'),
+                                      ? 'common.centerBarcodeRectangleEachScan'.tr
+                                      : 'common.centerBarcodeRectangle'.tr),
                               textAlign: TextAlign.center,
                               style: context.text.bodyLarge?.copyWith(color: colors.onInverseSurface),
                             ),
@@ -258,7 +259,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                       if (_continuous) ...[
                         const SizedBox(height: AppSpacing.sm),
                         AppButton(
-                          label: _count == 0 ? 'Concluir' : 'Concluir ($_count lidos)',
+                          label: _count == 0 ? 'common.done'.tr : 'common.doneCountScanned'.trParams({'_count': '$_count'}),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -281,9 +282,8 @@ class _CameraError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final message = error.errorCode == MobileScannerErrorCode.permissionDenied
-        ? 'Sem permissão para usar a câmera. Libere o acesso nas configurações do aparelho, '
-            'ou use o botão de teclado para digitar o código.'
-        : 'Não foi possível abrir a câmera. Use o botão de teclado para digitar o código.';
+        ? 'common.noPermissionUseCameraAllow'.tr
+        : 'common.couldntOpenCameraUseKeyboard'.tr;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),

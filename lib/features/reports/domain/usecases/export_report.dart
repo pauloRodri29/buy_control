@@ -11,7 +11,7 @@ class ExportReport {
   Future<Result<String?>> call(
     ExportFormat format, {
     ConsolidatedReport? report,
-    String title = 'Relatório',
+    String title = 'reports.report',
     String? periodLabel,
     Map<String, String>? appliedFilters,
   }) async {

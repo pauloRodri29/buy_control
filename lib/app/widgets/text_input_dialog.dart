@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 /// Diálogo padrão ([AlertDialog] nativo) para pedir um único texto ao
@@ -69,8 +70,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
         onSubmitted: (_) => _confirm(),
       ),
       actions: [
-        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-        FilledButton(style: compact, onPressed: _confirm, child: Text(widget.confirmLabel)),
+        TextButton(style: compact, onPressed: () => Navigator.of(context).pop(), child: Text('common.cancel'.tr)),
+        FilledButton(style: compact, onPressed: _confirm, child: Text(widget.confirmLabel.tr)),
       ],
     );
   }

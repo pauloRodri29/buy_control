@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_card.dart';
@@ -24,14 +25,14 @@ class SpendingByBoxChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText.subtitle('Gastos por Box'),
+          AppText.subtitle('dashboard.spendingBox'.tr),
           const SizedBox(height: AppSpacing.md),
           if (entries.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
               child: Center(
                 child: AppText.small(
-                  'Sem dados no período.',
+                  'common.noDataPeriod'.tr,
                   
                   color: context.colors.onSurfaceVariant,
                 ),

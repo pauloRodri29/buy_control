@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
@@ -82,18 +83,18 @@ class _MultiSelectPickerSheetState extends State<MultiSelectPickerSheet> {
             Expanded(child: AppText.heading(widget.title, )),
             GestureDetector(
               onTap: () => setState(_selected.clear),
-              child: AppText.small('Limpar',  color: context.colors.primary),
+              child: AppText.small('common.clear'.tr,  color: context.colors.primary),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
         if (widget.showSearch) ...[
-          SearchFieldDebounced(hint: 'Buscar', onChanged: (v) => setState(() => _query = v)),
+          SearchFieldDebounced(hint: 'common.search'.tr, onChanged: (v) => setState(() => _query = v)),
           const SizedBox(height: AppSpacing.sm),
         ],
         Flexible(
           child: _filtered.isEmpty
-              ? const EmptyStateView(title: 'Nenhum item encontrado')
+              ? EmptyStateView(title: 'reports.noItemsFound'.tr)
               : ListView.separated(
                   shrinkWrap: true,
                   itemCount: _filtered.length,
@@ -111,11 +112,11 @@ class _MultiSelectPickerSheetState extends State<MultiSelectPickerSheet> {
         ),
         const SizedBox(height: AppSpacing.sm),
         AppText(
-          _selected.isEmpty ? 'Todos incluídos (sem filtro)' : '${_selected.length} selecionado(s)',
+          _selected.isEmpty ? 'reports.allIncludedNoFilter'.tr : 'reports.selectedCount2'.trParams({'length': '${_selected.length}'}),
           color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppButton(label: 'Aplicar', onPressed: () => Navigator.of(context).pop(_selected)),
+        AppButton(label: 'common.apply'.tr, onPressed: () => Navigator.of(context).pop(_selected)),
       ],
     );
   }

@@ -19,4 +19,10 @@ class AppMetaStore {
   String? get themeMode => _box.get('themeMode') as String?;
 
   Future<void> setThemeMode(String value) => _box.put('themeMode', value);
+
+  /// Idioma escolhido ("pt_BR" ou "en_US"). `null` = nunca escolhido, o
+  /// app segue o idioma do aparelho.
+  String? get locale => _box.get('locale') as String?;
+
+  Future<void> setLocale(String value) => _box.put('locale', value);
 }

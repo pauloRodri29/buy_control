@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/errors/app_failure.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
@@ -6,13 +7,15 @@ import 'package:buy_control/core/validators/validators.dart';
 import 'package:buy_control/features/planning/domain/entities/plan_item_entity.dart';
 import 'package:buy_control/features/planning/domain/repositories/plan_item_repository.dart';
 import 'package:buy_control/features/planning/domain/usecases/plan_item_positions.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 
 AppFailure? _validateItem({required String title, Money? value}) {
   if (!Validators.isNotBlank(title)) {
-    return const ValidationFailure('Título do item é obrigatório.');
+    return ValidationFailure('planning.itemTitleRequired'.tr);
   }
   if (value != null && value.isNegative) {
-    return const ValidationFailure('O valor não pode ser negativo.');
+    return ValidationFailure('planning.valueCantNegative'.tr);
   }
   return null;
 }
@@ -26,7 +29,8 @@ class GetPlanItems {
 
 class CreatePlanItem {
   final PlanItemRepository repository;
-  const CreatePlanItem(this.repository);
+  final QuotaGuard? quota;
+  const CreatePlanItem(this.repository, {this.quota});
 
   Future<Result<PlanItemEntity>> call({
     String? boardId,
@@ -36,6 +40,8 @@ class CreatePlanItem {
   }) async {
     final failure = _validateItem(title: title, value: estimatedValue);
     if (failure != null) return Failure(failure);
+
+    if (await quota?.ensureCanAdd(ResourceKey.planItemsPerBoard, group: boardId) case final limit?) return Failure(limit);
 
     final itemsResult = await repository.getAll();
     if (itemsResult case Failure(:final failure)) return Failure(failure);
@@ -109,9 +115,12 @@ class TogglePlanItemPurchased {
 /// novo como "a comprar".
 class SendPendingItemToBoard {
   final PlanItemRepository repository;
-  const SendPendingItemToBoard(this.repository);
+  final QuotaGuard? quota;
+  const SendPendingItemToBoard(this.repository, {this.quota});
 
   Future<Result<void>> call(PlanItemEntity item, {required String boardId}) async {
+    if (await quota?.ensureCanAdd(ResourceKey.planItemsPerBoard, group: boardId) case final limit?) return Failure(limit);
+
     final itemsResult = await repository.getAll();
     if (itemsResult case Failure(:final failure)) return Failure(failure);
 
@@ -131,13 +140,20 @@ class SendPendingItemToBoard {
 /// imediatamente antes desse item.
 class MovePlanItem {
   final PlanItemRepository repository;
-  const MovePlanItem(this.repository);
+  final QuotaGuard? quota;
+  const MovePlanItem(this.repository, {this.quota});
 
   /// Diferença mínima entre posições antes de renumerar a coluna inteira.
   static const _minGap = 1e-6;
 
   Future<Result<void>> call(PlanItemEntity item, {String? toBoardId, String? beforeItemId}) async {
     if (beforeItemId == item.id) return const Success(null);
+
+    if (toBoardId != item.boardId) {
+      if (await quota?.ensureCanAdd(ResourceKey.planItemsPerBoard, group: toBoardId) case final limit?) {
+        return Failure(limit);
+      }
+    }
 
     final itemsResult = await repository.getAll();
     if (itemsResult case Failure(:final failure)) return Failure(failure);

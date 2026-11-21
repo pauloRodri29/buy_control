@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/core/money/money.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/boxes/domain/repositories/box_repository.dart';
@@ -83,7 +84,7 @@ class GetDashboardSummary {
       spendByBox[t.boxId] = (spendByBox[t.boxId] ?? 0) + t.total.cents;
     }
     final topBoxes = spendByBox.entries.map((e) {
-      return BoxSpend(boxId: e.key, boxName: boxNameById[e.key] ?? 'Box removida', total: Money(e.value));
+      return BoxSpend(boxId: e.key, boxName: boxNameById[e.key] ?? 'common.deletedBox'.tr, total: Money(e.value));
     }).toList()
       ..sort((a, b) => b.total.cents.compareTo(a.total.cents));
 

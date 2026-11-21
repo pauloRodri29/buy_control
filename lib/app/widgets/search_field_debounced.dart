@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:buy_control/app/theme/app_durations.dart';
@@ -16,7 +17,7 @@ class SearchFieldDebounced extends StatefulWidget {
 
   const SearchFieldDebounced({
     super.key,
-    this.hint = 'Buscar',
+    this.hint = 'common.search',
     required this.onChanged,
     this.debounce = AppDurations.searchDebounce,
   });
@@ -56,13 +57,13 @@ class _SearchFieldDebouncedState extends State<SearchFieldDebounced> {
       onChanged: _onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: widget.hint,
+        hintText: widget.hint.tr,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
         prefixIcon: const Icon(Symbols.search, size: 18),
         suffixIcon: _controller.text.isEmpty
             ? null
-            : IconButton(icon: const Icon(Symbols.close, size: 16), tooltip: 'Limpar', onPressed: _clear),
+            : IconButton(icon: const Icon(Symbols.close, size: 16), tooltip: 'common.clear'.tr, onPressed: _clear),
         border: noBorder,
         enabledBorder: noBorder,
       ),

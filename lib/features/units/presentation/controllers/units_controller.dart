@@ -6,8 +6,13 @@ import 'package:buy_control/features/units/domain/usecases/delete_unit.dart';
 import 'package:buy_control/features/units/domain/usecases/get_units.dart';
 import 'package:buy_control/features/units/domain/usecases/update_unit.dart';
 import 'package:get/get.dart';
+import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
+import 'package:buy_control/features/subscription/presentation/plan_locks.dart';
 
-class UnitsController extends GetxController {
+class UnitsController extends GetxController with PlanLocks {
+  @override
+  ResourceKey get lockResource => ResourceKey.units;
+
   final GetUnits getUnits;
   final CreateUnit createUnit;
   final UpdateUnit updateUnit;
@@ -30,9 +35,11 @@ class UnitsController extends GetxController {
     load();
   }
 
+  @override
   Future<void> load() async {
     status = ViewStatus.loading;
     update();
+    await refreshLocks();
 
     final result = await getUnits();
     result.fold((data) {

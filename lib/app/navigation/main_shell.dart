@@ -11,6 +11,7 @@ import 'package:buy_control/features/planning/presentation/pages/planning_page.d
 import 'package:buy_control/features/products/presentation/bindings/products_binding.dart';
 import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
 import 'package:buy_control/features/products/presentation/pages/products_page.dart';
+import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:get/get.dart';
@@ -31,6 +32,9 @@ class _MainShellState extends State<MainShell> {
 
   void _bindTabsOnce() {
     if (_bound) return;
+    // Plano do usuário que acabou de entrar: as abas recalculam os
+    // bloqueios quando ele termina de carregar (addPlanListener).
+    WidgetsBinding.instance.addPostFrameCallback((_) => Get.find<SubscriptionController>().load());
     DashboardBinding().dependencies();
     BoxesBinding().dependencies();
     ProductsBinding().dependencies();
@@ -71,12 +75,12 @@ class _MainShellState extends State<MainShell> {
               Get.find<PlanningController>().load(silent: true);
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Symbols.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Symbols.inventory_2), label: 'Boxes'),
-          BottomNavigationBarItem(icon: Icon(Symbols.shopping_basket), label: 'Produtos'),
-          BottomNavigationBarItem(icon: Icon(Symbols.view_kanban), label: 'Planejar'),
-          BottomNavigationBarItem(icon: Icon(Symbols.menu), label: 'Mais'),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Symbols.home), label: 'common.home'.tr),
+          BottomNavigationBarItem(icon: Icon(Symbols.inventory_2), label: 'common.boxes'.tr),
+          BottomNavigationBarItem(icon: Icon(Symbols.shopping_basket), label: 'common.products'.tr),
+          BottomNavigationBarItem(icon: Icon(Symbols.view_kanban), label: 'common.plan'.tr),
+          BottomNavigationBarItem(icon: Icon(Symbols.menu), label: 'common.more'.tr),
         ],
       ),
     );

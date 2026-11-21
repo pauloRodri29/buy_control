@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:buy_control/app/brand/app_brand.dart';
 import 'package:buy_control/app/brand/app_logo.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
@@ -22,28 +23,28 @@ class _AboutPageState extends State<AboutPage> {
   late final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
 
   static const _features = [
-    (Symbols.inventory_2, 'Caixas', 'Agrupe as compras por contexto, como "Mercado" ou "Farmácia".'),
+    (Symbols.inventory_2, 'common.boxes2', 'settings.groupPurchasesContextLikeGrocery'),
     (
       Symbols.qr_code_scanner,
-      'Lançamentos',
-      'Registre compras item a item, com leitura de código de barras, etiqueta de balança e promoções.',
+      'common.entries',
+      'settings.recordPurchasesItemItemBarcode',
     ),
     (
       Symbols.archive,
-      'Fechamentos',
-      'Feche o ciclo de uma caixa e guarde o histórico; lançamentos recorrentes seguem para o próximo.',
+      'common.closings',
+      'settings.closeBoxsCycleKeepHistory',
     ),
     (
       Symbols.view_kanban,
-      'Planejamento',
-      'Monte quadros de compras futuras com data de previsão e meta de gasto.',
+      'common.planning',
+      'settings.buildBoardsFuturePurchasesPlanned',
     ),
     (
       Symbols.bar_chart,
-      'Relatórios',
-      'Compare períodos, acompanhe gasto realizado e previsto e exporte em PDF.',
+      'common.reports',
+      'settings.comparePeriodsTrackActualPlanned',
     ),
-    (Symbols.shopping_basket, 'Catálogo', 'Produtos, categorias, tipos e unidades reutilizáveis.'),
+    (Symbols.shopping_basket, 'settings.catalog', 'settings.reusableProductsCategoriesTypesUnits'),
   ];
 
   @override
@@ -52,7 +53,7 @@ class _AboutPageState extends State<AboutPage> {
     final text = context.text;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sobre o sistema')),
+      appBar: AppBar(title: Text('settings.aboutApp'.tr)),
       body: FutureBuilder<PackageInfo>(
         future: _packageInfo,
         builder: (context, snapshot) {
@@ -72,52 +73,52 @@ class _AboutPageState extends State<AboutPage> {
                 style: text.bodySmall,
               ),
               const SizedBox(height: AppSpacing.sm),
-              Center(child: Chip(label: Text('Versão $version'))),
+              Center(child: Chip(label: Text('settings.version2'.trParams({'version': version})))),
               const SizedBox(height: AppSpacing.xl),
               _Section(
-                title: 'O que o app faz',
+                title: 'settings.whatAppDoes'.tr,
                 children: [
                   for (final (icon, title, description) in _features)
                     ListTile(
                       leading: Icon(icon, color: colors.primary),
-                      title: Text(title),
-                      subtitle: Text(description),
+                      title: Text(title.tr),
+                      subtitle: Text(description.tr),
                     ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xl),
-              const _Section(
-                title: 'Seus dados',
+              _Section(
+                title: 'settings.data2'.tr,
                 children: [
                   ListTile(
                     leading: Icon(Symbols.storage),
-                    title: Text('Guardados no aparelho'),
-                    subtitle: Text('Tudo fica salvo localmente e o app funciona sem internet.'),
+                    title: Text('settings.storedDevice'.tr),
+                    subtitle: Text('settings.everythingSavedLocallyAppWorks'.tr),
                   ),
                   ListTile(
                     leading: Icon(Symbols.backup),
-                    title: Text('Backup manual'),
-                    subtitle: Text('Use Configurações → Exportar dados para guardar uma cópia em arquivo.'),
+                    title: Text('common.manualBackup'.tr),
+                    subtitle: Text('settings.useSettingsBackupRestoreKeep'.tr),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xl),
               _Section(
-                title: 'Informações',
+                title: 'settings.information'.tr,
                 children: [
                   ListTile(
                     leading: const Icon(Symbols.sell),
-                    title: const Text('Versão'),
+                    title: Text('settings.version'.tr),
                     trailing: Text(version, style: text.bodyMedium),
                   ),
                   ListTile(
                     leading: const Icon(Symbols.tag),
-                    title: const Text('Compilação'),
+                    title: Text('settings.build'.tr),
                     trailing: Text(build, style: text.bodyMedium),
                   ),
                   ListTile(
                     leading: const Icon(Symbols.receipt_long),
-                    title: const Text('Licenças de código aberto'),
+                    title: Text('settings.openSourceLicenses'.tr),
                     trailing: const Icon(Symbols.chevron_right, size: 18),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(

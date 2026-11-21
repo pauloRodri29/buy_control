@@ -55,15 +55,15 @@ class _CategoryFormSheetState extends State<CategoryFormSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText.heading(widget.category != null ? 'Editar categoria' : 'Nova categoria', ),
+        AppText.heading(widget.category != null ? 'categories.editCategory'.tr : 'categories.newCategory'.tr, ),
         const SizedBox(height: AppSpacing.lg),
-        AppTextField(controller: nameController, label: 'Nome', hint: 'Bebidas'),
+        AppTextField(controller: nameController, label: 'common.name'.tr, hint: 'categories.drinks'.tr),
         if (errorMessage != null) ...[
           const SizedBox(height: AppSpacing.sm),
           AppText(errorMessage!, color: context.colors.error),
         ],
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Salvar', onPressed: submitting ? null : _submit),
+        AppButton(label: 'common.save'.tr, onPressed: submitting ? null : _submit),
       ],
     );
   }
