@@ -1,0 +1,351 @@
+[
+  {
+    "source": "lib/app/widgets/app_button.dart",
+    "catalog": "docs/componentes/catalogo/botoes.md",
+    "classes": [
+      "AppButton"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_date_picker.dart",
+    "catalog": "docs/componentes/catalogo/campos.md",
+    "classes": [
+      "AppDateShortcut",
+      "AppDateRangeShortcut",
+      "AppDatePicker"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_dropdown.dart",
+    "catalog": "docs/componentes/catalogo/campos.md",
+    "classes": [
+      "AppDropdownOption",
+      "AppDropdown"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_money_field.dart",
+    "catalog": "docs/componentes/catalogo/campos.md",
+    "classes": [
+      "AppMoneyField"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_text_field.dart",
+    "catalog": "docs/componentes/catalogo/campos.md",
+    "classes": [
+      "AppTextField"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/search_field_debounced.dart",
+    "catalog": "docs/componentes/catalogo/campos.md",
+    "classes": [
+      "SearchFieldDebounced"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_card.dart",
+    "catalog": "docs/componentes/catalogo/cards.md",
+    "classes": [
+      "AppCard"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_list_card.dart",
+    "catalog": "docs/componentes/catalogo/cards.md",
+    "classes": [
+      "AppListCardAction",
+      "AppListCard"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_feedback.dart",
+    "catalog": "docs/componentes/catalogo/feedback.md",
+    "classes": [
+      "AppFeedback"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/empty_state_view.dart",
+    "catalog": "docs/componentes/catalogo/feedback.md",
+    "classes": [
+      "EmptyStateView"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/error_state_view.dart",
+    "catalog": "docs/componentes/catalogo/feedback.md",
+    "classes": [
+      "ErrorStateView"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/loading_skeleton.dart",
+    "catalog": "docs/componentes/catalogo/feedback.md",
+    "classes": [
+      "LoadingSkeleton",
+      "LoadingSkeletonList"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/barcode_scanner_page.dart",
+    "catalog": "docs/componentes/catalogo/leitura.md",
+    "classes": [
+      "BarcodeScannerPage"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_bottom_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modais.md",
+    "classes": [
+      "AppBottomSheet"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/confirm_dialog.dart",
+    "catalog": "docs/componentes/catalogo/modais.md",
+    "classes": [
+      "ConfirmDialog"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/text_input_dialog.dart",
+    "catalog": "docs/componentes/catalogo/modais.md",
+    "classes": [
+      "TextInputDialog"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/filter_chips_bar.dart",
+    "catalog": "docs/componentes/catalogo/selecao.md",
+    "classes": [
+      "FilterChipOption",
+      "FilterChipsBar"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/selectable_list_tile.dart",
+    "catalog": "docs/componentes/catalogo/selecao.md",
+    "classes": [
+      "SelectableListTile"
+    ]
+  },
+  {
+    "source": "lib/app/widgets/app_text.dart",
+    "catalog": "docs/componentes/catalogo/texto.md",
+    "classes": [
+      "AppText"
+    ]
+  },
+  {
+    "source": "lib/features/backup/presentation/widgets/backup_busy_overlay.dart",
+    "catalog": "docs/componentes/catalogo/modulo-backup.md",
+    "classes": [
+      "BackupBusyOverlay"
+    ]
+  },
+  {
+    "source": "lib/features/boxes/presentation/widgets/box_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-boxes.md",
+    "classes": [
+      "BoxFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/categories/presentation/widgets/category_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-categories.md",
+    "classes": [
+      "CategoryFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/dashboard/presentation/widgets/dashboard_filters_section.dart",
+    "catalog": "docs/componentes/catalogo/modulo-dashboard.md",
+    "classes": [
+      "DashboardFiltersSection"
+    ]
+  },
+  {
+    "source": "lib/features/dashboard/presentation/widgets/monthly_evolution_chart.dart",
+    "catalog": "docs/componentes/catalogo/modulo-dashboard.md",
+    "classes": [
+      "MonthlyEvolutionChart"
+    ]
+  },
+  {
+    "source": "lib/features/dashboard/presentation/widgets/spending_by_box_chart.dart",
+    "catalog": "docs/componentes/catalogo/modulo-dashboard.md",
+    "classes": [
+      "SpendingByBoxChart"
+    ]
+  },
+  {
+    "source": "lib/features/dashboard/presentation/widgets/spending_by_category_chart.dart",
+    "catalog": "docs/componentes/catalogo/modulo-dashboard.md",
+    "classes": [
+      "SpendingByCategoryChart"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/finish_plan_board_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "FinishPlanBoardSheet"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/pending_items_view.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PendingItemsView"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_board_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PlanBoardFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_board_picker.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": []
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_column.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PlanColumn"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_history_view.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PlanHistoryView",
+      "PlanBoardStatusChip",
+      "PlanHistoryCard"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_item_card.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PlanItemCard"
+    ]
+  },
+  {
+    "source": "lib/features/planning/presentation/widgets/plan_item_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-planning.md",
+    "classes": [
+      "PlanItemFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/product_types/presentation/widgets/product_type_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-product_types.md",
+    "classes": [
+      "ProductTypeFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/products/presentation/widgets/product_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-products.md",
+    "classes": [
+      "ProductFormSheet"
+    ]
+  },
+  {
+    "source": "lib/features/reports/presentation/widgets/report_evolution_chart.dart",
+    "catalog": "docs/componentes/catalogo/modulo-reports.md",
+    "classes": [
+      "ReportEvolutionChart"
+    ]
+  },
+  {
+    "source": "lib/features/settings/presentation/widgets/language_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-settings.md",
+    "classes": [
+      "LanguageSheet"
+    ]
+  },
+  {
+    "source": "lib/features/settings/presentation/widgets/theme_mode_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-settings.md",
+    "classes": [
+      "ThemeModeSheet"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/coupon_field.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "CouponField"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/plan_badge.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "PlanBadge"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/plan_feature_row.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "PlanFeatureRow"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/plan_limit_prompt.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "PlanLimitPrompt"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/plan_summary_card.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "PlanSummaryCard"
+    ]
+  },
+  {
+    "source": "lib/features/subscription/presentation/widgets/simulated_payment_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-subscription.md",
+    "classes": [
+      "SimulatedPaymentSheet"
+    ]
+  },
+  {
+    "source": "lib/features/transactions/presentation/widgets/carry_over_switch.dart",
+    "catalog": "docs/componentes/catalogo/modulo-transactions.md",
+    "classes": [
+      "CarryOverSwitch"
+    ]
+  },
+  {
+    "source": "lib/features/transactions/presentation/widgets/discount_rule_editor.dart",
+    "catalog": "docs/componentes/catalogo/modulo-transactions.md",
+    "classes": [
+      "DiscountRuleEditor"
+    ]
+  },
+  {
+    "source": "lib/features/transactions/presentation/widgets/transaction_detail_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-transactions.md",
+    "classes": [
+      "TransactionDetailSheet"
+    ]
+  },
+  {
+    "source": "lib/features/units/presentation/widgets/unit_form_sheet.dart",
+    "catalog": "docs/componentes/catalogo/modulo-units.md",
+    "classes": [
+      "UnitFormSheet"
+    ]
+  }
+]

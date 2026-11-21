@@ -27,6 +27,20 @@ Se você utiliza FVM:
 
 ```bash
 fvm use 3.32.7
+```
+
+---
+
+## 📚 Documentação
+
+A documentação completa, conferida no código, fica em [`docs/`](docs/README.md):
+
+- [Fluxos](docs/fluxos/README.md): o que cada tela faz, módulo a módulo.
+- [Configurações](docs/configuracoes/README.md): estrutura, armazenamento, planos e limites, rede, visual e idioma.
+- [Componentes](docs/componentes/README.md) e o [catálogo gerado](docs/componentes/catalogo/README.md).
+- [Padrões](docs/padroes/nomenclatura.md): nomenclatura, erros e resultados, testes.
+
+Para manter: [Manutenção](docs/manutencao.md) e [scripts da pasta `tool`](tool/README.md).
 
 ---
 
