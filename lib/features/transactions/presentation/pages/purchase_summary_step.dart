@@ -8,7 +8,7 @@ import 'package:buy_control/core/formatters/date_time_formatter.dart';
 import 'package:buy_control/core/formatters/quantity_formatter.dart';
 import 'package:buy_control/core/result/result.dart';
 import 'package:buy_control/features/transactions/domain/repositories/transaction_repository.dart';
-import 'package:buy_control/features/transactions/domain/usecases/create_transaction.dart';
+import 'package:buy_control/features/transactions/domain/usecases/save_purchase_items.dart';
 import 'package:buy_control/features/transactions/domain/usecases/update_transaction.dart';
 import 'package:buy_control/features/transactions/presentation/purchase_draft.dart';
 import 'package:buy_control/features/transactions/presentation/widgets/carry_over_switch.dart';
@@ -39,6 +39,9 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
   bool _submitting = false;
   String? _errorMessage;
 
+  late final bool _showPurchaseAdjustments =
+      _draft.isEditing && (!_draft.discount.isZero || !_draft.additionalCost.isZero);
+
   void _editItems() => Navigator.of(context).pop(PurchaseSummaryResult.editItems);
 
   Future<void> _confirm() async {
@@ -51,13 +54,11 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
     final original = _draft.original;
     final Result<void> result;
     if (original == null) {
-      result = await CreateTransaction(repository)(
+      // Compra nova: um lançamento por produto (ver SavePurchaseItems).
+      result = await SavePurchaseItems(repository)(
         boxId: _draft.boxId,
-        title: _draft.title,
         occurredAt: _draft.occurredAt,
         notes: _draft.notes,
-        discount: _draft.discount,
-        additionalCost: _draft.additionalCost,
         items: _draft.items,
         carryOver: _draft.carryOver,
       );
@@ -133,7 +134,9 @@ class _PurchaseSummaryStepState extends State<PurchaseSummaryStep> {
                 ),
               )),
           const Divider(),
-          Row(
+          // Desconto/acréscimo da compra inteira só existem em lançamentos
+          // antigos com vários produtos; compras novas ajustam por item.
+          if (_showPurchaseAdjustments) Row(
             children: [
               Expanded(
                 child: AppMoneyField(

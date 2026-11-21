@@ -23,10 +23,20 @@ class ProductFormSheet extends StatefulWidget {
   /// lido e não estava cadastrado).
   final List<String> initialBarcodes;
 
+  /// Nome já preenchido num produto novo (ex.: termo buscado no seletor de
+  /// produtos que não encontrou nada).
+  final String? initialName;
+
   /// Chamado com o produto criado (só na criação).
   final void Function(ProductEntity product)? onCreated;
 
-  const ProductFormSheet({super.key, this.product, this.initialBarcodes = const [], this.onCreated});
+  const ProductFormSheet({
+    super.key,
+    this.product,
+    this.initialBarcodes = const [],
+    this.initialName,
+    this.onCreated,
+  });
 
   @override
   State<ProductFormSheet> createState() => _ProductFormSheetState();
@@ -38,7 +48,7 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
   late final codeController = TextEditingController(text: widget.product?.code);
   late final barcodeController =
       TextEditingController(text: (widget.product?.barcodes ?? widget.initialBarcodes).join(', '));
-  late final nameController = TextEditingController(text: widget.product?.name);
+  late final nameController = TextEditingController(text: widget.product?.name ?? widget.initialName);
   late final descriptionController = TextEditingController(text: widget.product?.description);
   late final brandController = TextEditingController(text: widget.product?.brand);
 

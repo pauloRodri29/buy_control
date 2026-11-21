@@ -241,8 +241,8 @@ class _SummaryHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              AppText.subtitle('${summary?.transactionCount ?? 0} lançamentos'),
-              AppText.subtitle('${summary?.itemCount ?? 0} itens'),
+              AppText.subtitle(_plural(summary?.transactionCount ?? 0, 'lançamento', 'lançamentos')),
+              AppText.subtitle(_plural(summary?.itemCount ?? 0, 'produto', 'produtos')),
             ],
           ),
         ],
@@ -251,6 +251,11 @@ class _SummaryHeader extends StatelessWidget {
   }
 }
 
+String _plural(num count, String singular, String plural) => '$count ${count == 1 ? singular : plural}';
+
+/// Card de um lançamento aberto. O caso comum é um produto por lançamento
+/// (layout plano: nome, preço, quantidade e total). Lançamentos antigos
+/// com vários produtos mostram uma linha por produto.
 class _TransactionCard extends StatelessWidget {
   final TransactionEntity transaction;
   final VoidCallback onTap;
@@ -267,98 +272,181 @@ class _TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.xs, AppSpacing.xs),
+          child: transaction.items.length == 1 ? _single(context) : _multiple(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _deleteButton() => IconButton(
+        tooltip: 'Excluir lançamento',
+        icon: const Icon(LucideIcons.trash2, size: 18),
+        onPressed: onDelete,
+      );
+
+  Widget _single(BuildContext context) {
+    final item = transaction.items.single;
+    final text = context.text;
+    final date = DateTimeFormatter.ddMMyyyy(transaction.occurredAt);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  item.nameSnapshot,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                transaction.total.formatted,
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: context.colors.primary),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${item.unitPrice.formatted} cada · $date', style: text.bodySmall),
+                  if (!item.discount.isZero)
+                    Text(
+                      '${item.discountRule?.description ?? 'Desconto'} · - ${item.discount.formatted}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall?.copyWith(color: context.colors.primary),
+                    ),
+                ],
+              ),
+            ),
+            _QuantityStepper(item: item, onChange: (delta) => onChangeQuantity(item, delta)),
+            _deleteButton(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _multiple(BuildContext context) {
+    final text = context.text;
     final title = (transaction.title != null && transaction.title!.trim().isNotEmpty)
         ? transaction.title!
-        : (transaction.items.isNotEmpty ? transaction.items.first.nameSnapshot : 'Lançamento');
+        : 'Compra com ${_plural(transaction.itemCount, 'produto', 'produtos')}';
 
-    return AppCard(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    '${DateTimeFormatter.ddMMyyyy(transaction.occurredAt)} · '
+                    '${_plural(transaction.itemCount, 'produto', 'produtos')}',
+                    style: text.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              transaction.total.formatted,
+              style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: context.colors.primary),
+            ),
+            _deleteButton(),
+          ],
+        ),
+        const Divider(height: AppSpacing.md),
+        for (final item in transaction.items)
           Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppText(title, fontWeight: FontWeight.w600),
-                    const SizedBox(height: AppSpacing.xs),
-                    AppText.subtitle(
-                      '${DateTimeFormatter.ddMMyyyy(transaction.occurredAt)} · ${transaction.itemCount} itens',
+                    Text(item.nameSnapshot, maxLines: 1, overflow: TextOverflow.ellipsis, style: text.bodyLarge),
+                    Text(
+                      item.discount.isZero
+                          ? item.unitPrice.formatted
+                          : '${item.unitPrice.formatted} · ${item.discountRule?.description ?? 'com desconto'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall,
                     ),
                   ],
                 ),
               ),
-              AppText(transaction.total.formatted, fontWeight: FontWeight.w600, color: context.colors.primary),
-              IconButton(
-                tooltip: 'Excluir lançamento',
-                icon: const Icon(LucideIcons.trash2, size: 18),
-                onPressed: onDelete,
+              _QuantityStepper(item: item, onChange: (delta) => onChangeQuantity(item, delta)),
+              Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: SizedBox(
+                  width: 84,
+                  child: Text(item.total.formatted, textAlign: TextAlign.right, style: text.bodyLarge),
+                ),
               ),
             ],
           ),
-          const Divider(height: AppSpacing.md),
-          ...transaction.items.map(
-            (item) => _QuickQuantityRow(
-              item: item,
-              onDecrease: item.quantity > 1 ? () => onChangeQuantity(item, -1) : null,
-              onIncrease: () => onChangeQuantity(item, 1),
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
 
-/// Linha de um item no card da Box com ajuste rápido de quantidade.
-class _QuickQuantityRow extends StatelessWidget {
+/// Ajuste rápido de quantidade (− 2 +) direto no card da Box.
+class _QuantityStepper extends StatelessWidget {
   final TransactionItemEntity item;
-  final VoidCallback? onDecrease;
-  final VoidCallback onIncrease;
+  final ValueChanged<double> onChange;
 
-  const _QuickQuantityRow({required this.item, required this.onDecrease, required this.onIncrease});
-
-  String get _quantity {
-    final q = item.quantity;
-    return QuantityFormatter.format(q);
-  }
+  const _QuantityStepper({required this.item, required this.onChange});
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppText(item.nameSnapshot, maxLines: 1),
-              AppText.subtitle(
-                item.discount.isZero
-                    ? item.unitPrice.formatted
-                    : '${item.unitPrice.formatted} · ${item.discountRule?.description ?? 'com desconto'}',
-              ),
-            ],
-          ),
-        ),
         IconButton(
           tooltip: 'Diminuir',
           visualDensity: VisualDensity.compact,
           icon: const Icon(LucideIcons.minus, size: 16),
-          onPressed: onDecrease,
+          onPressed: item.quantity > 1 ? () => onChange(-1) : null,
         ),
         SizedBox(
           width: 32,
-          child: AppText(_quantity, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
+          child: Text(
+            QuantityFormatter.format(item.quantity),
+            textAlign: TextAlign.center,
+            style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
         ),
         IconButton(
           tooltip: 'Aumentar',
           visualDensity: VisualDensity.compact,
           icon: const Icon(LucideIcons.plus, size: 16),
-          onPressed: onIncrease,
+          onPressed: () => onChange(1),
         ),
-        SizedBox(width: 84, child: AppText(item.total.formatted, textAlign: TextAlign.right)),
       ],
     );
   }

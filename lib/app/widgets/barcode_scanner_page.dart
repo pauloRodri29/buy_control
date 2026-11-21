@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
+import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
-import 'package:buy_control/app/widgets/app_text.dart';
 import 'package:buy_control/app/widgets/text_input_dialog.dart';
 import 'package:buy_control/core/barcode/barcode_parser.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +23,11 @@ typedef OnBarcodeScanned = Future<String?> Function(BuildContext context, Scanne
 /// - [scanContinuous]: "modo carrinho" — cada leitura chama [OnBarcodeScanned]
 ///   e a câmera continua aberta até o usuário tocar em "Concluir".
 ///
-/// Só aceita códigos de produto válidos (dígito verificador conferido) e
-/// ignora o mesmo código por alguns segundos, para não contar duas vezes a
-/// mesma embalagem parada na frente da câmera.
+/// Só lê códigos **dentro do retângulo** (`scanWindow` do `MobileScanner`);
+/// a moldura fica verde enquanto há um código válido nele. Só aceita
+/// códigos de produto válidos (dígito verificador conferido) e ignora o
+/// mesmo código por alguns segundos, para não contar duas vezes a mesma
+/// embalagem parada na frente da câmera.
 class BarcodeScannerPage extends StatefulWidget {
   final String title;
   final OnBarcodeScanned? onScanned;
@@ -53,11 +57,24 @@ class BarcodeScannerPage extends StatefulWidget {
 class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   static const _repeatCooldown = Duration(seconds: 3);
 
+  /// Quanto tempo a moldura continua verde depois da última leitura. Como
+  /// o leitor detecta a cada ~250 ms, ela fica verde enquanto o código
+  /// estiver no retângulo e volta ao normal logo que ele sai.
+  static const _detectedHold = Duration(milliseconds: 600);
+
+  /// Pausa curta depois da leitura para o usuário ver a moldura verde
+  /// antes da câmera pausar ou da tela fechar.
+  static const _confirmDelay = Duration(milliseconds: 350);
+
   final _controller = MobileScannerController(
     formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA],
+    // Android: aproxima sozinho quando o código aparece pequeno na imagem.
+    autoZoom: true,
   );
 
   bool _busy = false;
+  bool _detected = false;
+  Timer? _detectedTimer;
   String? _lastDigits;
   DateTime _lastAt = DateTime.fromMillisecondsSinceEpoch(0);
   String? _feedback;
@@ -67,8 +84,21 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
   @override
   void dispose() {
+    _detectedTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Área de leitura, nas coordenadas do próprio preview (abaixo da
+  /// AppBar). O mesmo retângulo limita a detecção e é desenhado na tela,
+  /// então o que aparece na moldura é exatamente o que é lido.
+  static Rect _scanWindowFor(Size size) {
+    final width = size.width * 0.8;
+    return Rect.fromCenter(
+      center: Offset(size.width / 2, size.height * 0.4),
+      width: width,
+      height: width * 0.5,
+    );
   }
 
   void _onDetect(BarcodeCapture capture) {
@@ -77,10 +107,19 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
       if (raw == null) continue;
       final code = BarcodeParser.parse(raw);
       if (code != null) {
+        _markDetected();
         _handle(code);
         return;
       }
     }
+  }
+
+  void _markDetected() {
+    _detectedTimer?.cancel();
+    if (!_detected) setState(() => _detected = true);
+    _detectedTimer = Timer(_detectedHold, () {
+      if (mounted) setState(() => _detected = false);
+    });
   }
 
   Future<void> _handle(ScannedCode code) async {
@@ -91,6 +130,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
     _busy = true;
     HapticFeedback.mediumImpact();
     SystemSound.play(SystemSoundType.click);
+    await Future<void>.delayed(_confirmDelay);
+    if (!mounted) return;
 
     if (!_continuous) {
       Navigator.of(context).pop(code);
@@ -109,6 +150,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
       _busy = false;
       if (mounted) {
         setState(() {
+          _detected = false;
           if (message != null) {
             _feedback = message;
             _count++;
@@ -139,14 +181,12 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final window = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height * 0.38),
-      width: size.width * 0.8,
-      height: size.width * 0.45,
-    );
+    final colors = context.colors;
+    final idleColor = Colors.white;
+    final detectedColor = context.semantic.success;
 
     return Scaffold(
+      // Fundo do preview da câmera: preto independente do tema.
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(widget.title),
@@ -159,68 +199,77 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
           IconButton(tooltip: 'Digitar código', icon: const Icon(LucideIcons.keyboard), onPressed: _typeCode),
         ],
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: MobileScanner(
-              controller: _controller,
-              onDetect: _onDetect,
-              errorBuilder: (context, error) => _CameraError(error: error),
-            ),
-          ),
-          Positioned.fromRect(
-            rect: window,
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 2),
-                  borderRadius: AppRadius.borderLg,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final window = _scanWindowFor(constraints.biggest);
+
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: MobileScanner(
+                  controller: _controller,
+                  scanWindow: window,
+                  tapToFocus: true,
+                  onDetect: _onDetect,
+                  errorBuilder: (context, error) => _CameraError(error: error),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.lg,
-            child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _Banner(
-                    text: _feedback ??
-                        (_continuous
-                            ? 'Aponte para o código de barras. Cada leitura adiciona o produto.'
-                            : 'Aponte para o código de barras.'),
-                  ),
-                  if (_continuous) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    AppButton(
-                      label: _count == 0 ? 'Concluir' : 'Concluir ($_count lidos)',
-                      onPressed: () => Navigator.of(context).pop(),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: TweenAnimationBuilder<Color?>(
+                    tween: ColorTween(end: _detected ? detectedColor : idleColor),
+                    duration: const Duration(milliseconds: 150),
+                    builder: (context, color, _) => ScanWindowOverlay(
+                      controller: _controller,
+                      scanWindow: window,
+                      borderColor: color ?? idleColor,
+                      borderWidth: _detected ? 4 : 2,
+                      borderRadius: AppRadius.borderLg,
                     ),
-                  ],
-                ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+              Positioned(
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                bottom: AppSpacing.lg,
+                child: SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Card(
+                        color: colors.inverseSurface,
+                        margin: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              _feedback ??
+                                  (_continuous
+                                      ? 'Centralize o código de barras no retângulo. Cada leitura adiciona o produto.'
+                                      : 'Centralize o código de barras no retângulo.'),
+                              textAlign: TextAlign.center,
+                              style: context.text.bodyLarge?.copyWith(color: colors.onInverseSurface),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_continuous) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        AppButton(
+                          label: _count == 0 ? 'Concluir' : 'Concluir ($_count lidos)',
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
-    );
-  }
-}
-
-class _Banner extends StatelessWidget {
-  final String text;
-  const _Banner({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.7), borderRadius: AppRadius.borderLg),
-      child: AppText(text, textAlign: TextAlign.center, color: Colors.white),
     );
   }
 }
@@ -238,7 +287,11 @@ class _CameraError extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: AppText(message, textAlign: TextAlign.center, color: Colors.white),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: context.text.bodyLarge?.copyWith(color: Colors.white),
+        ),
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:buy_control/app/theme/theme_context.dart';
-import 'package:buy_control/app/theme/app_radius.dart';
 import 'package:buy_control/app/theme/app_spacing.dart';
 import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
@@ -42,6 +41,15 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
   List<UnitEntity> _units = [];
   String? _errorMessage;
 
+  /// Produto aberto para edição (acordeão: um por vez). Com um só
+  /// produto ele já vem aberto; com vários, todos começam recolhidos.
+  late String? _expandedId = _draft.items.length == 1 ? _draft.items.first.id : null;
+
+  /// Depois de adicionar produtos, abre o último que entrou na lista.
+  void _expandLastAddedSince(int previousCount) {
+    if (_draft.items.length > previousCount) _expandedId = _draft.items.last.id;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,16 +77,22 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
       child: const ProductPickerSheet(),
     );
     if (selected == null || selected.isEmpty || !mounted) return;
+    final previousCount = _draft.items.length;
     setState(() {
       _draft.addProducts(selected);
+      _expandLastAddedSince(previousCount);
       _errorMessage = null;
     });
   }
 
   Future<void> _scanProducts() async {
+    final previousCount = _draft.items.length;
     await scanIntoDraft(context, _draft);
     if (!mounted) return;
-    setState(() => _errorMessage = null);
+    setState(() {
+      _expandLastAddedSince(previousCount);
+      _errorMessage = null;
+    });
   }
 
   void _updateItem(int index, TransactionItemEntity item) {
@@ -122,19 +136,25 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
                   key: ValueKey(_draft.items[i].id),
                   item: _draft.items[i],
                   units: _units,
+                  expanded: _draft.items[i].id == _expandedId,
+                  onExpansionChanged: (open) {
+                    final id = _draft.items[i].id;
+                    setState(() => _expandedId = open ? id : (_expandedId == id ? null : _expandedId));
+                  },
                   onChanged: (item) => _updateItem(i, item),
                   // Na edição não dá para esvaziar a compra: só remove se sobrar algum item.
                   onRemove: _draft.isEditing && _draft.items.length <= 1 ? null : () => _removeItem(i),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.sm),
               ],
+              const SizedBox(height: AppSpacing.xs),
               // Editar um lançamento altera só os itens já lançados.
               if (!_draft.isEditing)
                 Row(
                   children: [
                     Expanded(
                       child: AppButton.secondary(
-                        label: 'Adicionar produto',
+                        label: 'Produto',
                         icon: LucideIcons.plus,
                         onPressed: _addProducts,
                       ),
@@ -160,7 +180,10 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AppText('${_draft.items.length} itens', color: context.colors.onSurfaceVariant),
+            AppText(
+              _draft.items.length == 1 ? '1 produto' : '${_draft.items.length} produtos',
+              color: context.colors.onSurfaceVariant,
+            ),
             AppText(_draft.itemsTotal.formatted, fontWeight: FontWeight.bold, color: context.colors.primary),
           ],
         ),
@@ -171,9 +194,14 @@ class _ItemDetailsStepState extends State<ItemDetailsStep> {
   }
 }
 
+/// Um produto da compra como card recolhível ([ExpansionTile] nativo).
+/// Fechado mostra o resumo (nome, quantidade × preço, desconto, total);
+/// aberto mostra o formulário completo do item.
 class _ItemForm extends StatefulWidget {
   final TransactionItemEntity item;
   final List<UnitEntity> units;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
   final ValueChanged<TransactionItemEntity> onChanged;
   final VoidCallback? onRemove;
 
@@ -181,6 +209,8 @@ class _ItemForm extends StatefulWidget {
     super.key,
     required this.item,
     required this.units,
+    required this.expanded,
+    required this.onExpansionChanged,
     required this.onChanged,
     required this.onRemove,
   });
@@ -191,7 +221,16 @@ class _ItemForm extends StatefulWidget {
 
 class _ItemFormState extends State<_ItemForm> {
   late final _quantityController = TextEditingController(text: QuantityFormatter.format(widget.item.quantity));
+  final _expansion = ExpansibleController();
 
+  @override
+  void didUpdateWidget(covariant _ItemForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Acordeão: o pai decide qual card fica aberto.
+    if (widget.expanded != oldWidget.expanded && widget.expanded != _expansion.isExpanded) {
+      widget.expanded ? _expansion.expand() : _expansion.collapse();
+    }
+  }
 
   @override
   void dispose() {
@@ -211,33 +250,55 @@ class _ItemFormState extends State<_ItemForm> {
     widget.onChanged(widget.item.copyWith(quantity: next));
   }
 
+  String get _summary {
+    final item = widget.item;
+    final base = '${QuantityFormatter.format(item.quantity)} × ${item.unitPrice.formatted}';
+    if (item.discount.isZero) return base;
+    return '$base · ${item.discountRule?.description ?? 'desconto'} (- ${item.discount.formatted})';
+  }
+
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
+    final text = context.text;
     final unitOptions =
         widget.units.map((u) => AppDropdownOption(value: u.id, label: '${u.name} (${u.abbreviation})')).toList();
     final hasUnit = unitOptions.any((o) => o.value == item.unitId);
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceContainerHighest,
-        borderRadius: AppRadius.borderLg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: context.colors.surfaceContainerHighest,
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        controller: _expansion,
+        initiallyExpanded: widget.expanded,
+        onExpansionChanged: widget.onExpansionChanged,
+        shape: const Border(),
+        collapsedShape: const Border(),
+        tilePadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        childrenPadding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                item.nameSnapshot,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(item.total.formatted, style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+          ],
+        ),
+        subtitle: Text(
+          _summary,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: text.bodySmall?.copyWith(color: item.discount.isZero ? null : context.colors.primary),
+        ),
         children: [
-          Row(
-            children: [
-              Expanded(child: AppText(item.nameSnapshot, fontWeight: FontWeight.w600)),
-              if (widget.onRemove != null)
-                IconButton(
-                  tooltip: 'Remover item',
-                  icon: const Icon(LucideIcons.trash2, size: 18),
-                  onPressed: widget.onRemove,
-                ),
-            ],
-          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -290,7 +351,7 @@ class _ItemFormState extends State<_ItemForm> {
           ),
           if (item.discountRule == null && !item.discount.isZero) ...[
             const SizedBox(height: AppSpacing.xs),
-            AppText.subtitle('Desconto lançado anteriormente: ${item.discount.formatted}'),
+            Text('Desconto lançado anteriormente: ${item.discount.formatted}', style: text.bodySmall),
           ],
           const SizedBox(height: AppSpacing.sm),
           AppMoneyField(
@@ -298,22 +359,15 @@ class _ItemFormState extends State<_ItemForm> {
             label: 'Acréscimo (opcional)',
             onChanged: (money) => widget.onChanged(widget.item.copyWith(additionalCost: money)),
           ),
-          const Divider(height: AppSpacing.lg),
-          if (!item.discount.isZero)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const AppText.subtitle('Você economiza'),
-                AppText('- ${item.discount.formatted}', color: context.colors.primary, fontWeight: FontWeight.w600),
-              ],
+          if (widget.onRemove != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton.icon(
+              onPressed: widget.onRemove,
+              style: TextButton.styleFrom(foregroundColor: context.colors.error),
+              icon: const Icon(LucideIcons.trash2, size: 18),
+              label: const Text('Remover produto'),
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const AppText.subtitle('Total do item'),
-              AppText(item.total.formatted, fontWeight: FontWeight.w600),
-            ],
-          ),
+          ],
         ],
       ),
     );

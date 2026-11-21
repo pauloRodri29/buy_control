@@ -10,6 +10,11 @@ import 'package:buy_control/features/categories/domain/entities/category_entity.
 import 'package:buy_control/features/categories/domain/usecases/get_categories.dart';
 import 'package:buy_control/features/products/domain/entities/product_entity.dart';
 import 'package:buy_control/features/products/domain/usecases/search_products.dart';
+import 'package:buy_control/features/products/presentation/bindings/products_binding.dart';
+import 'package:buy_control/features/products/presentation/controllers/products_controller.dart';
+import 'package:buy_control/features/products/presentation/widgets/product_form_sheet.dart';
+import 'package:buy_control/app/widgets/app_bottom_sheet.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,7 +34,9 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
 
   List<ProductEntity> _products = [];
   List<CategoryEntity> _categories = [];
-  final Set<String> _selectedIds = {};
+  /// Selecionados por id. Guarda o produto (não só o id) para a seleção
+  /// sobreviver a uma busca/filtro que tire o produto da lista visível.
+  final Map<String, ProductEntity> _selected = {};
   String _query = '';
   String? _categoryId;
   bool _loading = true;
@@ -53,15 +60,37 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
     if (mounted) setState(() => _loading = false);
   }
 
-  void _toggle(String id) {
+  void _toggle(ProductEntity product) {
     setState(() {
-      if (!_selectedIds.remove(id)) _selectedIds.add(id);
+      if (_selected.remove(product.id) == null) _selected[product.id] = product;
     });
   }
 
-  void _continue() {
-    final selected = _products.where((p) => _selectedIds.contains(p.id)).toList();
-    Navigator.of(context).pop(selected);
+  void _continue() => Navigator.of(context).pop(_selected.values.toList());
+
+  /// Mostra o atalho "Cadastrar" quando há um termo buscado que não é
+  /// exatamente o nome de um produto já listado.
+  bool get _canCreateFromQuery {
+    final term = _query.trim().toLowerCase();
+    return term.isNotEmpty && !_products.any((p) => p.name.trim().toLowerCase() == term);
+  }
+
+  /// Cadastra no catálogo o produto que não existe, sem sair da compra, e
+  /// já o deixa selecionado.
+  Future<void> _createFromQuery() async {
+    if (!Get.isRegistered<ProductsController>()) ProductsBinding().dependencies();
+    ProductEntity? created;
+    await AppBottomSheet.show<void>(
+      context,
+      height: MediaQuery.of(context).size.height * 0.92,
+      child: ProductFormSheet(initialName: _query.trim(), onCreated: (product) => created = product),
+    );
+    final product = created;
+    if (product == null || !mounted) return;
+    setState(() {
+      _selected[product.id] = product;
+      _products = [product, ..._products];
+    });
   }
 
   @override
@@ -93,26 +122,41 @@ class _ProductPickerSheetState extends State<ProductPickerSheet> {
         Expanded(
           child: _loading
               ? const Center(child: CircularProgressIndicator())
-              : _products.isEmpty
+              : _products.isEmpty && !_canCreateFromQuery
                   ? const EmptyStateView(title: 'Nenhum produto encontrado')
-                  : ListView.separated(
-                      itemCount: _products.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (_, i) {
-                        final product = _products[i];
-                        return SelectableListTile(
-                          title: product.name,
-                          subtitle: product.brand,
-                          selected: _selectedIds.contains(product.id),
-                          onTap: () => _toggle(product.id),
-                        );
-                      },
+                  : ListView(
+                      children: [
+                        if (_canCreateFromQuery) ...[
+                          ListTile(
+                            onTap: _createFromQuery,
+                            tileColor: context.colors.primaryContainer,
+                            textColor: context.colors.onPrimaryContainer,
+                            iconColor: context.colors.onPrimaryContainer,
+                            leading: const Icon(LucideIcons.plus),
+                            title: Text('Cadastrar "${_query.trim()}"'),
+                            subtitle: const Text('Vira produto do catálogo e já entra nesta compra'),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                        for (final product in _products) ...[
+                          SelectableListTile(
+                            title: product.name,
+                            subtitle: product.brand,
+                            selected: _selected.containsKey(product.id),
+                            onTap: () => _toggle(product),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                      ],
                     ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        AppText('${_selectedIds.length} produtos selecionados', color: context.colors.onSurfaceVariant),
+        AppText(
+          _selected.length == 1 ? '1 produto selecionado' : '${_selected.length} produtos selecionados',
+          color: context.colors.onSurfaceVariant,
+        ),
         const SizedBox(height: AppSpacing.sm),
-        AppButton(label: 'Continuar', onPressed: _selectedIds.isEmpty ? null : _continue),
+        AppButton(label: 'Continuar', onPressed: _selected.isEmpty ? null : _continue),
       ],
     );
   }

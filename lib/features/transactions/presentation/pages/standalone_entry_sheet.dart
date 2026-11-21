@@ -14,6 +14,8 @@ import 'package:buy_control/features/categories/domain/usecases/get_categories.d
 import 'package:buy_control/features/product_types/domain/entities/product_type_entity.dart';
 import 'package:buy_control/features/product_types/domain/usecases/get_product_types.dart';
 import 'package:buy_control/core/result/result.dart';
+import 'package:buy_control/features/products/domain/usecases/create_product.dart';
+import 'package:buy_control/features/products/presentation/bindings/products_binding.dart';
 import 'package:buy_control/features/transactions/domain/entities/discount_rule.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:buy_control/features/transactions/domain/entities/transaction_item_entity.dart';
@@ -56,6 +58,10 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
   late final DateTime _occurredAt = widget.initial?.occurredAt ?? DateTime.now();
   late DiscountRule? _discountRule = _initialItem?.discountRule;
   late bool _carryOver = widget.initial?.carryOver ?? true;
+
+  /// Além de lançar, cadastra o item no catálogo de produtos (e vincula o
+  /// lançamento a ele), sem precisar sair da Box.
+  bool _saveAsProduct = false;
 
   double get _quantity {
     final parsed = QuantityFormatter.parse(_quantityController.text) ?? 1;
@@ -118,15 +124,41 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
       setState(() => _errorMessage = 'Cadastre ao menos uma unidade antes de lançar.');
       return;
     }
+    if (_saveAsProduct && (_categoryId == null || _productTypeId == null)) {
+      setState(() => _errorMessage = 'Para salvar como produto, escolha a categoria e o tipo.');
+      return;
+    }
     setState(() {
       _submitting = true;
       _errorMessage = null;
     });
 
+    String? productId;
+    if (_saveAsProduct) {
+      if (!Get.isRegistered<CreateProduct>()) ProductsBinding().dependencies();
+      final created = await Get.find<CreateProduct>()(
+        name: title,
+        categoryId: _categoryId!,
+        productTypeId: _productTypeId!,
+        defaultUnitId: _unitId!,
+        referencePrice: _value.isZero ? null : _value,
+      );
+      if (!mounted) return;
+      if (created.isFailure) {
+        setState(() {
+          _submitting = false;
+          _errorMessage = FailurePresenter.present(created.failureOrNull!);
+        });
+        return;
+      }
+      productId = created.dataOrNull!.id;
+    }
+
     final initial = widget.initial;
     final item = TransactionItemEntity(
       id: _initialItem?.id ?? IdGenerator.generate(),
       transactionId: initial?.id ?? '',
+      productId: productId,
       nameSnapshot: title,
       categoryId: _categoryId,
       productTypeId: _productTypeId,
@@ -212,7 +244,13 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
           ),
           const SizedBox(height: AppSpacing.lg),
           AppTextField(controller: _titleController, label: 'Título', hint: 'Ex: Feira livre'),
-          const SizedBox(height: AppSpacing.md),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            value: _saveAsProduct,
+            onChanged: (v) => setState(() => _saveAsProduct = v),
+            title: const Text('Salvar também como produto'),
+            subtitle: const Text('Cadastra no catálogo com este nome, preço e unidade'),
+          ),
           AppTextField(controller: _descriptionController, label: 'Descrição (opcional)', maxLines: 2),
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -267,7 +305,7 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
           ),
           const SizedBox(height: AppSpacing.md),
           AppDropdown<String>(
-            label: 'Categoria (opcional)',
+            label: _saveAsProduct ? 'Categoria' : 'Categoria (opcional)',
             hint: 'Selecione',
             value: _categoryId,
             options: categoryOptions,
@@ -275,7 +313,7 @@ class _StandaloneEntrySheetState extends State<StandaloneEntrySheet> {
           ),
           const SizedBox(height: AppSpacing.md),
           AppDropdown<String>(
-            label: 'Tipo (opcional)',
+            label: _saveAsProduct ? 'Tipo' : 'Tipo (opcional)',
             hint: 'Selecione',
             value: _productTypeId,
             options: productTypeOptions,
