@@ -33,6 +33,7 @@ import 'package:buy_control/features/settings/presentation/pages/about_page.dart
 import 'package:buy_control/features/settings/presentation/pages/clear_data_page.dart';
 import 'package:buy_control/features/settings/presentation/pages/settings_page.dart';
 import 'package:buy_control/features/auth/presentation/pages/profile_page.dart';
+import 'package:buy_control/features/subscription/presentation/pages/custom_plan_builder_page.dart';
 import 'package:buy_control/features/subscription/presentation/pages/my_plan_page.dart';
 import 'package:buy_control/features/subscription/presentation/pages/plans_page.dart';
 import 'package:buy_control/features/units/domain/repositories/unit_repository.dart';
@@ -140,6 +141,7 @@ void main() {
         'settings.aboutApp': (() => const AboutPage(), null),
         'common.myPlan': (() => const MyPlanPage(), null),
         'subscription.plans': (() => const PlansPage(), null),
+        'subscription.builderTitle': (() => const CustomPlanBuilderPage(), null),
         'common.profile': (() => const ProfilePage(), null),
       };
       for (final MapEntry(key: name, value: (page, binding)) in pages.entries) {

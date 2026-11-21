@@ -2,12 +2,16 @@ import 'package:buy_control/app/errors/failure_presenter.dart';
 import 'package:buy_control/app/state/view_status.dart';
 import 'package:buy_control/app/widgets/app_feedback.dart';
 import 'package:buy_control/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:buy_control/features/subscription/domain/entities/coupon.dart';
+import 'package:buy_control/features/subscription/domain/entities/custom_plan_config.dart';
 import 'package:buy_control/features/subscription/domain/entities/entitlement.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_definition.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
 import 'package:buy_control/features/subscription/domain/repositories/billing_gateway.dart';
+import 'package:buy_control/features/subscription/domain/repositories/coupon_repository.dart';
 import 'package:buy_control/features/subscription/domain/repositories/subscription_repository.dart';
 import 'package:buy_control/features/subscription/domain/resource_inventory.dart';
+import 'package:buy_control/features/subscription/domain/usecases/coupon_usecases.dart';
 import 'package:buy_control/features/subscription/domain/usecases/plan_access_usecases.dart';
 import 'package:buy_control/features/subscription/domain/usecases/quota_guard.dart';
 import 'package:buy_control/features/subscription/domain/usecases/subscription_usecases.dart';
@@ -28,6 +32,8 @@ class SubscriptionController extends GetxController implements EntitlementSource
   final ResourceInventory inventory;
   final SubscriptionRepository repository;
   final BillingGateway billing;
+  final ValidateCoupon validateCoupon;
+  final CouponRepository coupons;
 
   SubscriptionController({
     required this.getEntitlement,
@@ -37,6 +43,8 @@ class SubscriptionController extends GetxController implements EntitlementSource
     required this.inventory,
     required this.repository,
     required this.billing,
+    required this.validateCoupon,
+    required this.coupons,
   });
 
   @override
@@ -44,6 +52,9 @@ class SubscriptionController extends GetxController implements EntitlementSource
   Map<ResourceKey, int> usage = {};
   ViewStatus status = ViewStatus.initial;
   bool purchasing = false;
+
+  /// Cupom aplicado na tela de planos/montador (vale até assinar ou remover).
+  Coupon? coupon;
 
   final _planListeners = <VoidCallback>[];
 
@@ -67,7 +78,7 @@ class SubscriptionController extends GetxController implements EntitlementSource
     }
     status = ViewStatus.success;
     update();
-    if (previous.plan.id != entitlement.plan.id) _notifyPlanChanged();
+    if (_signature(previous) != _signature(entitlement)) _notifyPlanChanged();
   }
 
   /// Uso de cada recurso, para a tela "Meu plano".
@@ -82,18 +93,50 @@ class SubscriptionController extends GetxController implements EntitlementSource
   /// Ids que passaram do limite do plano e estão inacessíveis.
   Future<Set<String>> lockedIds(ResourceKey resource) => _getLockedIds(resource);
 
-  /// Assina [plan] (pagamento simulado ou pela loja). Devolve `true` se deu certo.
-  Future<bool> subscribe(PlanDefinition plan, BillingPeriod period) async {
+  /// Valida e aplica um cupom. Devolve a mensagem de erro ou `null`.
+  Future<String?> applyCoupon(String code) async {
+    final userId = _userId;
+    if (userId == null) return null;
+    final result = await validateCoupon(code, userId: userId);
+    return result.fold((found) {
+      coupon = found;
+      update();
+      return null;
+    }, FailurePresenter.present);
+  }
+
+  void removeCoupon() {
+    coupon = null;
+    update();
+  }
+
+  /// Cupom aplicado, se ele vale para [planId].
+  Coupon? couponFor(String planId) => coupon != null && coupon!.appliesTo(planId) ? coupon : null;
+
+  /// Assina [plan] (pagamento simulado ou pela loja), com o cupom aplicado
+  /// quando ele vale para o plano. Com [customConfig], assina o
+  /// Personalizado. Devolve `true` se deu certo.
+  Future<bool> subscribe(PlanDefinition plan, BillingPeriod period, {CustomPlanConfig? customConfig}) async {
     final userId = _userId;
     if (userId == null || purchasing) return false;
 
     purchasing = true;
     update();
-    final result = await purchasePlan(userId: userId, plan: plan, period: period);
+    final result = await purchasePlan(
+      userId: userId,
+      plan: plan,
+      period: period,
+      customConfig: customConfig,
+      coupon: couponFor(plan.id),
+    );
     purchasing = false;
 
     final ok = FailurePresenter.showIfFailure(result, title: 'subscription.couldntSubscribe'.tr);
-    if (ok) AppFeedback.success('subscription.youreNowPlanName'.trParams({'name': plan.name}), title: 'subscription.planActivated'.tr);
+    if (ok) {
+      coupon = null;
+      final name = result.dataOrNull == null ? plan.name : Entitlement.resolve(result.dataOrNull).plan.name;
+      AppFeedback.success('subscription.youreNowPlanName'.trParams({'name': name}), title: 'subscription.planActivated'.tr);
+    }
     await _reload();
     return ok;
   }
@@ -121,6 +164,8 @@ class SubscriptionController extends GetxController implements EntitlementSource
     final userId = _userId;
     if (userId == null) return;
     FailurePresenter.showIfFailure(await repository.clear(userId));
+    await coupons.clearRedeemed(userId);
+    coupon = null;
     await _reload();
   }
 
@@ -128,6 +173,9 @@ class SubscriptionController extends GetxController implements EntitlementSource
     await load();
     await loadUsage();
   }
+
+  /// Muda quando o plano ou a configuração do Personalizado mudam.
+  static String _signature(Entitlement e) => '${e.plan.id}|${e.subscription?.customConfig?.toMap()}';
 
   void _notifyPlanChanged() {
     for (final listener in List.of(_planListeners)) {

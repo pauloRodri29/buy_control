@@ -61,6 +61,13 @@ class SimulatedPaymentSheet extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           _Line(label: 'subscription.plan'.tr, value: request.plan.name),
           _Line(label: 'subscription.billing'.tr, value: request.period.label),
+          if (!request.discount.isZero) ...[
+            _Line(label: 'subscription.price'.tr, value: request.originalPrice!.formatted),
+            _Line(
+              label: 'subscription.couponLine'.trParams({'code': request.couponCode ?? ''}),
+              value: '− ${request.discount.formatted}',
+            ),
+          ],
           const Divider(height: AppSpacing.xl),
           _Line(
             label: 'common.total'.tr,

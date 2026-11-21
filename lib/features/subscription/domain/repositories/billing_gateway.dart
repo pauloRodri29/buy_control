@@ -7,9 +7,23 @@ import 'package:buy_control/features/subscription/domain/entities/subscription_e
 class PurchaseRequest {
   final PlanDefinition plan;
   final BillingPeriod period;
+
+  /// Valor cobrado (já com o cupom).
   final Money price;
 
-  const PurchaseRequest({required this.plan, required this.period, required this.price});
+  /// Preço sem desconto e o cupom aplicado, para o resumo da cobrança.
+  final Money? originalPrice;
+  final String? couponCode;
+
+  const PurchaseRequest({
+    required this.plan,
+    required this.period,
+    required this.price,
+    this.originalPrice,
+    this.couponCode,
+  });
+
+  Money get discount => originalPrice == null ? Money.zero : originalPrice! - price;
 }
 
 class PurchaseReceipt {

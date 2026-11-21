@@ -1,3 +1,4 @@
+import 'package:buy_control/features/subscription/domain/custom_plan_pricing.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_definition.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
 import 'package:buy_control/features/subscription/domain/entities/subscription_entity.dart';
@@ -21,7 +22,11 @@ class Entitlement {
     if (subscription == null) return free;
     final active = subscription.isActiveAt(now ?? DateTime.now());
     if (!active) return Entitlement(plan: PlanCatalog.free, subscription: subscription, expired: true);
-    return Entitlement(plan: PlanCatalog.byId(subscription.planId), subscription: subscription);
+    final config = subscription.customConfig;
+    final plan = subscription.planId == CustomPlanPricing.planId && config != null
+        ? CustomPlanPricing.buildPlan(config)
+        : PlanCatalog.byId(subscription.planId);
+    return Entitlement(plan: plan, subscription: subscription);
   }
 
   int? limitOf(ResourceKey resource) => plan.limitOf(resource);

@@ -1,4 +1,5 @@
 import 'package:buy_control/core/money/money.dart';
+import 'package:buy_control/features/subscription/domain/entities/custom_plan_config.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
 import 'package:buy_control/features/subscription/domain/entities/subscription_entity.dart';
 
@@ -15,6 +16,8 @@ class SubscriptionModel {
         'expiresAt': s.expiresAt.toIso8601String(),
         'autoRenew': s.autoRenew,
         'source': s.source.name,
+        'customConfig': s.customConfig?.toMap(),
+        'couponCode': s.couponCode,
       };
 
   static SubscriptionEntity fromMap(Map<String, dynamic> map) => SubscriptionEntity(
@@ -26,5 +29,9 @@ class SubscriptionModel {
         expiresAt: DateTime.parse(map['expiresAt'] as String),
         autoRenew: map['autoRenew'] as bool? ?? true,
         source: SubscriptionSource.values.asNameMap()[map['source']] ?? SubscriptionSource.simulated,
+        customConfig: map['customConfig'] == null
+            ? null
+            : CustomPlanConfig.fromMap(Map<String, dynamic>.from(map['customConfig'] as Map)),
+        couponCode: map['couponCode'] as String?,
       );
 }

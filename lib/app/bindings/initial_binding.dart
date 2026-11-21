@@ -1,5 +1,8 @@
 import 'package:buy_control/features/subscription/data/billing/fake_billing_gateway.dart';
+import 'package:buy_control/features/subscription/data/repositories/local_coupon_repository.dart';
 import 'package:buy_control/features/subscription/data/repositories/local_subscription_repository.dart';
+import 'package:buy_control/features/subscription/domain/repositories/coupon_repository.dart';
+import 'package:buy_control/features/subscription/domain/usecases/coupon_usecases.dart';
 import 'package:buy_control/features/subscription/domain/repositories/billing_gateway.dart';
 import 'package:buy_control/features/subscription/domain/repositories/subscription_repository.dart';
 import 'package:buy_control/features/subscription/domain/resource_inventory.dart';
@@ -127,6 +130,7 @@ class InitialBinding extends Bindings {
   /// a loja, troque o [FakeBillingGateway] (e, com backend, o repositório).
   void _subscription() {
     Get.put<SubscriptionRepository>(LocalSubscriptionRepository(), permanent: true);
+    Get.put<CouponRepository>(LocalCouponRepository(), permanent: true);
     Get.put<BillingGateway>(const FakeBillingGateway(confirm: SimulatedPaymentSheet.ask), permanent: true);
     Get.put(
       ResourceInventory(
@@ -143,12 +147,14 @@ class InitialBinding extends Bindings {
     final controller = Get.put(
       SubscriptionController(
         getEntitlement: GetEntitlement(repository: Get.find(), billing: Get.find()),
-        purchasePlan: PurchasePlan(repository: Get.find(), billing: Get.find()),
+        purchasePlan: PurchasePlan(repository: Get.find(), billing: Get.find(), coupons: Get.find<CouponRepository>()),
         setAutoRenew: SetAutoRenew(Get.find()),
         getPlanUsage: GetPlanUsage(Get.find()),
         inventory: Get.find(),
         repository: Get.find(),
         billing: Get.find(),
+        validateCoupon: ValidateCoupon(coupons: Get.find(), subscriptions: Get.find()),
+        coupons: Get.find(),
       ),
       permanent: true,
     );

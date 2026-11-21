@@ -1,4 +1,5 @@
 import 'package:buy_control/core/money/money.dart';
+import 'package:buy_control/features/subscription/domain/entities/custom_plan_config.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
 
 /// De onde veio a assinatura. `simulated` = pagamento de teste, sem
@@ -16,6 +17,12 @@ class SubscriptionEntity {
   final bool autoRenew;
   final SubscriptionSource source;
 
+  /// O que foi escolhido no Personalizado (só quando [planId] é "custom").
+  final CustomPlanConfig? customConfig;
+
+  /// Cupom usado na compra (o desconto vale para as renovações).
+  final String? couponCode;
+
   const SubscriptionEntity({
     required this.userId,
     required this.planId,
@@ -25,6 +32,8 @@ class SubscriptionEntity {
     required this.expiresAt,
     this.autoRenew = true,
     this.source = SubscriptionSource.simulated,
+    this.customConfig,
+    this.couponCode,
   });
 
   bool isActiveAt(DateTime now) => now.isBefore(expiresAt);
@@ -45,6 +54,8 @@ class SubscriptionEntity {
       expiresAt: expiresAt ?? this.expiresAt,
       autoRenew: autoRenew ?? this.autoRenew,
       source: source,
+      customConfig: customConfig,
+      couponCode: couponCode,
     );
   }
 }

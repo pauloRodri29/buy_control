@@ -5,11 +5,15 @@ import 'package:buy_control/app/theme/theme_context.dart';
 import 'package:buy_control/app/widgets/app_button.dart';
 import 'package:buy_control/app/widgets/confirm_dialog.dart';
 import 'package:buy_control/core/formatters/date_time_formatter.dart';
+import 'package:buy_control/features/subscription/domain/custom_plan_pricing.dart';
+import 'package:buy_control/features/subscription/domain/entities/coupon.dart';
 import 'package:buy_control/features/subscription/domain/entities/entitlement.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_definition.dart';
 import 'package:buy_control/features/subscription/domain/entities/plan_keys.dart';
 import 'package:buy_control/features/subscription/domain/plan_catalog.dart';
 import 'package:buy_control/features/subscription/presentation/controllers/subscription_controller.dart';
+import 'package:buy_control/features/subscription/presentation/pages/custom_plan_builder_page.dart';
+import 'package:buy_control/features/subscription/presentation/widgets/coupon_field.dart';
 import 'package:buy_control/features/subscription/presentation/widgets/plan_feature_row.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -63,6 +67,12 @@ class _PlansPageState extends State<PlansPage> {
     if (ok && mounted) Navigator.of(context).maybePop();
   }
 
+  /// Abre o montador; se o usuário assinar lá, volta direto para "Meu plano".
+  Future<void> _openBuilder() async {
+    final subscribed = await Get.to<bool>(() => CustomPlanBuilderPage(initialPeriod: _period));
+    if (subscribed == true && mounted) Navigator.of(context).maybePop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,17 +106,21 @@ class _PlansPageState extends State<PlansPage> {
                   ],
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.md),
+              const CouponField(),
+              const SizedBox(height: AppSpacing.md),
               for (final plan in PlanCatalog.all) ...[
                 _PlanOptionCard(
                   plan: plan,
                   period: _period,
                   entitlement: entitlement,
+                  coupon: plan.isFree ? null : controller.couponFor(plan.id),
                   busy: controller.purchasing,
                   onChoose: () => _choose(plan),
                 ),
                 const SizedBox(height: AppSpacing.md),
               ],
+              _CustomPlanCard(entitlement: entitlement, onOpen: _openBuilder),
             ],
           );
         },
@@ -121,6 +135,9 @@ class _PlanOptionCard extends StatelessWidget {
   final PlanDefinition plan;
   final BillingPeriod period;
   final Entitlement entitlement;
+
+  /// Cupom aplicado que vale para este plano (mostra o preço com desconto).
+  final Coupon? coupon;
   final bool busy;
   final VoidCallback onChoose;
 
@@ -128,6 +145,7 @@ class _PlanOptionCard extends StatelessWidget {
     required this.plan,
     required this.period,
     required this.entitlement,
+    this.coupon,
     required this.busy,
     required this.onChoose,
   });
@@ -205,8 +223,18 @@ class _PlanOptionCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                if (coupon != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      price.formatted,
+                      style: text.bodyMedium?.copyWith(decoration: TextDecoration.lineThrough),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
                 Text(
-                  plan.isFree ? 'subscription.free'.tr : price.formatted,
+                  plan.isFree ? 'subscription.free'.tr : (coupon?.apply(price) ?? price).formatted,
                   style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: colors.primary),
                 ),
                 if (!plan.isFree) ...[
@@ -296,6 +324,70 @@ class _LimitChip extends StatelessWidget {
       child: Text(
         label,
         style: context.text.labelMedium?.copyWith(color: context.colors.onSurface),
+      ),
+    );
+  }
+}
+
+/// Entrada do plano Personalizado: explica a ideia e leva ao montador.
+/// Quando é o plano atual, mostra o preço e vira "Ajustar meu plano".
+class _CustomPlanCard extends StatelessWidget {
+  final Entitlement entitlement;
+  final VoidCallback onOpen;
+
+  const _CustomPlanCard({required this.entitlement, required this.onOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final text = context.text;
+    final isCurrent = !entitlement.expired && entitlement.plan.id == CustomPlanPricing.planId;
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.borderLg,
+        side: isCurrent
+            ? BorderSide(color: colors.primary, width: 2)
+            : BorderSide(color: colors.outlineVariant, style: BorderStyle.solid),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Symbols.tune, color: colors.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text('subscription.customPlan'.tr, style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(width: AppSpacing.sm),
+                if (isCurrent)
+                  _Tag(label: 'subscription.current'.tr, background: colors.primary, foreground: colors.onPrimary),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text('subscription.customPlanTagline'.tr, style: text.bodySmall),
+            const SizedBox(height: AppSpacing.md),
+            if (isCurrent)
+              Text(
+                '${entitlement.subscription!.pricePaid.formatted}${entitlement.subscription!.period.suffix}',
+                style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: colors.primary),
+              )
+            else
+              Text(
+                'subscription.customFromPrice'.trParams({'price': CustomPlanPricing.minMonthly.formatted}),
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: colors.primary),
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            Text('subscription.customCardDescription'.tr, style: text.bodyMedium),
+            const SizedBox(height: AppSpacing.lg),
+            AppButton(
+              label: isCurrent ? 'subscription.adjustMyPlan'.tr : 'subscription.buildMyPlan'.tr,
+              icon: Symbols.tune,
+              onPressed: onOpen,
+            ),
+          ],
+        ),
       ),
     );
   }

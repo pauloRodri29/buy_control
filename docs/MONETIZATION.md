@@ -16,7 +16,10 @@ Status: Fases 0 e 1 parcialmente implementadas em `lib/features/subscription/`:
   - etiqueta de balança.
 - "Repetir no próximo ciclo" foi para o Grátis: já vem ligado por padrão e é o comportamento central do fechamento.
 
-Ainda faltam: o montador do Personalizado e os cupons. Os catálogos padrão são reconhecidos pelo nome (`DefaultCatalogs`), não por um campo `isSystem`. Este documento reúne o que é preciso para publicar o GastoLog nas lojas com plano gratuito, três planos prontos, um plano **Personalizado** com preço calculado a partir dos recursos escolhidos, e cupons.
+- montador do Personalizado (`CustomPlanPricing`, tela `CustomPlanBuilderPage`): pesos em reais inteiros, de R$ 5 a R$ 40/mês, anual = 10 mensalidades, sugestão de plano pronto mais barato;
+- cupons (`ValidateCoupon`, `LocalCouponRepository`) com cupons de teste: BEMVINDO10, GASTOLOG20, PRIMEIRA50 (só primeira assinatura), MONTE30 (só Personalizado), MENOS5 (R$ 5) e VENCIDO.
+
+No modo simulado, o desconto do cupom vale para as renovações. Com a loja, ele vira um degrau mais baixo da escada ou uma oferta. Os catálogos padrão são reconhecidos pelo nome (`DefaultCatalogs`), não por um campo `isSystem`. Este documento reúne o que é preciso para publicar o GastoLog nas lojas com plano gratuito, três planos prontos, um plano **Personalizado** com preço calculado a partir dos recursos escolhidos, e cupons.
 
 ---
 
